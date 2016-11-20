@@ -44,16 +44,33 @@ proc swapEndian16*(outp, inp: pointer) =
   o[1] = i[0]
 
 when system.cpuEndian == bigEndian:
-  proc littleEndian64*(outp, inp: pointer) {.inline.} = swapEndian64(outp, inp)
+  proc littleEndian64*(outp, inp: pointer) {.inline.} = 
+    ## swaps the endian of `inp`, iff the system endian is not littleEndian
+    ## can be used both, for reading littleEndian into system endian, and for writing from system endian into littleEndian
+    swapEndian64(outp, inp)
+    
   proc littleEndian32*(outp, inp: pointer) {.inline.} = swapEndian32(outp, inp)
   proc littleEndian16*(outp, inp: pointer) {.inline.} = swapEndian16(outp, inp)
-  proc bigEndian64*(outp, inp: pointer) {.inline.} = copyMem(outp, inp, 8)
+  
+  proc bigEndian64*(outp, inp: pointer) {.inline.} =
+    ## swaps the endian of `inp`, iff the system endian is not bigEndian
+    ## can be used both, for reading bigEndian into system endian, and for writing from system endian into bigEndian
+    copyMem(outp, inp, 8)
+
   proc bigEndian32*(outp, inp: pointer) {.inline.} = copyMem(outp, inp, 4)
   proc bigEndian16*(outp, inp: pointer) {.inline.} = copyMem(outp, inp, 2)
 else:
-  proc littleEndian64*(outp, inp: pointer) {.inline.} = copyMem(outp, inp, 8)
+  proc littleEndian64*(outp, inp: pointer) {.inline.} = 
+    ## swaps the endian of `inp`, iff the system endian is not littleEndian
+    ## can be used both, for reading littleEndian into system endian, and for writing from system endian into littleEndian
+    copyMem(outp, inp, 8)
+    
   proc littleEndian32*(outp, inp: pointer) {.inline.} = copyMem(outp, inp, 4)
   proc littleEndian16*(outp, inp: pointer){.inline.} = copyMem(outp, inp, 2)
-  proc bigEndian64*(outp, inp: pointer) {.inline.} = swapEndian64(outp, inp)
+  proc bigEndian64*(outp, inp: pointer) {.inline.} = 
+    ## swaps the endian of `inp`, iff the system endian is not bigEndian
+    ## can be used both, for reading bigEndian into system endian, and for writing from system endian into bigEndian
+    swapEndian64(outp, inp)
+  
   proc bigEndian32*(outp, inp: pointer) {.inline.} = swapEndian32(outp, inp)
   proc bigEndian16*(outp, inp: pointer) {.inline.} = swapEndian16(outp, inp)
