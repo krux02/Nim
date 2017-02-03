@@ -556,8 +556,11 @@ proc rawExecute(c: PCtx, start: int, tos: PStackFrame): TFullReg =
       of rkNode:
         if regs[rb].node.kind == nkNilLit:
           stackTrace(c, tos, pc, errNilAccess)
-        if regs[rb].node.kind == nkRefTy:
+        elif regs[rb].node.kind == nkRefTy:
           regs[ra].node = regs[rb].node.sons[0]
+        elif nfIsRef in regs[rb].node.flags:
+          ensureKind(rkNode)
+          regs[ra].node = regs[rb].node
         else:
           stackTrace(c, tos, pc, errGenerated, "limited VM support for pointers")
       else:
