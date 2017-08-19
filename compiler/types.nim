@@ -110,11 +110,11 @@ proc getOrdValue(n: PNode): BiggestInt =
     localError(n.info, errOrdinalTypeExpected)
     result = 0
 
-proc isIntLit*(t: PType): bool {.inline.} =
+proc isIntLit*(t: PType): bool {.inline, exportc.} =
   result = t.kind == tyInt and t.n != nil and t.n.kind == nkIntLit
 
-proc isFloatLit*(t: PType): bool {.inline.} =
-  result = t.kind == tyFloat and t.n != nil and t.n.kind == nkFloatLit
+proc isFloatLit*(t: PType): bool {.inline, exportc.} =
+  result = t.kind == tyFloat64 and t.n != nil and t.n.kind == nkFloatLit
 
 proc isCompatibleToCString(a: PType): bool =
   if a.kind == tyArray:
@@ -1557,14 +1557,21 @@ proc skipHiddenSubConv*(n: PNode): PNode =
   else:
     result = n
 
+
+proc typeToString2(arg: PType): string =
+  let named = typeToString(arg)
+  let desc = typeToString(arg, preferDesc)
+  return if named == desc: named else: named & " = " & desc
+
 proc typeMismatch*(info: TLineInfo, formal, actual: PType) =
   if formal.kind != tyError and actual.kind != tyError:
-    let named = typeToString(formal)
-    let desc = typeToString(formal, preferDesc)
-    let x = if named == desc: named else: named & " = " & desc
+
+    let expectedStr = typeToString2(formal)
+    let actualStr = typeToString2(actual)
+
     var msg = msgKindToString(errTypeMismatch) &
-              typeToString(actual) & ") " &
-              msgKindToString(errButExpectedX) % [x]
+              actualStr & ") " &
+              msgKindToString(errButExpectedX) % [expectedStr]
 
     if formal.kind == tyProc and actual.kind == tyProc:
       case compatibleEffects(formal, actual)

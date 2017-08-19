@@ -107,3 +107,4 @@ proc initDefines*() =
   defineSymbol("nimDistros")
   defineSymbol("nimHasCppDefine")
   defineSymbol("nimGenericInOutFlags")
+  defineSymbol("nimNoDistinctInt")

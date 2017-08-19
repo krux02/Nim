@@ -69,19 +69,19 @@ proc getSysType*(kind: TTypeKind): PType =
   result = gSysTypes[kind]
   if result == nil:
     case kind
-    of tyInt: result = sysTypeFromName("int")
+    of tyInt: return sysTypeFromName("int")
     of tyInt8: result = sysTypeFromName("int8")
     of tyInt16: result = sysTypeFromName("int16")
     of tyInt32: result = sysTypeFromName("int32")
     of tyInt64: result = sysTypeFromName("int64")
-    of tyUInt: result = sysTypeFromName("uint")
+    of tyUInt: return sysTypeFromName("uint")
     of tyUInt8: result = sysTypeFromName("uint8")
     of tyUInt16: result = sysTypeFromName("uint16")
     of tyUInt32: result = sysTypeFromName("uint32")
     of tyUInt64: result = sysTypeFromName("uint64")
-    of tyFloat: result = sysTypeFromName("float")
+    of tyFloat: return sysTypeFromName("float")
     of tyFloat32: result = sysTypeFromName("float32")
-    of tyFloat64: return sysTypeFromName("float64")
+    of tyFloat64: result = sysTypeFromName("float64")
     of tyFloat128: result = sysTypeFromName("float128")
     of tyBool: result = sysTypeFromName("bool")
     of tyChar: result = sysTypeFromName("char")

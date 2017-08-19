@@ -22,26 +22,23 @@
 # in the global index as part of the previous header (Exception hierarchy).
 
 type
-  int* {.magic: Int.} ## default integer type; bitwidth depends on
-                      ## architecture, but is always the same as a pointer
-  int8* {.magic: Int8.} ## signed 8 bit integer type
-  int16* {.magic: Int16.} ## signed 16 bit integer type
-  int32* {.magic: Int32.} ## signed 32 bit integer type
-  int64* {.magic: Int64.} ## signed 64 bit integer type
-  uint* {.magic: UInt.} ## unsigned default integer type
-  uint8* {.magic: UInt8.} ## unsigned 8 bit integer type
-  uint16* {.magic: UInt16.} ## unsigned 16 bit integer type
-  uint32* {.magic: UInt32.} ## unsigned 32 bit integer type
-  uint64* {.magic: UInt64.} ## unsigned 64 bit integer type
-  float* {.magic: Float.} ## default floating point type
+  int8*    {.magic: Int8.}    ## signed 8 bit integer type
+  int16*   {.magic: Int16.}   ## signed 16 bit integer type
+  int32*   {.magic: Int32.}   ## signed 32 bit integer type
+  int64*   {.magic: Int64.}   ## signed 64 bit integer type
+  uint8*   {.magic: UInt8.}   ## unsigned 8 bit integer type
+  uint16*  {.magic: UInt16.}  ## unsigned 16 bit integer type
+  uint32*  {.magic: UInt32.}  ## unsigned 32 bit integer type
+  uint64*  {.magic: UInt64.}  ## unsigned 64 bit integer type
   float32* {.magic: Float32.} ## 32 bit floating point type
-  float64* {.magic: Float.} ## 64 bit floating point type
+  float64* {.magic: Float64.} ## 64 bit floating point type
+  float* = float64
 
 # 'float64' is now an alias to 'float'; this solves many problems
 
 type # we need to start a new type section here, so that ``0`` can have a type
   bool* {.magic: Bool.} = enum ## built-in boolean type
-    false = 0, true = 1
+    false, true
 
 type
   char* {.magic: Char.} ## built-in 8 bit character type (unsigned)
@@ -92,25 +89,6 @@ type
   typed* {.magic: Stmt.}   ## meta type to denote an expression that
                            ## is resolved (for templates)
 
-  SomeSignedInt* = int|int8|int16|int32|int64
-    ## type class matching all signed integer types
-
-  SomeUnsignedInt* = uint|uint8|uint16|uint32|uint64
-    ## type class matching all unsigned integer types
-
-  SomeInteger* = SomeSignedInt|SomeUnsignedInt
-    ## type class matching all integer types
-
-  SomeOrdinal* = int|int8|int16|int32|int64|bool|enum|uint8|uint16|uint32
-    ## type class matching all ordinal types; however this includes enums with
-    ## holes.
-
-  SomeReal* = float|float32|float64
-    ## type class matching all floating point number types
-
-  SomeNumber* = SomeInteger|SomeReal
-    ## type class matching all number types
-
 proc defined*(x: untyped): bool {.magic: "Defined", noSideEffect, compileTime.}
   ## Special compile-time procedure that checks whether `x` is
   ## defined.
@@ -122,6 +100,90 @@ proc defined*(x: untyped): bool {.magic: "Defined", noSideEffect, compileTime.}
   ##   when not defined(release):
   ##     # Do here programmer friendly expensive sanity checks.
   ##   # Put here the normal code
+
+when defined(nimNoDistinctInt):
+  type
+    SomeSignedInt* = int8|int16|int32|int64
+      ## type class matching all signed integer types
+    SomeUnsignedInt* = uint8|uint16|uint32|uint64
+      ## type class matching all unsigned integer types
+    SomeOrdinal* = int8|int16|int32|int64|bool|enum|uint8|uint16|uint32
+      ## type class matching all ordinal types; however this includes
+      ## enums with holes.
+else:
+  type
+    SomeSignedInt* = int|int8|int16|int32|int64
+    SomeUnsignedInt* = uint|uint8|uint16|uint32|uint64
+    SomeOrdinal* = int|int8|int16|int32|int64|bool|enum|uint8|uint16|uint32
+
+type
+  SomeInteger* = SomeSignedInt|SomeUnsignedInt
+    ## type class matching all integer types
+
+  SomeReal* = float|float32|float64
+    ## type class matching all floating point number types
+
+  SomeNumber* = SomeInteger|SomeReal
+    ## type class matching all number types
+
+
+when defined(nimNoDistinctInt):
+  discard
+else:
+  type
+    int*  {.magic: Int.}
+    uint* {.magic: UInt.}
+
+
+when defined(nimNoDistinctInt):
+  when false:
+    when defined(cpu8):
+      type
+        int* = int8   ## default integer type; bitwidth depends on
+                      ## architecture, but is always the same as a pointer
+        uint* = uint8 ## default unsigned integer type; bitwidth depends on
+                      ## architecture, but is always the same as a pointer
+
+    when defined(cpu16):
+      type
+        int* = int16   ## default integer type; bitwidth depends on
+                       ## architecture, but is always the same as a pointer
+        uint* = uint16 ## default unsigned integer type; bitwidth depends on
+                       ## architecture, but is always the same as a pointer
+
+    when defined(cpu32):
+      type
+        int* = int32   ## default integer type; bitwidth depends on
+                       ## architecture, but is always the same as a pointer
+        uint* = uint32 ## default unsigned integer type; bitwidth depends on
+                       ## architecture, but is always the same as a pointer
+
+    when defined(cpu64):
+      type
+        int* = int64   ## default integer type; bitwidth depends on
+                       ## architecture, but is always the same as a pointer
+        uint* = uint64 ## default unsigned integer type; bitwidth depends on
+                       ## architecture, but is always the same as a pointer
+  else:
+    when defined(cpu8):
+      type
+        int*  {.magic: Int8.}
+        uint* {.magic: UInt8.}
+
+    when defined(cpu16):
+      type
+        int*  {.magic: Int16.}
+        uint* {.magic: UInt16.}
+
+    when defined(cpu32):
+      type
+        int*  {.magic: Int32.}
+        uint* {.magic: UInt64.}
+
+    when defined(cpu64):
+      type
+        int*  {.magic: Int64.}
+        uint* {.magic: UInt64.}
 
 when defined(nimalias):
   {.deprecated: [
@@ -802,68 +864,58 @@ when not defined(JS):
     ## last 32 bits from `x`.
 
 # integer calculations:
-proc `+` *(x: int): int {.magic: "UnaryPlusI", noSideEffect.}
 proc `+` *(x: int8): int8 {.magic: "UnaryPlusI", noSideEffect.}
 proc `+` *(x: int16): int16 {.magic: "UnaryPlusI", noSideEffect.}
 proc `+` *(x: int32): int32 {.magic: "UnaryPlusI", noSideEffect.}
 proc `+` *(x: int64): int64 {.magic: "UnaryPlusI", noSideEffect.}
   ## Unary `+` operator for an integer. Has no effect.
+when not defined(nimNoDistinctInt):
+  proc `+` *(x: int): int {.magic: "UnaryPlusI", noSideEffect.}
 
-proc `-` *(x: int): int {.magic: "UnaryMinusI", noSideEffect.}
 proc `-` *(x: int8): int8 {.magic: "UnaryMinusI", noSideEffect.}
 proc `-` *(x: int16): int16 {.magic: "UnaryMinusI", noSideEffect.}
 proc `-` *(x: int32): int32 {.magic: "UnaryMinusI", noSideEffect.}
 proc `-` *(x: int64): int64 {.magic: "UnaryMinusI64", noSideEffect.}
   ## Unary `-` operator for an integer. Negates `x`.
+when not defined(nimNoDistinctInt):
+  proc `-` *(x: int): int {.magic: "UnaryMinusI64", noSideEffect.}
 
-proc `not` *(x: int): int {.magic: "BitnotI", noSideEffect.}
 proc `not` *(x: int8): int8 {.magic: "BitnotI", noSideEffect.}
 proc `not` *(x: int16): int16 {.magic: "BitnotI", noSideEffect.}
 proc `not` *(x: int32): int32 {.magic: "BitnotI", noSideEffect.}
+proc `not` *(x: int64): int64 {.magic: "BitnotI", noSideEffect.}
   ## computes the `bitwise complement` of the integer `x`.
+when not defined(nimNoDistinctInt):
+  proc `not` *(x: int): int {.magic: "BitnotI", noSideEffect.}
 
-when defined(nimnomagic64):
-  proc `not` *(x: int64): int64 {.magic: "BitnotI", noSideEffect.}
-else:
-  proc `not` *(x: int64): int64 {.magic: "BitnotI64", noSideEffect.}
-
-proc `+` *(x, y: int): int {.magic: "AddI", noSideEffect.}
 proc `+` *(x, y: int8): int8 {.magic: "AddI", noSideEffect.}
 proc `+` *(x, y: int16): int16 {.magic: "AddI", noSideEffect.}
 proc `+` *(x, y: int32): int32 {.magic: "AddI", noSideEffect.}
+proc `+` *(x, y: int64): int64 {.magic: "AddI", noSideEffect.}
   ## Binary `+` operator for an integer.
+when not defined(nimNoDistinctInt):
+  proc `+` *(x, y: int): int {.magic: "AddI", noSideEffect.}
 
-when defined(nimnomagic64):
-  proc `+` *(x, y: int64): int64 {.magic: "AddI", noSideEffect.}
-else:
-  proc `+` *(x, y: int64): int64 {.magic: "AddI64", noSideEffect.}
-
-proc `-` *(x, y: int): int {.magic: "SubI", noSideEffect.}
 proc `-` *(x, y: int8): int8 {.magic: "SubI", noSideEffect.}
 proc `-` *(x, y: int16): int16 {.magic: "SubI", noSideEffect.}
 proc `-` *(x, y: int32): int32 {.magic: "SubI", noSideEffect.}
+proc `-` *(x, y: int64): int64 {.magic: "SubI", noSideEffect.}
   ## Binary `-` operator for an integer.
+when not defined(nimNoDistinctInt):
+  proc `-` *(x, y: int): int {.magic: "SubI", noSideEffect.}
 
-when defined(nimnomagic64):
-  proc `-` *(x, y: int64): int64 {.magic: "SubI", noSideEffect.}
-else:
-  proc `-` *(x, y: int64): int64 {.magic: "SubI64", noSideEffect.}
-
-proc `*` *(x, y: int): int {.magic: "MulI", noSideEffect.}
 proc `*` *(x, y: int8): int8 {.magic: "MulI", noSideEffect.}
 proc `*` *(x, y: int16): int16 {.magic: "MulI", noSideEffect.}
 proc `*` *(x, y: int32): int32 {.magic: "MulI", noSideEffect.}
+proc `*` *(x, y: int64): int64 {.magic: "MulI", noSideEffect.}
   ## Binary `*` operator for an integer.
+when not defined(nimNoDistinctInt):
+  proc `*` *(x, y: int): int {.magic: "MulI", noSideEffect.}
 
-when defined(nimnomagic64):
-  proc `*` *(x, y: int64): int64 {.magic: "MulI", noSideEffect.}
-else:
-  proc `*` *(x, y: int64): int64 {.magic: "MulI64", noSideEffect.}
-
-proc `div` *(x, y: int): int {.magic: "DivI", noSideEffect.}
 proc `div` *(x, y: int8): int8 {.magic: "DivI", noSideEffect.}
 proc `div` *(x, y: int16): int16 {.magic: "DivI", noSideEffect.}
 proc `div` *(x, y: int32): int32 {.magic: "DivI", noSideEffect.}
+proc `div` *(x, y: int64): int64 {.magic: "DivI", noSideEffect.}
   ## computes the integer division. This is roughly the same as
   ## ``floor(x/y)``.
   ##
@@ -873,29 +925,23 @@ proc `div` *(x, y: int32): int32 {.magic: "DivI", noSideEffect.}
   ##   3 div 2 == 1
   ##   7 div 5 == 1
 
-when defined(nimnomagic64):
-  proc `div` *(x, y: int64): int64 {.magic: "DivI", noSideEffect.}
-else:
-  proc `div` *(x, y: int64): int64 {.magic: "DivI64", noSideEffect.}
+when not defined(nimNoDistinctInt):
+  proc `div` *(x, y: int): int {.magic: "DivI", noSideEffect.}
 
-proc `mod` *(x, y: int): int {.magic: "ModI", noSideEffect.}
 proc `mod` *(x, y: int8): int8 {.magic: "ModI", noSideEffect.}
 proc `mod` *(x, y: int16): int16 {.magic: "ModI", noSideEffect.}
 proc `mod` *(x, y: int32): int32 {.magic: "ModI", noSideEffect.}
+proc `mod` *(x, y: int64): int64 {.magic: "ModI", noSideEffect.}
   ## computes the integer modulo operation (remainder).
   ## This is the same as
   ## ``x - (x div y) * y``.
   ##
   ## .. code-block:: Nim
   ##   (7 mod 5) == 2
-
-when defined(nimnomagic64):
-  proc `mod` *(x, y: int64): int64 {.magic: "ModI", noSideEffect.}
-else:
-  proc `mod` *(x, y: int64): int64 {.magic: "ModI64", noSideEffect.}
+when not defined(nimNoDistinctInt):
+  proc `mod` *(x, y: int): int {.magic: "ModI", noSideEffect.}
 
 when defined(nimNewShiftOps):
-  proc `shr` *(x: int, y: SomeInteger): int {.magic: "ShrI", noSideEffect.}
   proc `shr` *(x: int8, y: SomeInteger): int8 {.magic: "ShrI", noSideEffect.}
   proc `shr` *(x: int16, y: SomeInteger): int16 {.magic: "ShrI", noSideEffect.}
   proc `shr` *(x: int32, y: SomeInteger): int32 {.magic: "ShrI", noSideEffect.}
@@ -907,9 +953,10 @@ when defined(nimNewShiftOps):
     ##   0b0001_0000'i8 shr 2 == 0b0000_0100'i8
     ##   0b1000_0000'i8 shr 8 == 0b0000_0000'i8
     ##   0b0000_0001'i8 shr 1 == 0b0000_0000'i8
+  when not defined(nimNoDistinctInt):
+    proc `shr` *(x: int, y: SomeInteger): int {.magic: "ShrI", noSideEffect.}
 
 
-  proc `shl` *(x: int, y: SomeInteger): int {.magic: "ShlI", noSideEffect.}
   proc `shl` *(x: int8, y: SomeInteger): int8 {.magic: "ShlI", noSideEffect.}
   proc `shl` *(x: int16, y: SomeInteger): int16 {.magic: "ShlI", noSideEffect.}
   proc `shl` *(x: int32, y: SomeInteger): int32 {.magic: "ShlI", noSideEffect.}
@@ -919,8 +966,9 @@ when defined(nimNewShiftOps):
     ## .. code-block:: Nim
     ##  1'i32 shl 4 == 0x0000_0010
     ##  1'i64 shl 4 == 0x0000_0000_0000_0010
+  when not defined(nimNoDistinctInt):
+    proc `shl` *(x: int, y: SomeInteger): int {.magic: "ShlI", noSideEffect.}
 else:
-  proc `shr` *(x, y: int): int {.magic: "ShrI", noSideEffect.}
   proc `shr` *(x, y: int8): int8 {.magic: "ShrI", noSideEffect.}
   proc `shr` *(x, y: int16): int16 {.magic: "ShrI", noSideEffect.}
   proc `shr` *(x, y: int32): int32 {.magic: "ShrI", noSideEffect.}
@@ -932,7 +980,6 @@ else:
   proc `shl` *(x, y: int32): int32 {.magic: "ShlI", noSideEffect.}
   proc `shl` *(x, y: int64): int64 {.magic: "ShlI", noSideEffect.}
 
-proc `and` *(x, y: int): int {.magic: "BitandI", noSideEffect.}
 proc `and` *(x, y: int8): int8 {.magic: "BitandI", noSideEffect.}
 proc `and` *(x, y: int16): int16 {.magic: "BitandI", noSideEffect.}
 proc `and` *(x, y: int32): int32 {.magic: "BitandI", noSideEffect.}
@@ -941,8 +988,9 @@ proc `and` *(x, y: int64): int64 {.magic: "BitandI", noSideEffect.}
   ##
   ## .. code-block:: Nim
   ##  (0xffff'i16 and 0x0010'i16) == 0x0010
+when not defined(nimNoDistinctInt):
+  proc `and` *(x, y: int): int {.magic: "BitandI", noSideEffect.}
 
-proc `or` *(x, y: int): int {.magic: "BitorI", noSideEffect.}
 proc `or` *(x, y: int8): int8 {.magic: "BitorI", noSideEffect.}
 proc `or` *(x, y: int16): int16 {.magic: "BitorI", noSideEffect.}
 proc `or` *(x, y: int32): int32 {.magic: "BitorI", noSideEffect.}
@@ -951,8 +999,9 @@ proc `or` *(x, y: int64): int64 {.magic: "BitorI", noSideEffect.}
   ##
   ## .. code-block:: Nim
   ##  (0x0005'i16 or 0x0010'i16) == 0x0015
+when not defined(nimNoDistinctInt):
+  proc `or` *(x, y: int): int {.magic: "BitorI", noSideEffect.}
 
-proc `xor` *(x, y: int): int {.magic: "BitxorI", noSideEffect.}
 proc `xor` *(x, y: int8): int8 {.magic: "BitxorI", noSideEffect.}
 proc `xor` *(x, y: int16): int16 {.magic: "BitxorI", noSideEffect.}
 proc `xor` *(x, y: int32): int32 {.magic: "BitxorI", noSideEffect.}
@@ -961,30 +1010,35 @@ proc `xor` *(x, y: int64): int64 {.magic: "BitxorI", noSideEffect.}
   ##
   ## .. code-block:: Nim
   ##  (0x1011'i16 xor 0x0101'i16) == 0x1110
+when not defined(nimNoDistinctInt):
+  proc `xor` *(x, y: int): int {.magic: "BitxorI", noSideEffect.}
 
-proc `==` *(x, y: int): bool {.magic: "EqI", noSideEffect.}
 proc `==` *(x, y: int8): bool {.magic: "EqI", noSideEffect.}
 proc `==` *(x, y: int16): bool {.magic: "EqI", noSideEffect.}
 proc `==` *(x, y: int32): bool {.magic: "EqI", noSideEffect.}
 proc `==` *(x, y: int64): bool {.magic: "EqI", noSideEffect.}
   ## Compares two integers for equality.
+when not defined(nimNoDistinctInt):
+  proc `==` *(x, y: int): bool {.magic: "EqI", noSideEffect.}
 
-proc `<=` *(x, y: int): bool {.magic: "LeI", noSideEffect.}
 proc `<=` *(x, y: int8): bool {.magic: "LeI", noSideEffect.}
 proc `<=` *(x, y: int16): bool {.magic: "LeI", noSideEffect.}
 proc `<=` *(x, y: int32): bool {.magic: "LeI", noSideEffect.}
 proc `<=` *(x, y: int64): bool {.magic: "LeI", noSideEffect.}
   ## Returns true iff `x` is less than or equal to `y`.
+when not defined(nimNoDistinctInt):
+  proc `<=` *(x, y: int): bool {.magic: "LeI", noSideEffect.}
 
-proc `<` *(x, y: int): bool {.magic: "LtI", noSideEffect.}
 proc `<` *(x, y: int8): bool {.magic: "LtI", noSideEffect.}
 proc `<` *(x, y: int16): bool {.magic: "LtI", noSideEffect.}
 proc `<` *(x, y: int32): bool {.magic: "LtI", noSideEffect.}
 proc `<` *(x, y: int64): bool {.magic: "LtI", noSideEffect.}
   ## Returns true iff `x` is less than `y`.
+when not defined(nimNoDistinctInt):
+  proc `<` *(x, y: int): bool {.magic: "LtI", noSideEffect.}
 
 type
-  IntMax32 = int|int8|int16|int32
+  IntMax32 = int8|int16|int32
 
 proc `+%` *(x, y: IntMax32): IntMax32 {.magic: "AddU", noSideEffect.}
 proc `+%` *(x, y: int64): int64 {.magic: "AddU", noSideEffect.}
@@ -1831,14 +1885,10 @@ template `>%` *(x, y: untyped): untyped = y <% x
   ## treats `x` and `y` as unsigned and compares them.
   ## Returns true iff ``unsigned(x) > unsigned(y)``.
 
-proc `$`*(x: int): string {.magic: "IntToStr", noSideEffect.}
+proc `$`*(x: int64): string {.magic: "Int64ToStr", noSideEffect.}
   ## The stringify operator for an integer argument. Returns `x`
   ## converted to a decimal string. ``$`` is Nim's general way of
   ## spelling `toString`:idx:.
-
-proc `$`*(x: int64): string {.magic: "Int64ToStr", noSideEffect.}
-  ## The stringify operator for an integer argument. Returns `x`
-  ## converted to a decimal string.
 
 when not defined(nimscript):
   when not defined(JS) and hasAlloc:
@@ -1993,8 +2043,6 @@ iterator `||`*[S, T](a: S, b: T, annotation=""): T {.
   discard
 
 {.push stackTrace:off.}
-proc min*(x, y: int): int {.magic: "MinI", noSideEffect.} =
-  if x <= y: x else: y
 proc min*(x, y: int8): int8 {.magic: "MinI", noSideEffect.} =
   if x <= y: x else: y
 proc min*(x, y: int16): int16 {.magic: "MinI", noSideEffect.} =
@@ -2011,8 +2059,6 @@ proc min*[T](x: openArray[T]): T =
   for i in 1..high(x):
     if x[i] < result: result = x[i]
 
-proc max*(x, y: int): int {.magic: "MaxI", noSideEffect.} =
-  if y <= x: x else: y
 proc max*(x, y: int8): int8 {.magic: "MaxI", noSideEffect.} =
   if y <= x: x else: y
 proc max*(x, y: int16): int16 {.magic: "MaxI", noSideEffect.} =
@@ -2723,26 +2769,18 @@ proc getTypeInfo*[T](x: T): pointer {.magic: "GetTypeInfo", benign.}
   ## the `typeinfo` module instead.
 
 {.push stackTrace: off.}
-proc abs*(x: int): int {.magic: "AbsI", noSideEffect.} =
-  if x < 0: -x else: x
 proc abs*(x: int8): int8 {.magic: "AbsI", noSideEffect.} =
   if x < 0: -x else: x
 proc abs*(x: int16): int16 {.magic: "AbsI", noSideEffect.} =
   if x < 0: -x else: x
 proc abs*(x: int32): int32 {.magic: "AbsI", noSideEffect.} =
   if x < 0: -x else: x
-when defined(nimnomagic64):
-  proc abs*(x: int64): int64 {.magic: "AbsI", noSideEffect.} =
-    ## returns the absolute value of `x`. If `x` is ``low(x)`` (that
-    ## is -MININT for its type), an overflow exception is thrown (if overflow
-    ## checking is turned on).
-    if x < 0: -x else: x
-else:
-  proc abs*(x: int64): int64 {.magic: "AbsI64", noSideEffect.} =
-    ## returns the absolute value of `x`. If `x` is ``low(x)`` (that
-    ## is -MININT for its type), an overflow exception is thrown (if overflow
-    ## checking is turned on).
-    if x < 0: -x else: x
+proc abs*(x: int64): int64 {.magic: "AbsI", noSideEffect.} =
+  ## returns the absolute value of `x`. If `x` is ``low(x)`` (that
+  ## is -MININT for its type), an overflow exception is thrown (if overflow
+  ## checking is turned on).
+  if x < 0: -x else: x
+
 {.pop.}
 
 type
@@ -2934,7 +2972,7 @@ when not defined(JS): #and not defined(nimscript):
       ## Raises an IO exception in case of an error.
 
     proc write*(f: File, r: float32) {.tags: [WriteIOEffect], benign.}
-    proc write*(f: File, i: int) {.tags: [WriteIOEffect], benign.}
+    #proc write*(f: File, i: int) {.tags: [WriteIOEffect], benign.}
     proc write*(f: File, i: BiggestInt) {.tags: [WriteIOEffect], benign.}
     proc write*(f: File, r: BiggestFloat) {.tags: [WriteIOEffect], benign.}
     proc write*(f: File, s: string) {.tags: [WriteIOEffect], benign.}
@@ -3112,7 +3150,7 @@ when not defined(JS): #and not defined(nimscript):
 
     when not defined(nimscript):
       proc zeroMem(p: pointer, size: Natural) =
-        c_memset(p, 0, size)
+        c_memset(p, cint(0), size)
         when declared(memTrackerOp):
           memTrackerOp("zeroMem", p, size)
       proc copyMem(dest, source: pointer, size: Natural) =

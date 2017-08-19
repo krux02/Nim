@@ -63,9 +63,12 @@ proc nextIdentIter*(ti: var TIdentIter, tab: TStrTable): PSym
 
 # these are for debugging only: They are not really deprecated, but I want
 # the warning so that release versions do not contain debugging statements:
-proc debug*(n: PSym) {.deprecated.}
-proc debug*(n: PType) {.deprecated.}
-proc debug*(n: PNode) {.deprecated.}
+proc debug*(n: PSym) {.deprecated, exportc: "debugPSym".}   ## can be called from gdb with: "call debugPSym(arg)" to inspect symbols
+proc debug*(n: PType) {.deprecated, exportc: "debugPType".} ## can be called from gdb with: "call debugPType(arg)" to inspect types
+proc debug*(n: PNode) {.deprecated, exportc: "debugPNode".} ## can be called from gdb with: "call debugNNode(arg)" to inspect nodes
+proc debug*(r: Rope) {.deprecated, exportc: "debugRope".} =
+  echo r
+
 
 template mdbg*: bool {.dirty.} =
   when compiles(c.module):

@@ -92,20 +92,20 @@ elif defined(genode):
 
 elif defined(posix):
   const
-    PROT_READ  = 1             # page can be read
-    PROT_WRITE = 2             # page can be written
+    PROT_READ  : cint = 1     # page can be read
+    PROT_WRITE : cint = 2     # page can be written
 
   when defined(macosx) or defined(bsd):
     const MAP_ANONYMOUS = 0x1000
     const MAP_PRIVATE = 0x02        # Changes are private
   elif defined(solaris):
-    const MAP_ANONYMOUS = 0x100
-    const MAP_PRIVATE = 0x02        # Changes are private
+    const MAP_ANONYMOUS : cint = 0x100
+    const MAP_PRIVATE : cint = 0x02  # Changes are private
   elif defined(linux) and defined(amd64):
     # actually, any architecture using asm-generic, but being conservative here,
     # some arches like mips and alpha use different values
-    const MAP_ANONYMOUS = 0x20
-    const MAP_PRIVATE = 0x02        # Changes are private
+    const MAP_ANONYMOUS : cint = 0x20
+    const MAP_PRIVATE : cint = 0x02  # Changes are private
   else:
     var
       MAP_ANONYMOUS {.importc: "MAP_ANONYMOUS", header: "<sys/mman.h>".}: cint

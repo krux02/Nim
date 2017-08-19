@@ -128,7 +128,7 @@ proc getFileHandle*(f: File): FileHandle = c_fileno(f)
 
 proc readLine(f: File, line: var TaintedString): bool =
   var pos = 0
-  var sp: cint = 80
+  var sp: cint = 80'i32
   # Use the currently reserved space for a first try
   if line.string.isNil:
     line = TaintedString(newStringOfCap(80))

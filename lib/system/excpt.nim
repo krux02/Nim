@@ -257,7 +257,7 @@ proc raiseExceptionAux(e: ref Exception) =
     if excHandler != nil:
       if not excHandler.hasRaiseAction or excHandler.raiseAction(e):
         pushCurrentException(e)
-        c_longjmp(excHandler.context, 1)
+        c_longjmp(excHandler.context, cint(1))
     elif e[] of OutOfMemError:
       showErrorMessage(e.name)
       quitOrDebug()
@@ -339,7 +339,7 @@ when defined(nimRequiresNimFrame):
     quitOrDebug()
 
   proc nimFrame(s: PFrame) {.compilerRtl, inl, exportc: "nimFrame".} =
-    s.calldepth = if framePtr == nil: 0 else: framePtr.calldepth+1
+    s.calldepth = if framePtr == nil: 0'i16 else: framePtr.calldepth + 1'i16
     s.prev = framePtr
     framePtr = s
     if s.calldepth == 2000: stackOverflow()
