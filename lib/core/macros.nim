@@ -212,6 +212,10 @@ proc getType*(n: typedesc): NimNode {.magic: "NGetType", noSideEffect.}
   ## are an exception in macro calls - they are not mapped implicitly to
   ## NimNode like any other arguments.
 
+when defined(nimResolveAlias):
+  proc isAlias*(arg: NimNode): bool {.magic: "NIsAlias".}
+  proc resolveAlias*(arg: NimNode): NimNode {.magic: "NResolveAlias".}
+
 proc typeKind*(n: NimNode): NimTypeKind {.magic: "NGetType", noSideEffect.}
   ## Returns the type kind of the node 'n' that should represent a type, that
   ## means the node should have been obtained via `getType`.

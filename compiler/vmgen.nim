@@ -1095,6 +1095,10 @@ proc genMagic(c: PCtx; n: PNode; dest: var TDest; m: TMagic) =
     c.gABC(n, opcNGetType, dest, tmp, rc)
     c.freeTemp(tmp)
     #genUnaryABC(c, n, dest, opcNGetType)
+  of mNIsAlias:
+    genUnaryABC(c, n, dest, opcNIsAlias)
+  of mNResolveAlias:
+    genUnaryABC(c, n, dest, opcNResolveAlias)
   of mNStrVal: genUnaryABC(c, n, dest, opcNStrVal)
   of mNSetIntVal:
     unused(n, dest)

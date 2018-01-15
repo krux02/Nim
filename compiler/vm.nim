@@ -1279,6 +1279,12 @@ proc rawExecute(c: PCtx, start: int, tos: PStackFrame): TFullReg =
           regs[ra].node = opMapTypeImplToAst(regs[rb].node.typ, c.debug[pc])
         else:
           stackTrace(c, tos, pc, errGenerated, "node has no type")
+    of opcNIsAlias:
+      stackTrace(c, tos, pc, errUser, " `isAlias` is not implemented.", nil)
+    of opcNResolveAlias:
+      decodeB(rkNode)
+      #regs[ra].node = regs[rb].node
+      stackTrace(c, tos, pc, errUser, " `resolveAlias` is not implemented.", nil)
     of opcNStrVal:
       decodeB(rkNode)
       createStr regs[ra]
