@@ -229,7 +229,6 @@ proc getTypeImpl*(n: typedesc): NimNode {.magic: "NGetType", noSideEffect.}
   ## Like getType except it includes generic parameters for the implementation
 
 when defined(nimResolveAlias):
-  proc isAlias*(arg: NimNode): bool {.magic: "NIsAlias", noSideEffect.}
   proc resolveAlias*(arg: NimNode): NimNode {.magic: "NResolveAlias", noSideEffect.}
 
 proc strVal*(n: NimNode): string  {.magic: "NStrVal", noSideEffect.}

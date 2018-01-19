@@ -1264,59 +1264,22 @@ proc rawExecute(c: PCtx, start: int, tos: PStackFrame): TFullReg =
         else: # getTypeImpl opcode:
           regs[ra].node = opMapTypeImplToAst(typ, c.debug[pc])
 
-    of opcNIsAlias:
-      decodeB(rkInt)
-      let typ = regs[rb].node.typ
-      if typ.sonsLen == 0 or typ.lastSon == nil:
-        regs[ra].intVal = 0
-      else:
-        if typ.kind == tyGenericInst and typ.lastSon.kind != tyGenericInst:
-          regs[ra].intVal = 0
-        else:
-          regs[ra].intVal = 1
-
-      #[
-      let typ = regs[rb].node.typ
-
-          kind*: TTypeKind          # kind of type
-    callConv*: TCallingConvention # for procs
-    flags*: TTypeFlags        # flags of the type
-    sons*: TTypeSeq           # base types, etc.
-    n*: PNode                 # node for types:
-                              # for range types a nkRange node
-                              # for record types a nkRecord node
-                              # for enum types a list of symbols
-                              # for tyInt it can be the int literal
-                              # for procs and tyGenericBody, it's the
-                              # formal param list
-                              # for concepts, the concept body
-                              # else: unused
-    owner*: PSym              # the 'owner' of the type
-    sym*: PSym                # types have the sym associated with them
-                              # it is used for converting types to strings
-    destructor*: PSym         # destructor. warning: nil here may not necessary
-                              # mean that there is no destructor.
-                              # see instantiateDestructor in semdestruct.nim
-    deepCopy*: PSym           # overriden 'deepCopy' operation
-    assignment*: PSym         # overriden '=' operation
-    sink*: PSym               # overriden '=sink' operation
-    methods*: seq[(int,PSym)] # attached methods
-    size*: BiggestInt         # the size of the type in bytes
-                              # -1 means that the size is unkwown
-    align*: int16             # the type's alignment requirements
-    lockLevel*: TLockLevel    # lock level as required for deadlock checking
-    loc*: TLoc
-    typeInst*: PType          # for generic instantiations the tyGenericInst that led to this
-                              # type.
-      ]#
     of opcNResolveAlias:
       decodeB(rkNode)
       if regs[rb].kind != rkNode or regs[rb].node.typ == nil:
         stackTrace(c, tos, pc, errGenerated, "node has no type")
       else:
         var typ = regs[rb].node.typ
-        if 0 < typ.sonsLen and typ.lastSon != nil:
+
+        template isAlias: bool =
+          # this part is very very lazy implemented and does only what
+          # I, Arne Döring, need at this moment.
+
+          (typ.sonsLen > 0 and typ.lastSon != nil and (typ.kind != tyGenericInst or typ.lastSon.kind == tyGenericInst))
+
+        while isAlias:
           typ = typ.lastSon
+
         regs[ra].node = opMapTypeInstToAst(typ, c.debug[pc])
     of opcNStrVal:
       decodeB(rkNode)
