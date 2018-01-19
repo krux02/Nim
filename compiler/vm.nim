@@ -1248,45 +1248,35 @@ proc rawExecute(c: PCtx, start: int, tos: PStackFrame): TFullReg =
       else:
         stackTrace(c, tos, pc, errFieldXNotFound, "ident")
     of opcNGetType:
-      let rb = instr.regB
-      let rc = instr.regC
-      case rc:
-      of 0:
-        # getType opcode:
-        ensureKind(rkNode)
-        if regs[rb].kind == rkNode and regs[rb].node.typ != nil:
-          regs[ra].node = opMapTypeToAst(regs[rb].node.typ, c.debug[pc])
-        else:
-          stackTrace(c, tos, pc, errGenerated, "node has no type")
-      of 1:
-        # typeKind opcode:
-        ensureKind(rkInt)
-        if regs[rb].kind == rkNode and regs[rb].node.typ != nil:
-          regs[ra].intVal = ord(regs[rb].node.typ.kind)
-        #else:
-        #  stackTrace(c, tos, pc, errGenerated, "node has no type")
-      of 2:
-        # getTypeInst opcode:
-        ensureKind(rkNode)
-        if regs[rb].kind == rkNode and regs[rb].node.typ != nil:
-          regs[ra].node = opMapTypeInstToAst(regs[rb].node.typ, c.debug[pc])
-        else:
-          stackTrace(c, tos, pc, errGenerated, "node has no type")
+      decodeBC(rkNode)
+      if regs[rb].kind != rkNode or regs[rb].node.typ == nil:
+        stackTrace(c, tos, pc, errGenerated, "node has no type")
       else:
-        # getTypeImpl opcode:
-        ensureKind(rkNode)
-        if regs[rb].kind == rkNode and regs[rb].node.typ != nil:
-          regs[ra].node = opMapTypeImplToAst(regs[rb].node.typ, c.debug[pc])
-        else:
-          stackTrace(c, tos, pc, errGenerated, "node has no type")
+        let typ = regs[rb].node.typ
+        case rc:
+        of 0: # getType opcode:
+          regs[ra].node = opMapTypeToAst(typ, c.debug[pc])
+        of 1: # typeKind opcode:
+          ensureKind(rkInt)
+          regs[ra].intVal = ord(typ.kind)
+        of 2: # getTypeInst opcode:
+          regs[ra].node = opMapTypeInstToAst(typ, c.debug[pc])
+        else: # getTypeImpl opcode:
+          regs[ra].node = opMapTypeImplToAst(typ, c.debug[pc])
+
     of opcNIsAlias:
-      stackTrace(c, tos, pc, errUser, " `isAlias` is not implemented.", nil)
-      decodeB(rkNode)
-      regs[ra].intVal = 0
-      echo "############################################################ isAlias"
+      decodeB(rkInt)
       let typ = regs[rb].node.typ
-      debug typ
+      if typ.sonsLen == 0 or typ.lastSon == nil:
+        regs[ra].intVal = 0
+      else:
+        if typ.kind == tyGenericInst and typ.lastSon.kind != tyGenericInst:
+          regs[ra].intVal = 0
+        else:
+          regs[ra].intVal = 1
+
       #[
+      let typ = regs[rb].node.typ
 
           kind*: TTypeKind          # kind of type
     callConv*: TCallingConvention # for procs
@@ -1319,11 +1309,15 @@ proc rawExecute(c: PCtx, start: int, tos: PStackFrame): TFullReg =
     typeInst*: PType          # for generic instantiations the tyGenericInst that led to this
                               # type.
       ]#
-      echo "############################################################ isAlias done"
     of opcNResolveAlias:
       decodeB(rkNode)
-      #regs[ra].node = regs[rb].node
-      stackTrace(c, tos, pc, errUser, " `resolveAlias` is not implemented.", nil)
+      if regs[rb].kind != rkNode or regs[rb].node.typ == nil:
+        stackTrace(c, tos, pc, errGenerated, "node has no type")
+      else:
+        var typ = regs[rb].node.typ
+        if 0 < typ.sonsLen and typ.lastSon != nil:
+          typ = typ.lastSon
+        regs[ra].node = opMapTypeInstToAst(typ, c.debug[pc])
     of opcNStrVal:
       decodeB(rkNode)
       createStr regs[ra]

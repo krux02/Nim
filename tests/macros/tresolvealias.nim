@@ -18,6 +18,25 @@ type
 
   MyObjectSubAlias = MyObjectAlias
 
+macro bar(arg: typed): untyped =
+  echo arg.getTypeInst.isAlias
+
+var a: Vec4f            # true
+var b: Vec4[float32]    # true
+var c: Vec[4,float32]   # false
+var d: float32          # false
+var e: MyObject         # false
+var f: MyObjectAlias    # true
+var g: MyObjectSubAlias # true
+
+bar(a)
+bar(b)
+bar(c)
+bar(d)
+bar(e)
+bar(f)
+bar(g)
+
 macro foobar(arg: typed; expected: static[string]): untyped =
   var typ = arg.getTypeInst
   while typ.isAlias:
@@ -40,10 +59,6 @@ test(float32,          float32)
 test(MyObject,         MyObject)
 test(MyObjectAlias,    MyObject)
 test(MyObjectSubAlias, MyObject)
-
-
-static:
-  assert(false)
 
 # Local Variables:
 # compile-command: "./koch test run macros/tresolvealias.nim"
