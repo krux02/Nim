@@ -457,13 +457,43 @@ proc parseStmt*(s: string): NimNode {.noSideEffect, compileTime.} =
   if x.len > 0: raise newException(ValueError, x)
 
 proc getAst*(macroOrTemplate: untyped): NimNode {.magic: "ExpandToAst", noSideEffect.}
-  ## Obtains the AST nodes returned from a macro or template invocation.
+  ## Obtains the AST nodes returned from a macro or template
+  ## invocation, to serve as a template for AST constructions.  The
+  ## template/macro that is invoked needs to be a name of an existing
+  ## template/macro, while the arguments are all NimNodes.  The
+  ## typechecking and overload resolution phase is skipped here.
+  ## Terefore the macro/template that is expanded with this may not
+  ## have any overloads.
+  ##
   ## Example:
   ##
   ## .. code-block:: nim
   ##
-  ##   macro FooMacro() =
-  ##     var ast = getAst(BarTemplate())
+  ##   template myTemplate(arg: untyped): untyped =
+  ##     echo "hello from myTemplate ", arg
+  ##
+  ##   macro myMacro(arg: untyped): untyped =
+  ##     result = nnkCommand.newTree(
+  ##       bindSym"echo", newLit"Hello from myMacro ", arg
+  ##     )
+  ##
+  ##   proc myFunc(arg: NimNode): NimNode =
+  ##     nnkCommand.newTree(
+  ##       bindSym"echo", newLit"Hello from myFunc ", arg
+  ##     )
+  ##
+  ##   macro foobar(arg: untyped): untyped =
+  ##     result = newStmtList()
+  ##     # 4 ways to get an identical tree
+  ##     result.add getAst(myTemplate(arg))
+  ##     result.add getAst(myMacro(arg))
+  ##     result.add myFunc(arg)
+  ##     result.add quote do:
+  ##       echo "hello from quote ", `arg`
+  ##
+  ##     echo result.treeRepr
+  ##
+  ##   foobar(123 + 321)
 
 proc quote*(bl: typed, op = "``"): NimNode {.magic: "QuoteAst", noSideEffect.}
   ## Quasi-quoting operator.
@@ -1402,4 +1432,3 @@ macro unpackVarargs*(callee: untyped; args: varargs[untyped]): untyped =
 
 proc getProjectPath*(): string = discard
   ## Returns the path to the currently compiling project
-
