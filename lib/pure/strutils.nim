@@ -1471,6 +1471,7 @@ proc count*(s: string, sub: string, overlapping: bool = false): int {.
   ## Count the occurrences of a substring `sub` in the string `s`.
   ## Overlapping occurrences of `sub` only count when `overlapping`
   ## is set to true.
+  doAssert sub.len > 0
   var i = 0
   while true:
     i = s.find(sub, i)
@@ -1488,6 +1489,7 @@ proc count*(s: string, sub: char): int {.noSideEffect,
 proc count*(s: string, subs: set[char]): int {.noSideEffect,
   rtl, extern: "nsuCountCharSet".} =
   ## Count the occurrences of the group of character `subs` in the string `s`.
+  doAssert card(subs) > 0
   for c in s:
     if c in subs: inc result
 
@@ -2389,6 +2391,29 @@ proc removePrefix*(s: var string, prefix: string) {.
      doAssert answers == "yes"
   if s.startsWith(prefix):
     s.delete(0, prefix.len - 1)
+
+proc stripLineEnd*(s: var string) =
+  ## Returns ``s`` stripped from one of these suffixes:
+  ## ``\r, \n, \r\n, \f, \v`` (at most once instance).
+  ## For example, can be useful in conjunction with ``osproc.execCmdEx``.
+  runnableExamples:
+    var s = "foo\n\n"
+    s.stripLineEnd
+    doAssert s == "foo\n"
+    s = "foo\r\n"
+    s.stripLineEnd
+    doAssert s == "foo"
+  if s.len > 0:
+    case s[^1]
+    of '\n':
+      if s.len > 1 and s[^2] == '\r':
+        s.setLen s.len-2
+      else:
+        s.setLen s.len-1
+    of '\r', '\v', '\f':
+      s.setLen s.len-1
+    else:
+      discard
 
 when isMainModule:
   proc nonStaticTests =

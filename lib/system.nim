@@ -1437,11 +1437,11 @@ const
     ## compiler magic. It is useful to embed testing code in a module.
 
   CompileDate* {.magic: "CompileDate"}: string = "0000-00-00"
-    ## is the date of compilation as a string of the form
+    ## is the date (in UTC) of compilation as a string of the form
     ## ``YYYY-MM-DD``. This works thanks to compiler magic.
 
   CompileTime* {.magic: "CompileTime"}: string = "00:00:00"
-    ## is the time of compilation as a string of the form
+    ## is the time (in UTC) of compilation as a string of the form
     ## ``HH:MM:SS``. This works thanks to compiler magic.
 
   cpuEndian* {.magic: "CpuEndian"}: Endianness = littleEndian
@@ -2771,8 +2771,11 @@ when not defined(nimscript) and hasAlloc:
       {.warning: "GC_getStatistics is a no-op in JavaScript".}
       ""
 
-template accumulateResult*(iter: untyped) =
+template accumulateResult*(iter: untyped) {.deprecated: "use `sequtils.toSeq` instead (more hygienic, sometimes more efficient)".} =
   ## helps to convert an iterator to a proc.
+  ## See also `sequtils.toSeq` which is more hygienic and efficient.
+  ##
+  ## **Deprecated since v0.19.2:** use toSeq instead
   result = @[]
   for x in iter: add(result, x)
 
@@ -4354,6 +4357,8 @@ when not defined(js):
   proc toOpenArray*[T](x: seq[T]; first, last: int): openarray[T] {.
     magic: "Slice".}
   proc toOpenArray*[T](x: openarray[T]; first, last: int): openarray[T] {.
+    magic: "Slice".}
+  proc toOpenArray*[T](x: ptr UncheckedArray[T]; first, last: int): openarray[T] {.
     magic: "Slice".}
   proc toOpenArray*[I, T](x: array[I, T]; first, last: I): openarray[T] {.
     magic: "Slice".}
