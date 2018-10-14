@@ -403,10 +403,8 @@ proc semIs(c: PContext, n: PNode, flags: TExprFlags): PNode =
       n[1] = makeTypeSymNode(c, lhsType, n[1].info)
       lhsType = n[1].typ
   else:
-    if lhsType.base.kind == tyNone:
-      # this is a typedesc variable, leave for evals
-      return
-    if lhsType.base.containsGenericType:
+    internalAssert c.config, lhsType.base.kind != tyNone
+    if c.inGenericContext > 0 and lhsType.base.containsGenericType:
       # BUGFIX: don't evaluate this too early: ``T is void``
       return
 
@@ -2036,6 +2034,14 @@ proc semMagic(c: PContext, n: PNode, s: PSym, flags: TExprFlags): PNode =
       result = setMs(n, s)
     else:
       result = c.graph.emptyNode
+  of mOmpParFor:
+    checkMinSonsLen(n, 3, c.config)
+    if n.sonsLen == 4:
+      let annotationStr = getConstExpr(c.module, semExpr(c, n[^1]), c.graph)
+      if annotationStr == nil or annotationStr.kind notin nkStrKinds:
+        localError(c.config, result[^1].info,
+          "The annotation string for `||` must be known at compile time")
+    result = semDirectOp(c, n, flags)
   else:
     result = semDirectOp(c, n, flags)
 
