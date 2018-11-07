@@ -777,7 +777,6 @@ proc processArgument*(pass: TCmdLinePass; p: OptParser;
     if p.key.endswith(".nims"):
       config.command = "e"
       config.projectName = unixToNativePath(p.key)
-      config.arguments = cmdLineRest(p)
       result = true
     elif pass != passCmd2:
       config.command = p.key
@@ -786,6 +785,5 @@ proc processArgument*(pass: TCmdLinePass; p: OptParser;
     if argsCount == 1:
       # support UNIX style filenames everywhere for portable build scripts:
       config.projectName = unixToNativePath(p.key)
-      config.arguments = cmdLineRest(p)
       result = true
   inc argsCount

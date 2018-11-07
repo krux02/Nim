@@ -1087,46 +1087,45 @@ proc createHardlink*(src, dest: string) =
     if link(src, dest) != 0:
       raiseOSError(osLastError())
 
-proc parseCmdLine*(c: string): seq[string] {.
-  noSideEffect, rtl, extern: "nos$1".} =
-  ## Splits a `command line`:idx: into several components;
-  ## This proc is only occasionally useful, better use the `parseopt` module.
-  ##
-  ## On Windows, it uses the following parsing rules
-  ## (see http://msdn.microsoft.com/en-us/library/17w5ykft.aspx ):
-  ##
-  ## * Arguments are delimited by white space, which is either a space or a tab.
-  ## * The caret character (^) is not recognized as an escape character or
-  ##   delimiter. The character is handled completely by the command-line parser
-  ##   in the operating system before being passed to the argv array in the
-  ##   program.
-  ## * A string surrounded by double quotation marks ("string") is interpreted
-  ##   as a single argument, regardless of white space contained within. A
-  ##   quoted string can be embedded in an argument.
-  ## * A double quotation mark preceded by a backslash (\") is interpreted as a
-  ##   literal double quotation mark character (").
-  ## * Backslashes are interpreted literally, unless they immediately precede
-  ##   a double quotation mark.
-  ## * If an even number of backslashes is followed by a double quotation mark,
-  ##   one backslash is placed in the argv array for every pair of backslashes,
-  ##   and the double quotation mark is interpreted as a string delimiter.
-  ## * If an odd number of backslashes is followed by a double quotation mark,
-  ##   one backslash is placed in the argv array for every pair of backslashes,
-  ##   and the double quotation mark is "escaped" by the remaining backslash,
-  ##   causing a literal double quotation mark (") to be placed in argv.
-  ##
-  ## On Posix systems, it uses the following parsing rules:
-  ## Components are separated by whitespace unless the whitespace
-  ## occurs within ``"`` or ``'`` quotes.
-  result = @[]
-  var i = 0
-  var a = ""
-  while true:
-    setLen(a, 0)
-    # eat all delimiting whitespace
-    while i < c.len and c[i] in {' ', '\t', '\l', '\r'}: inc(i)
-    if i >= c.len: break
-    when defined(windows):
+when defined(windows):
+  proc parseCmdLine*(c: string): seq[string] {.
+    noSideEffect, rtl, extern: "nos$1".} =
+    ## Splits a `command line`:idx: into several components according
+    ## to the Windows rules (see
+    ## http://msdn.microsoft.com/en-us/library/17w5ykft.aspx ). It
+    ## uses the following parsing rules
+    ##
+    ## * Arguments are delimited by white space, which is either a space or a tab.
+    ## * The caret character (^) is not recognized as an escape character or
+    ##   delimiter. The character is handled completely by the command-line parser
+    ##   in the operating system before being passed to the argv array in the
+    ##   program.
+    ## * A string surrounded by double quotation marks ("string") is interpreted
+    ##   as a single argument, regardless of white space contained within. A
+    ##   quoted string can be embedded in an argument.
+    ## * A double quotation mark preceded by a backslash (\") is interpreted as a
+    ##   literal double quotation mark character (").
+    ## * Backslashes are interpreted literally, unless they immediately precede
+    ##   a double quotation mark.
+    ## * If an even number of backslashes is followed by a double quotation mark,
+    ##   one backslash is placed in the argv array for every pair of backslashes,
+    ##   and the double quotation mark is interpreted as a string delimiter.
+    ## * If an odd number of backslashes is followed by a double quotation mark,
+    ##   one backslash is placed in the argv array for every pair of backslashes,
+    ##   and the double quotation mark is "escaped" by the remaining backslash,
+    ##   causing a literal double quotation mark (") to be placed in argv.
+    ##
+    ## Do not use on Posix systems, iterpreting the command line and
+    ## splitting it up indo individual arguments is handled by the
+    ## shell.
+    result = @[]
+    var i = 0
+    var a = ""
+    while true:
+      setLen(a, 0)
+      # eat all delimiting whitespace
+      while i < c.len and c[i] in {' ', '\t', '\l', '\r'}: inc(i)
+      if i >= c.len: break
       # parse a single argument according to the above rules:
       var inQuote = false
       while i < c.len:
@@ -1160,20 +1159,36 @@ proc parseCmdLine*(c: string): seq[string] {.
         else:
           a.add(c[i])
           inc(i)
-    else:
-      case c[i]
-      of '\'', '\"':
-        var delim = c[i]
-        inc(i) # skip ' or "
-        while i < c.len and c[i] != delim:
-          add a, c[i]
-          inc(i)
-        if i < c.len: inc(i)
-      else:
-        while i < c.len and c[i] > ' ':
-          add(a, c[i])
-          inc(i)
-    add(result, a)
+      add(result, a)
+
+else:
+  proc parseCmdLine*(c: string): seq[string] {.noSideEffect, rtl, extern: "nos$1", deprecated.} =
+
+    result = @[]
+    var i = 0
+    var a = ""
+    while true:
+      setLen(a, 0)
+      # eat all delimiting whitespace
+      while i < c.len and c[i] in {' ', '\t', '\l', '\r'}: inc(i)
+      if i >= c.len: break
+      # parse a single argument according to the above rules:
+      var inQuote = false
+      while i < c.len:
+        case c[i]
+        of '\'', '\"':
+          var delim = c[i]
+          inc(i) # skip ' or "
+          while i < c.len and c[i] != delim:
+            add a, c[i]
+            inc(i)
+          if i < c.len: inc(i)
+        else:
+          while i < c.len and c[i] > ' ':
+            add(a, c[i])
+            inc(i)
+
+
 
 proc copyFileWithPermissions*(source, dest: string,
                               ignorePermissionErrors = true) =

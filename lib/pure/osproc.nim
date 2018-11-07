@@ -1258,6 +1258,25 @@ elif not defined(useNimRtl):
       createStream(p.errStream, p.errHandle, fmRead)
     return p.errStream
 
+  #proc execvp(file: cstring, argv: cstring): cint {.importc, header: "<unistd.h>".}
+  proc fork(): cint {.importc, header: "<unistd.h>".}
+  proc waitpid(pid: cint; status: ptr cint; options: cint): cint {.importc, header: "<sys/wait.h>".}
+
+  proc execCmd*(command: string; argv: openarray[string]): int =
+    let childId = fork()
+    if childId != 0:
+      var childStatus: cint
+      discard waitpid(childId, childStatus.addr, 0)
+      result = childStatus
+    else:
+      var childargs = newSeq[cstring](argv.len + 2)
+      childargs[0] = command.cstring
+      for i in 0 ..< argv.len:
+        childargs[i+1] = argv[i].cstring
+      childargs[^1] = cstring(nil)
+      discard execvp("echo", cast[cstringArray](childargs[0].addr))
+      assert(false, "execvp may not return")
+
   proc csystem(cmd: cstring): cint {.nodecl, importc: "system",
                                      header: "<stdlib.h>".}
 

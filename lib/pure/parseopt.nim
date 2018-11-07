@@ -94,37 +94,6 @@ when declared(os.paramCount):
   # we cannot provide this for NimRtl creation on Posix, because we can't
   # access the command line arguments then!
 
-  #[
-  proc initOptParser*(cmdline = "", shortNoVal: set[char]={},
-                      longNoVal: seq[string] = @[]): OptParser =
-    ## inits the option parser. If ``cmdline == ""``, the real command line
-    ## (as provided by the ``OS`` module) is taken.  If ``shortNoVal`` is
-    ## provided command users do not need to delimit short option keys and
-    ## values with a ':' or '='.  If ``longNoVal`` is provided command users do
-    ## not need to delimit long option keys and values with a ':' or '='
-    ## (though they still need at least a space).  In both cases, ':' or '='
-    ## may still be used if desired.  They just become optional.
-    result.pos = 0
-    result.idx = 0
-    result.inShortState = false
-    result.shortNoVal = shortNoVal
-    result.longNoVal = longNoVal
-    if cmdline != "":
-      result.cmd = cmdline
-      result.cmds = parseCmdLine(cmdline)
-    else:
-      result.cmd = ""
-      result.cmds = newSeq[string](paramCount())
-      for i in countup(1, paramCount()):
-        result.cmds[i-1] = paramStr(i).string
-        result.cmd.add quote(result.cmds[i-1])
-        result.cmd.add ' '
-
-    result.kind = cmdEnd
-    result.key = TaintedString""
-    result.val = TaintedString""
-  ]#
-
   proc initOptParser*(cmdline: seq[TaintedString] = @[], shortNoVal: set[char]={},
                       longNoVal: seq[string] = @[]): OptParser =
     ## inits the option parser. If ``cmdline.len == 0``, the real command line
@@ -151,6 +120,8 @@ when declared(os.paramCount):
     result.kind = cmdEnd
     result.key = TaintedString""
     result.val = TaintedString""
+
+
 
 proc handleShortOption(p: var OptParser; cmd: string) =
   var i = p.pos
@@ -187,7 +158,10 @@ proc next*(p: var OptParser) {.rtl, extern: "npo$1".} =
   setLen(p.val.string, 0)
 
   var i = p.pos
+  # there should not be any whitespace at the beginning of a command
+  # eating it anyway
   while i < p.cmds[p.idx].len and p.cmds[p.idx][i] in {'\t', ' '}: inc(i)
+
   p.pos = i
   if p.inShortState:
     p.inShortState = false
@@ -207,14 +181,13 @@ proc next*(p: var OptParser) {.rtl, extern: "npo$1".} =
       p.kind = cmdLongOption
       inc(i)
       i = parseWord(p.cmds[p.idx], i, p.key.string, {' ', '\t', ':', '='})
+      # eat whitespace at end
       while i < p.cmds[p.idx].len and p.cmds[p.idx][i] in {'\t', ' '}: inc(i)
       if i < p.cmds[p.idx].len and p.cmds[p.idx][i] in {':', '='}:
         inc(i)
+        # eat whitespace at beginning of value
         while i < p.cmds[p.idx].len and p.cmds[p.idx][i] in {'\t', ' '}: inc(i)
-        # if we're at the end, use the next command line option:
-        if i >= p.cmds[p.idx].len and p.idx < p.cmds.len:
-          inc p.idx
-          i = 0
+        # value may be empty
         p.val = TaintedString p.cmds[p.idx].substr(i)
       elif len(p.longNoVal) > 0 and p.key.string notin p.longNoVal and p.idx+1 < p.cmds.len:
         p.val = TaintedString p.cmds[p.idx+1]
@@ -232,14 +205,14 @@ proc next*(p: var OptParser) {.rtl, extern: "npo$1".} =
     inc p.idx
     p.pos = 0
 
-when declared(os.paramCount):
-  proc cmdLineRest*(p: OptParser): TaintedString {.rtl, extern: "npo$1".} =
-    ## retrieves the rest of the command line that has not been parsed yet.
-    var res = ""
-    for i in p.idx..<p.cmds.len:
-      if i > p.idx: res.add ' '
-      res.add quote(p.cmds[i])
-    result = res.TaintedString
+#when declared(os.paramCount):
+#  proc cmdLineRest*(p: OptParser): TaintedString {.rtl, extern: "npo$1".} =
+#    ## retrieves the rest of the command line that has not been parsed yet.
+#    var res = ""
+#    for i in p.idx..<p.cmds.len:
+#      if i > p.idx: res.add ' '
+#      res.add quote(p.cmds[i])
+#    result = res.TaintedString
 
 iterator getopt*(p: var OptParser): tuple[kind: CmdLineKind, key, val: TaintedString] =
   ## This is an convenience iterator for iterating over the given OptParser object.

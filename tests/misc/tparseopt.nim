@@ -20,6 +20,10 @@ kind: cmdShortOption	key:val  --  r:1
 kind: cmdShortOption	key:val  --  r:0
 kind: cmdShortOption	key:val  --  l:
 kind: cmdShortOption	key:val  --  r:4
+issue9619
+kind: cmdLongOption key: option val:
+kind: cmdLongOption key: anotherOption val:
+kind: cmdArgument key: tree val:
 parseopt2
 first round
 kind: cmdLongOption	key:val  --  left:
@@ -40,7 +44,7 @@ block:
 
     # pass custom cmdline arguments
     echo "first round"
-    var argv = "--left --debug:3 -l=4 -r:2"
+    var argv = @["--left", "--debug:3", "-l=4", "-r:2"]
     var p = parseopt.initOptParser(argv)
     for kind, key, val in parseopt.getopt(p):
       echo "kind: ", kind, "\tkey:val  --  ", key, ":", val
@@ -53,11 +57,22 @@ block:
 block:
     echo "parseoptNoVal"
     # test NoVal mode with custom cmdline arguments
-    var argv = "--left --debug:3 -l -r:2 --debug 2 --debug=1 -r1 -r=0 -lr4"
+    var argv = @["--left", "--debug:3", "-l", "-r:2", "--debug", "2", "--debug=1", "-r1", "-r=0", "-lr4"]
     var p = parseopt.initOptParser(argv,
                                    shortNoVal = {'l'}, longNoVal = @["left"])
     for kind, key, val in parseopt.getopt(p):
       echo "kind: ", kind, "\tkey:val  --  ", key, ":", val
+
+block:
+  echo "issue9619"
+  var p = parseopt.initOptParser(@["--option=", "--anotherOption", "tree"])
+  for kind, key, val in parseopt.getopt(p):
+    case kind
+    of parseopt.cmdArgument:
+      echo "kind: ", kind, " key: ", key, " val: ", val
+    of parseopt.cmdLongOption, parseopt.cmdShortOption:
+      echo "kind: ", kind, " key: ", key, " val: ", val
+    of parseopt.cmdEnd: assert(false)
 
 block:
     echo "parseopt2"

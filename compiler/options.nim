@@ -186,8 +186,8 @@ type
     cppDefines*: HashSet[string] # (*)
     headerFile*: string
     features*: set[Feature]
-    arguments*: string ## the arguments to be passed to the program that
-                       ## should be run
+#    arguments*: string ## the arguments to be passed to the program that
+#                       ## should be run
     helpWritten*: bool
     ideCmd*: IdeCmd
     oldNewlines*: bool
@@ -334,7 +334,6 @@ proc newConfigRef*(): ConfigRef =
     compileOptions: "",
     ccompilerpath: "",
     toCompile: @[],
-    arguments: "",
     suggestMaxResults: 10_000
   )
   setTargetFromSystem(result.target)
