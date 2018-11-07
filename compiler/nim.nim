@@ -38,7 +38,7 @@ proc prependCurDir(f: AbsoluteFile): AbsoluteFile =
   else:
     result = f
 
-proc processCmdLine(pass: TCmdLinePass, cmd: string; config: ConfigRef) =
+proc processCmdLine(pass: TCmdLinePass, cmd: seq[string]; config: ConfigRef) =
   var p = parseopt.initOptParser(cmd)
   var argsCount = 0
   while true:

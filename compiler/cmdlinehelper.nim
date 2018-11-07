@@ -17,7 +17,7 @@ type
   NimProg* = ref object
     suggestMode*: bool
     supportsStdinFile*: bool
-    processCmdLine*: proc(pass: TCmdLinePass, cmd: string; config: ConfigRef)
+    processCmdLine*: proc(pass: TCmdLinePass, cmd: seq[string]; config: ConfigRef)
     mainCommand*: proc(graph: ModuleGraph)
 
 proc initDefinesProg*(self: NimProg, conf: ConfigRef, name: string) =
@@ -25,7 +25,7 @@ proc initDefinesProg*(self: NimProg, conf: ConfigRef, name: string) =
   defineSymbol conf.symbols, name
 
 proc processCmdLineAndProjectPath*(self: NimProg, conf: ConfigRef) =
-  self.processCmdLine(passCmd1, "", conf)
+  self.processCmdLine(passCmd1, @[], conf)
   if self.supportsStdinFile and conf.projectName == "-":
     conf.projectName = "stdinfile"
     conf.projectFull = AbsoluteFile "stdinfile"
@@ -82,7 +82,7 @@ proc loadConfigsAndRunMainCommand*(self: NimProg, cache: IdentCache; conf: Confi
   # now process command line arguments again, because some options in the
   # command line can overwite the config file's settings
   extccomp.initVars(conf)
-  self.processCmdLine(passCmd2, "", conf)
+  self.processCmdLine(passCmd2, @[], conf)
   if conf.command == "":
     rawMessage(conf, errGenerated, "command missing")
 

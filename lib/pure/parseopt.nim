@@ -44,7 +44,7 @@ type
     cmdShortOption            ## a short option ``-c`` detected
   OptParser* =
       object of RootObj ## this object implements the command line parser
-    cmd*: string              #  cmd,pos exported so caller can catch "--" as..
+    #cmd*: string              #  cmd,pos exported so caller can catch "--" as..
     pos*: int                 # ..empty key or subcmd cmdArg & handle specially
     inShortState: bool
     shortNoVal: set[char]
@@ -94,6 +94,7 @@ when declared(os.paramCount):
   # we cannot provide this for NimRtl creation on Posix, because we can't
   # access the command line arguments then!
 
+  #[
   proc initOptParser*(cmdline = "", shortNoVal: set[char]={},
                       longNoVal: seq[string] = @[]): OptParser =
     ## inits the option parser. If ``cmdline == ""``, the real command line
@@ -122,8 +123,9 @@ when declared(os.paramCount):
     result.kind = cmdEnd
     result.key = TaintedString""
     result.val = TaintedString""
+  ]#
 
-  proc initOptParser*(cmdline: seq[TaintedString], shortNoVal: set[char]={},
+  proc initOptParser*(cmdline: seq[TaintedString] = @[], shortNoVal: set[char]={},
                       longNoVal: seq[string] = @[]): OptParser =
     ## inits the option parser. If ``cmdline.len == 0``, the real command line
     ## (as provided by the ``OS`` module) is taken. ``shortNoVal`` and
@@ -133,19 +135,19 @@ when declared(os.paramCount):
     result.inShortState = false
     result.shortNoVal = shortNoVal
     result.longNoVal = longNoVal
-    result.cmd = ""
+    #result.cmd = ""
     if cmdline.len != 0:
       result.cmds = newSeq[string](cmdline.len)
       for i in 0..<cmdline.len:
         result.cmds[i] = cmdline[i].string
-        result.cmd.add quote(cmdline[i].string)
-        result.cmd.add ' '
+        #result.cmd.add quote(cmdline[i].string)
+        #result.cmd.add ' '
     else:
       result.cmds = newSeq[string](paramCount())
       for i in countup(1, paramCount()):
         result.cmds[i-1] = paramStr(i).string
-        result.cmd.add quote(result.cmds[i-1])
-        result.cmd.add ' '
+        #result.cmd.add quote(result.cmds[i-1])
+        #result.cmd.add ' '
     result.kind = cmdEnd
     result.key = TaintedString""
     result.val = TaintedString""
@@ -181,12 +183,12 @@ proc next*(p: var OptParser) {.rtl, extern: "npo$1".} =
   if p.idx >= p.cmds.len:
     p.kind = cmdEnd
     return
+  setLen(p.key.string, 0)
+  setLen(p.val.string, 0)
 
   var i = p.pos
   while i < p.cmds[p.idx].len and p.cmds[p.idx][i] in {'\t', ' '}: inc(i)
   p.pos = i
-  setLen(p.key.string, 0)
-  setLen(p.val.string, 0)
   if p.inShortState:
     p.inShortState = false
     if i >= p.cmds[p.idx].len:
