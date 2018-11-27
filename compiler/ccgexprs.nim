@@ -445,12 +445,18 @@ proc binaryStmt(p: BProc, e: PNode, d: var TLoc, frmt: string) =
   initLocExpr(p, e.sons[2], b)
   lineCg(p, cpsStmts, frmt, rdLoc(a), rdLoc(b))
 
+proc strLoc(p: BProc; d: TLoc): Rope =
+  if p.config.selectedGc == gcDestructors and p.config.cmd != cmdCompileToCpp:
+    result = addrLoc(p.config, d)
+  else:
+    result = rdLoc(d)
+
 proc binaryStmtAddr(p: BProc, e: PNode, d: var TLoc, frmt: string) =
   var a, b: TLoc
   if d.k != locNone: internalError(p.config, e.info, "binaryStmtAddr")
   initLocExpr(p, e.sons[1], a)
   initLocExpr(p, e.sons[2], b)
-  lineCg(p, cpsStmts, frmt, strLoc(p.config, a), rdLoc(b))
+  lineCg(p, cpsStmts, frmt, strLoc(p, a), rdLoc(b))
 
 proc unaryStmt(p: BProc, e: PNode, d: var TLoc, frmt: string) =
   var a: TLoc
@@ -1018,12 +1024,6 @@ proc genEcho(p: BProc, n: PNode) =
 proc gcUsage(conf: ConfigRef; n: PNode) =
   if conf.selectedGC == gcNone: message(conf, n.info, warnGcMem, n.renderTree)
 
-proc strLoc(p: BProc; d: TLoc): Rope =
-  if p.config.selectedGc == gcDestructors and p.config.cmd != cmdCompileToCpp:
-    result = addrLoc(p.config, d)
-  else:
-    result = rdLoc(d)
-
 proc genStrConcat(p: BProc, e: PNode, d: var TLoc) =
   #   <Nim code>
   #   s = 'Hello ' & name & ', how do you feel?' & 'z'
@@ -1102,7 +1102,7 @@ proc genStrAppend(p: BProc, e: PNode, d: var TLoc) =
                         strLoc(p, dest), rdLoc(a)))
   if p.config.selectedGC == gcDestructors:
     linefmt(p, cpsStmts, "#prepareAdd($1, $2$3);$n",
-            strLoc(p.config, dest), lens, rope(L))
+            strLoc(p, dest), lens, rope(L))
   else:
     initLoc(call, locCall, e, OnHeap)
     call.r = ropecg(p.module, "#resizeString($1, $2$3)", [rdLoc(dest), lens, rope(L)])
