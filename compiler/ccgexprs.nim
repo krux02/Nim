@@ -241,7 +241,7 @@ proc genGenericAsgn(p: BProc, dest, src: TLoc, flags: TAssignmentFlags) =
   # (for objects, etc.):
   if p.config.selectedGC == gcDestructors:
     linefmt(p, cpsStmts,
-        "$1.len = $2.len; $1.p = $2.p;$n",
+        "$1 = $2;$n",
         rdLoc(dest), rdLoc(src))
   elif needToCopy notin flags or
       tfShallow in skipTypes(dest.t, abstractVarRange).flags:
