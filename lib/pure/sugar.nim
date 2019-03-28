@@ -238,3 +238,39 @@ macro distinctBase*(T: typedesc): untyped =
   while typeSym.typeKind == ntyDistinct:
     typeSym = getTypeImpl(typeSym)[0]
   typeSym.freshIdentNodes
+
+macro enumerate*(x: ForLoopStmt): untyped =
+  ## Add an index to an arbitrary iterator call.
+  runnableExamples:
+    {.experimental: "forLoopMacros".}
+    iterator myIterator*(): string =
+      yield "my"
+      yield "custom"
+      yield "iterator"
+
+    for i, str in enumerate(myIterator()):
+      echo i, ": ", str
+
+    # output:
+    # 0: my
+    # 1: custom
+    # 2: iterator
+
+  x.expectKind nnkForStmt
+  x.expectLen 4
+  x[0].expectKind nnkIdent
+  x[1].expectKind({nnkIdent, nnkVarTuple})
+  x[2].expectkind nnkCall
+  x[3].expectKind nnkStmtList
+
+  let incVar = x[0]
+  let loopVars = x[1]
+  let iteratorCall = x[2][1]
+  let body = x[3]
+
+  result = quote do:
+    block:
+      var `incVar`: int = 0
+      for `loopVars` in `iteratorCall`:
+        `body`
+        inc(`incVar`)
