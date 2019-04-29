@@ -48,8 +48,8 @@ proc addDotDependency(c: PPassContext, n: PNode): PNode =
 
 proc generateDot*(graph: ModuleGraph; project: AbsoluteFile) =
   let b = Backend(graph.backend)
-  discard writeRope("digraph $1 {$n$2}$n" % [
-      rope(project.splitFile.name), b.dotGraph],
+  discard writeRope(formatRope("digraph $1 {$n$2}$n", [
+      rope(project.splitFile.name), b.dotGraph]),
             changeFileExt(project, "dot"))
 
 proc myOpen(graph: ModuleGraph; module: PSym): PPassContext =
@@ -63,4 +63,3 @@ proc myOpen(graph: ModuleGraph; module: PSym): PPassContext =
   result = g
 
 const gendependPass* = makePass(open = myOpen, process = addDotDependency)
-

@@ -56,7 +56,7 @@
 #  To cache them they are inserted in a `cache` array.
 
 import
-  hashes
+  hashes, macros
 
 from pathutils import AbsoluteFile
 
@@ -269,21 +269,110 @@ proc runtimeFormat*(frmt: FormatStr, args: openArray[Rope]): Rope =
       add(result, substr(frmt, start, i - 1))
   assert(ropeInvariant(result))
 
-proc `%`*(frmt: static[FormatStr], args: openArray[Rope]): Rope =
-  runtimeFormat(frmt, args)
 
-template addf*(c: var Rope, frmt: FormatStr, args: openArray[Rope]) =
+proc ropesFormatValue(result: var string; value: Rope): void =
+  for str in leaves(value):
+    result.add str
+
+proc ropesFormatValue(result: var string; value: string): void =
+  result.add value
+
+proc ropesFormatValue(result: var string; value: BiggestInt): void =
+  result.add value
+
+
+macro addFormated(resVar: var string; frmt: static[FormatStr], args: untyped): untyped =
+  var i = 0
+  var length = len(frmt)
+
+  result = newStmtList()
+  let formatValue = bindSym"ropesFormatValue"
+  var num = 0
+  var strLit = ""
+
+  template flushStrLit() =
+    if strLit != "":
+      result.add newCall(ident "add", resVar, newLit(strLit))
+      strLit.setLen 0
+
+  while i < length:
+    if frmt[i] == '$':
+      inc(i)                  # skip '$'
+      case frmt[i]
+      of '$':
+        strLit.add '$'
+        inc(i)
+      of '#':
+        flushStrLit()
+        inc(i)
+        result.add newCall(formatValue, resVar, args[num])
+        inc(num)
+      of '0'..'9':
+        var j = 0
+        while true:
+          j = j * 10 + ord(frmt[i]) - ord('0')
+          inc(i)
+          if i >= frmt.len or frmt[i] notin {'0'..'9'}: break
+        num = j
+        if j > len(args):
+          error("ropes: invalid format string " & newLit(frmt).repr & " args.len: " & $args.len)
+
+        flushStrLit()
+        result.add newCall(formatValue, resVar, args[j-1])
+      of '{':
+        inc(i)
+        var j = 0
+        while frmt[i] in {'0'..'9'}:
+          j = j * 10 + ord(frmt[i]) - ord('0')
+          inc(i)
+        num = j
+        if frmt[i] == '}': inc(i)
+        else:
+          error("invalid format string: " & frmt)
+
+        if j > len(args):
+          error("invalid format string: " & frmt)
+        else:
+          add(result, args[j-1])
+      of 'n':
+        strLit.add "\n"
+        inc(i)
+      of 'N':
+        strLit.add "\n"
+        inc(i)
+      else:
+        error("invalid format string: " & frmt)
+    var start = i
+    while i < length:
+      if frmt[i] != '$': inc(i)
+      else: break
+    if i - 1 >= start:
+      strLit.add substr(frmt, start, i - 1)
+
+  flushStrLit()
+
+template formatRope*(frmt: static[FormatStr], args: untyped): Rope =
+  var tmp: string
+  addFormated(tmp, frmt, args)
+  rope(tmp)
+
+template `%`*(frmt: static[FormatStr], args: untyped): Rope =
+  formatRope(frmt, args)
+
+template addf*(c: var Rope, frmt: FormatStr, args: untyped) =
   ## shortcut for ``add(c, frmt % args)``.
-  add(c, frmt % args)
+  var tmp: string = newStringOfCap(20)
+  addFormated(tmp, frmt, args)
+  c.add tmp
 
 when true:
-  template `~`*(r: string): Rope = r % []
+  template `~`*(r: string): Rope = formatRope(r, [])
 else:
   {.push stack_trace: off, line_trace: off.}
   proc `~`*(r: static[string]): Rope =
     # this is the new optimized "to rope" operator
     # the mnemonic is that `~` looks a bit like a rope :)
-    var r {.global.} = r % []
+    var r {.global.} = formatRope(r, [])
     return r
   {.pop.}
 

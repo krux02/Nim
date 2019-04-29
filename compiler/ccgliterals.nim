@@ -84,7 +84,7 @@ proc genStringLiteralV2Const(m: BModule; n: PNode): Rope =
     genStringLiteralDataOnlyV2(m, n.strVal, pureLit)
   else:
     pureLit = m.tmpBase & rope(id)
-  result = "{$1, (NimStrPayload*)&$2}" % [rope(len(n.strVal)), pureLit]
+  result = formatRope("{$1, (NimStrPayload*)&$2}", [len(n.strVal), pureLit])
 
 # ------ Version selector ---------------------------------------------------
 

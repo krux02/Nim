@@ -8,8 +8,10 @@
 #
 
 import
-  options, strutils, os, tables, ropes, platform, terminal, macros,
+  options, strutils, os, tables, platform, terminal, macros,
   lineinfos, pathutils
+
+import ropes except `%`
 
 proc toCChar*(c: char; result: var string) =
   case c

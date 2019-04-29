@@ -227,7 +227,7 @@ proc flagsToStr[T](flags: set[T]): Rope =
     result = "[" & result & "]"
 
 proc lineInfoToStr(conf: ConfigRef; info: TLineInfo): Rope =
-  result = "[$1, $2, $3]" % [makeYamlString(toFilename(conf, info)),
+  result = "[$1, $2, $3]".formatRope [makeYamlString(toFilename(conf, info)),
                              rope(toLinenumber(info)),
                              rope(toColumn(info))]
 
@@ -243,7 +243,7 @@ proc symToYamlAux(conf: ConfigRef; n: PSym, marker: var IntSet, indent: int,
   if n == nil:
     result = rope("null")
   elif containsOrIncl(marker, n.id):
-    result = "\"$1\"" % [rope(n.name.s)]
+    result = formatRope("\"$1\"", [n.name.s])
   else:
     var ast = treeToYamlAux(conf, n.ast, marker, indent + 2, maxRecDepth - 1)
                                  #rope("typ"), typeToYamlAux(conf, n.typ, marker,
@@ -276,8 +276,8 @@ proc typeToYamlAux(conf: ConfigRef; n: PType, marker: var IntSet, indent: int,
   if n == nil:
     sonsRope = rope("null")
   elif containsOrIncl(marker, n.id):
-    sonsRope = "\"$1 @$2\"" % [rope($n.kind), rope(
-        strutils.toHex(cast[ByteAddress](n), sizeof(n) * 2))]
+    sonsRope = formatRope("\"$1 @$2\"", [
+      $n.kind, strutils.toHex(cast[ByteAddress](n), sizeof(n) * 2)])
   else:
     if sonsLen(n) > 0:
       sonsRope = rope("[")
@@ -307,7 +307,7 @@ proc treeToYamlAux(conf: ConfigRef; n: PNode, marker: var IntSet, indent: int,
     result = rope("null")
   else:
     var istr = rspaces(indent + 2)
-    result = "{$N$1\"kind\": $2" % [istr, makeYamlString($n.kind)]
+    result = formatRope("{$N$1\"kind\": $2", [istr, makeYamlString($n.kind)])
     if maxRecDepth != 0:
       if conf != nil:
         addf(result, ",$N$1\"info\": $2", [istr, lineInfoToStr(conf, n.info)])

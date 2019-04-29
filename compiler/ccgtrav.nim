@@ -54,12 +54,12 @@ proc genTraverseProc(c: TTraversalClosure, accessor: Rope, n: PNode;
     if field.loc.r == nil: fillObjectFields(c.p.module, typ)
     if field.loc.t == nil:
       internalError(c.p.config, n.info, "genTraverseProc()")
-    genTraverseProc(c, "$1.$2" % [accessor, field.loc.r], field.loc.t)
+    genTraverseProc(c, formatRope("$1.$2", [accessor, field.loc.r]), field.loc.t)
   else: internalError(c.p.config, n.info, "genTraverseProc()")
 
 proc parentObj(accessor: Rope; m: BModule): Rope {.inline.} =
   if not m.compileToCpp:
-    result = "$1.Sup" % [accessor]
+    result = formatRope("$1.Sup", [accessor])
   else:
     result = accessor
 
@@ -126,7 +126,7 @@ proc genTraverseProcSeq(c: TTraversalClosure, accessor: Rope, typ: PType) =
   lineF(p, cpsStmts, "for ($1 = 0; $1 < $2; $1++) {$n",
       [i.r, lenExpr(c.p, a)])
   let oldLen = p.s(cpsStmts).len
-  genTraverseProc(c, "$1$3[$2]" % [accessor, i.r, dataField(c.p)], typ.sons[0])
+  genTraverseProc(c, formatRope("$1$3[$2]", [accessor, i.r, dataField(c.p)]), typ.sons[0])
   if p.s(cpsStmts).len == oldLen:
     # do not emit dummy long loops for faster debug builds:
     p.s(cpsStmts) = oldCode
@@ -141,7 +141,7 @@ proc genTraverseProc(m: BModule, origTyp: PType; sig: SigHash): Rope =
     hcrOn = m.hcrOn
     typ = origTyp.skipTypes(abstractInstOwned)
     markerName = if hcrOn: result & "_actual" else: result
-    header = "static N_NIMCALL(void, $1)(void* p, NI op)" % [markerName]
+    header = formatRope("static N_NIMCALL(void, $1)(void* p, NI op)", [markerName])
     t = getTypeDesc(m, typ)
 
   lineF(p, cpsLocals, "$1 a;$n", [t])
@@ -160,8 +160,8 @@ proc genTraverseProc(m: BModule, origTyp: PType; sig: SigHash): Rope =
     else:
       genTraverseProc(c, "(*a)".rope, typ.sons[0])
 
-  let generatedProc = "$1 {$n$2$3$4}\n" %
-        [header, p.s(cpsLocals), p.s(cpsInit), p.s(cpsStmts)]
+  let generatedProc = formatRope("$1 {$n$2$3$4}\n",
+        [header, p.s(cpsLocals), p.s(cpsInit), p.s(cpsStmts)])
 
   m.s[cfsProcHeaders].addf("$1;\n", [header])
   m.s[cfsProcs].add(generatedProc)
@@ -185,11 +185,11 @@ proc genTraverseProcForGlobal(m: BModule, s: PSym; info: TLineInfo): Rope =
 
   c.visitorFrmt = "0" # "#nimGCvisit((void*)$1, 0);$n"
   c.p = p
-  let header = "static N_NIMCALL(void, $1)(void)" % [result]
+  let header = formatRope("static N_NIMCALL(void, $1)(void)", [result])
   genTraverseProc(c, sLoc, s.loc.t)
 
-  let generatedProc = "$1 {$n$2$3$4}$n" %
-        [header, p.s(cpsLocals), p.s(cpsInit), p.s(cpsStmts)]
+  let generatedProc = formatRope("$1 {$n$2$3$4}$n",
+        [header, p.s(cpsLocals), p.s(cpsInit), p.s(cpsStmts)])
 
   m.s[cfsProcHeaders].addf("$1;$n", [header])
   m.s[cfsProcs].add(generatedProc)

@@ -19,7 +19,7 @@ import
 when not defined(leanCompiler):
   import semparallel
 
-import strutils except `%` # collides with ropes.`%`
+import strutils except `%`
 
 from modulegraphs import ModuleGraph, PPassContext
 from lineinfos import
@@ -114,22 +114,17 @@ proc cgFormatValue(result: var string; value: BiggestInt): void =
   result.add value
 
 # TODO: please document
-macro ropecg(m: BModule, frmt: static[FormatStr], args: untyped): Rope =
+macro addcg(resVar: var string; m: BModule, frmt: static[FormatStr], args: untyped): untyped =
   args.expectKind nnkBracket
   # echo "ropecg ", newLit(frmt).repr, ", ", args.repr
   var i = 0
   var length = len(frmt)
-  result = nnkStmtListExpr.newTree()
 
+  result = newStmtList()
   result.add quote do:
     assert `m` != nil
 
-  let resVar = genSym(nskVar, "res")
-  # during `koch boot` the median of all generates strings from this
-  # macro is around 40 bytes in length.
-  result.add newVarStmt(resVar, newCall(bindSym"newStringOfCap", newLit(80)))
   let formatValue = bindSym"cgFormatValue"
-
   var num = 0
   var strLit = ""
 
@@ -198,7 +193,13 @@ macro ropecg(m: BModule, frmt: static[FormatStr], args: untyped): Rope =
       add(strLit, substr(frmt, start, i - 1))
 
   flushStrLit()
-  result.add newCall(ident"rope", resVar)
+
+template ropecg(m: BModule, frmt: static[FormatStr], args: untyped): Rope =
+  # during `koch boot` the median of all generates strings from this
+  # macro is around 40 bytes in length.
+  var tmp: string = newStringOfCap(80)
+  tmp.addcg(m, frmt, args)
+  rope(tmp)
 
 proc indentLine(p: BProc, r: Rope): Rope =
   result = r
@@ -225,7 +226,7 @@ template line(p: BProc, sec: TCProcSection, r: string) =
 
 template lineF(p: BProc, sec: TCProcSection, frmt: FormatStr,
               args: untyped) =
-  add(p.s(sec), indentLine(p, frmt % args))
+  add(p.s(sec), indentLine(p, formatRope(frmt, args)))
 
 template lineCg(p: BProc, sec: TCProcSection, frmt: FormatStr,
                args: untyped) =
@@ -259,7 +260,7 @@ proc genLineDir(p: BProc, t: PNode) =
   let line = t.info.safeLineNm
 
   if optEmbedOrigSrc in p.config.globalOptions:
-    add(p.s(cpsStmts), ~"//" & sourceLine(p.config, t.info) & "\L")
+    addf(p.s(cpsStmts), "//$1\L", [sourceLine(p.config, t.info)])
   genCLineDir(p.s(cpsStmts), toFullPath(p.config, t.info), line, p.config)
   if ({optStackTrace, optEndb} * p.options == {optStackTrace, optEndb}) and
       (p.prc == nil or sfPure notin p.prc.flags):
@@ -290,7 +291,7 @@ proc getTempName(m: BModule): Rope =
 proc rdLoc(a: TLoc): Rope =
   # 'read' location (deref if indirect)
   result = a.r
-  if lfIndirect in a.flags: result = "(*$1)" % [result]
+  if lfIndirect in a.flags: result = formatRope("(*$1)", [result])
 
 proc lenField(p: BProc): Rope =
   result = rope(if p.module.compileToCpp: "len" else: "Sup.len")
@@ -299,7 +300,7 @@ proc lenExpr(p: BProc; a: TLoc): Rope =
   if p.config.selectedGc == gcDestructors:
     result = rdLoc(a) & ".len"
   else:
-    result = "($1 ? $1->$2 : 0)" % [rdLoc(a), lenField(p)]
+    result = formatRope("($1 ? $1->$2 : 0)", [rdLoc(a), lenField(p)])
 
 proc dataField(p: BProc): Rope =
   if p.config.selectedGc == gcDestructors:
@@ -327,7 +328,7 @@ proc rdCharLoc(a: TLoc): Rope =
   # read a location that may need a char-cast:
   result = rdLoc(a)
   if skipTypes(a.t, abstractRange).kind == tyChar:
-    result = "((NU8)($1))" % [result]
+    result = formatRope("((NU8)($1))", [result])
 
 proc genObjectInit(p: BProc, section: TCProcSection, t: PType, a: TLoc,
                    takeAddr: bool) =
@@ -342,7 +343,7 @@ proc genObjectInit(p: BProc, section: TCProcSection, t: PType, a: TLoc,
     discard
   of frHeader:
     var r = rdLoc(a)
-    if not takeAddr: r = "(*$1)" % [r]
+    if not takeAddr: r = formatRope("(*$1)", [r])
     var s = skipTypes(t, abstractInst)
     if not p.module.compileToCpp:
       while s.kind == tyObject and s.sons[0] != nil:
@@ -459,7 +460,7 @@ proc getIntTemp(p: BProc, result: var TLoc) =
   result.flags = {}
 
 proc initGCFrame(p: BProc): Rope =
-  if p.gcFrameId > 0: result = "struct {$1} GCFRAME_;$n" % [p.gcFrameType]
+  if p.gcFrameId > 0: result = "struct {$1} GCFRAME_;$n".formatRope [p.gcFrameType]
 
 proc deinitGCFrame(p: BProc): Rope =
   if p.gcFrameId > 0:
@@ -700,7 +701,7 @@ proc mangleDynLibProc(sym: PSym): Rope =
     # NOTE: sym.loc.r is the external name!
     result = rope(sym.name.s)
   else:
-    result = rope(strutils.`%`("Dl_$1_", $sym.id))
+    result = ropeFormat("Dl_$1_", [$sym.id])
 
 proc symInDynamicLib(m: BModule, sym: PSym) =
   var lib = sym.annex
@@ -720,7 +721,7 @@ proc symInDynamicLib(m: BModule, sym: PSym) =
       initLocExpr(m.initProc, n[i], a)
       params.add(rdLoc(a))
       params.add(", ")
-    let load = "\t$1 = ($2) ($3$4));$n" %
+    let load = "\t$1 = ($2) ($3$4));$n".formatRope
         [tmp, getTypeDesc(m, sym.typ), params, makeCString($extname)]
     var last = lastSon(n)
     if last.kind == nkHiddenStdConv: last = last.sons[1]
@@ -960,7 +961,7 @@ proc getProcTypeCast(m: BModule, prc: PSym): Rope =
     var rettype, params: Rope
     var check = initIntSet()
     genProcParams(m, prc.typ, rettype, params, check)
-    result = "$1(*)$2" % [rettype, params]
+    result = "$1(*)$2".formatRope [rettype, params]
 
 proc genProcAux(m: BModule, prc: PSym) =
   var p = newProc(prc, m)
@@ -1155,7 +1156,7 @@ proc requestConstImpl(p: BProc, sym: PSym) =
   # declare header:
   if q != m and not containsOrIncl(m.declaredThings, sym.id):
     assert(sym.loc.r != nil)
-    let headerDecl = "extern NIM_CONST $1 $2;$n" %
+    let headerDecl = "extern NIM_CONST $1 $2;$n".formatRope
         [getTypeDesc(m, sym.loc.t), sym.loc.r]
     add(m.s[cfsData], headerDecl)
     if sfExportc in sym.flags and p.module.g.generatedHeader != nil:
@@ -1214,21 +1215,21 @@ proc addIntTypes(result: var Rope; conf: ConfigRef) {.inline.} =
 
 proc getCopyright(conf: ConfigRef; cfile: Cfile): Rope =
   if optCompileOnly in conf.globalOptions:
-    result = ("/* Generated by Nim Compiler v$1 */$N" &
+    result = formatRope("/* Generated by Nim Compiler v$1 */$N" &
         "/*   (c) " & copyrightYear & " Andreas Rumpf */$N" &
-        "/* The generated code is subject to the original license. */$N") %
-        [rope(VersionAsString)]
+        "/* The generated code is subject to the original license. */$N",
+        [rope(VersionAsString)])
   else:
-    result = ("/* Generated by Nim Compiler v$1 */$N" &
+    result = formatRope("/* Generated by Nim Compiler v$1 */$N" &
         "/*   (c) " & copyrightYear & " Andreas Rumpf */$N" &
         "/* The generated code is subject to the original license. */$N" &
         "/* Compiled for: $2, $3, $4 */$N" &
-        "/* Command for C compiler:$n   $5 */$N") %
+        "/* Command for C compiler:$n   $5 */$N",
         [rope(VersionAsString),
         rope(platform.OS[conf.target.targetOS].name),
         rope(platform.CPU[conf.target.targetCPU].name),
         rope(extccomp.CC[conf.cCompiler].name),
-        rope(getCompileCFileCmd(conf, cfile))]
+        rope(getCompileCFileCmd(conf, cfile))])
 
 proc getFileHeader(conf: ConfigRef; cfile: Cfile): Rope =
   result = getCopyright(conf, cfile)
@@ -1464,7 +1465,7 @@ proc registerModuleToMain(g: BModuleList; m: BModule) =
     datInit = m.getDatInitName
 
   if m.hcrOn:
-    var hcr_module_meta = "$nN_LIB_PRIVATE const char* hcr_module_list[] = {$n" % []
+    var hcr_module_meta = ~"$nN_LIB_PRIVATE const char* hcr_module_list[] = {$n"
     let systemModulePath = getModuleDllPath(m, g.modules[g.graph.config.m.systemFileIdx.int].module)
     let mainModulePath = getModuleDllPath(m, m.module)
     if sfMainModule in m.module.flags:

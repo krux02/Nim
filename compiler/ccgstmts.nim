@@ -141,9 +141,10 @@ proc loadInto(p: BProc, le, ri: PNode, a: var TLoc) {.inline.} =
   else:
     expr(p, ri, a)
 
-proc assignLabel(b: var TBlock): Rope {.inline.} =
-  b.label = "LA" & b.id.rope
-  result = b.label
+proc assignLabel(b: var TBlock): ptr string {.inline.} =
+  b.label = "LA"
+  b.label.add b.id
+  result = b.label.addr
 
 proc blockBody(b: var TBlock): Rope =
   result = b.sections[cpsLocals]
@@ -167,7 +168,7 @@ proc endBlock(p: BProc) =
   var blockEnd: Rope
   if frameLen > 0:
     blockEnd.addf("FR_.len-=$1;$n", [frameLen.rope])
-  if p.blocks[topBlock].label != nil:
+  if p.blocks[topBlock].label != "":
     blockEnd.addf("} $1: ;$n", [p.blocks[topBlock].label])
   else:
     blockEnd.addf("}$n", [])
@@ -585,7 +586,7 @@ proc genWhileStmt(p: BProc, t: PNode) =
       initLocExpr(p, t.sons[0], a)
       if (t.sons[0].kind != nkIntLit) or (t.sons[0].intVal == 0):
         let label = assignLabel(p.blocks[p.breakIdx])
-        lineF(p, cpsStmts, "if (!$1) goto $2;$n", [rdLoc(a), label])
+        lineF(p, cpsStmts, "if (!$1) goto $2;$n", [rdLoc(a), label[]])
       genStmts(p, loopBody)
 
       if optProfiler in p.options:
@@ -668,7 +669,7 @@ proc genBreakStmt(p: BProc, t: PNode) =
     p.nestedTryStmts.len - p.blocks[idx].nestedTryStmts,
     p.inExceptBlockLen - p.blocks[idx].nestedExceptStmts)
   genLineDir(p, t)
-  lineF(p, cpsStmts, "goto $1;$n", [label])
+  lineF(p, cpsStmts, "goto $1;$n", [label[]])
 
 proc genRaiseStmt(p: BProc, t: PNode) =
   if p.module.compileToCpp:

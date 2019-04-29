@@ -27,15 +27,15 @@ proc genObjectFields(p: PProc, typ: PType, n: PNode): Rope =
       for i in countup(0, length - 1):
         if i > 0: add(s, ", \L")
         add(s, genObjectFields(p, typ, n.sons[i]))
-      result = ("{kind: 2, len: $1, offset: 0, " &
-          "typ: null, name: null, sons: [$2]}") % [rope(length), s]
+      result = formatRope("{kind: 2, len: $1, offset: 0, " &
+          "typ: null, name: null, sons: [$2]}", [rope(length), s])
   of nkSym:
     field = n.sym
     s = genTypeInfo(p, field.typ)
-    result = ("{kind: 1, offset: \"$1\", len: 0, " &
-        "typ: $2, name: $3, sons: null}") %
+    result = formatRope("{kind: 1, offset: \"$1\", len: 0, " &
+        "typ: $2, name: $3, sons: null}",
                    [mangleName(p.module, field), s,
-                    makeJSString(field.name.s)]
+                    makeJSString(field.name.s)])
   of nkRecCase:
     length = sonsLen(n)
     if (n.sons[0].kind != nkSym): internalError(p.config, n.info, "genObjectFields")
@@ -61,10 +61,10 @@ proc genObjectFields(p: PProc, typ: PType, n: PNode): Rope =
       if result != nil: add(result, ", \L")
       addf(result, "[setConstr($1), $2]",
            [u, genObjectFields(p, typ, lastSon(b))])
-    result = ("{kind: 3, offset: \"$1\", len: $3, " &
-        "typ: $2, name: $4, sons: [$5]}") % [
+    result = formatRope("{kind: 3, offset: \"$1\", len: $3, " &
+        "typ: $2, name: $4, sons: [$5]}", [
         mangleName(p.module, field), s,
-        rope(lengthOrd(p.config, field.typ)), makeJSString(field.name.s), result]
+        rope(lengthOrd(p.config, field.typ)), makeJSString(field.name.s), result])
   else: internalError(p.config, n.info, "genObjectFields")
 
 proc objHasTypeField(t: PType): bool {.inline.} =
@@ -72,8 +72,8 @@ proc objHasTypeField(t: PType): bool {.inline.} =
 
 proc genObjectInfo(p: PProc, typ: PType, name: Rope) =
   let kind = if objHasTypeField(typ): tyObject else: tyTuple
-  var s = ("var $1 = {size: 0, kind: $2, base: null, node: null, " &
-           "finalizer: null};$n") % [name, rope(ord(kind))]
+  var s = formatRope("var $1 = {size: 0, kind: $2, base: null, node: null, " &
+           "finalizer: null};$n", [name, rope(ord(kind))])
   prepend(p.g.typeInfo, s)
   addf(p.g.typeInfo, "var NNI$1 = $2;$n",
        [rope(typ.id), genObjectFields(p, typ, typ.n)])
@@ -89,12 +89,12 @@ proc genTupleFields(p: PProc, typ: PType): Rope =
     s.addf("{kind: 1, offset: \"Field$1\", len: 0, " &
            "typ: $2, name: \"Field$1\", sons: null}",
            [i.rope, genTypeInfo(p, typ.sons[i])])
-  result = ("{kind: 2, len: $1, offset: 0, " &
-            "typ: null, name: null, sons: [$2]}") % [rope(typ.len), s]
+  result = formatRope("{kind: 2, len: $1, offset: 0, " &
+            "typ: null, name: null, sons: [$2]}", [rope(typ.len), s])
 
 proc genTupleInfo(p: PProc, typ: PType, name: Rope) =
-  var s = ("var $1 = {size: 0, kind: $2, base: null, node: null, " &
-           "finalizer: null};$n") % [name, rope(ord(typ.kind))]
+  var s = formatRope("var $1 = {size: 0, kind: $2, base: null, node: null, " &
+           "finalizer: null};$n", [name, rope(ord(typ.kind))])
   prepend(p.g.typeInfo, s)
   addf(p.g.typeInfo, "var NNI$1 = $2;$n",
        [rope(typ.id), genTupleFields(p, typ)])
@@ -110,10 +110,10 @@ proc genEnumInfo(p: PProc, typ: PType, name: Rope) =
     let extName = if field.ast == nil: field.name.s else: field.ast.strVal
     addf(s, "\"$1\": {kind: 1, offset: $1, typ: $2, name: $3, len: 0, sons: null}",
          [rope(field.position), name, makeJSString(extName)])
-  var n = ("var NNI$1 = {kind: 2, offset: 0, typ: null, " &
-      "name: null, len: $2, sons: {$3}};$n") % [rope(typ.id), rope(length), s]
-  s = ("var $1 = {size: 0, kind: $2, base: null, node: null, " &
-       "finalizer: null};$n") % [name, rope(ord(typ.kind))]
+  var n = formatRope("var NNI$1 = {kind: 2, offset: 0, typ: null, " &
+      "name: null, len: $2, sons: {$3}};$n", [rope(typ.id), rope(length), s])
+  s = formatRope("var $1 = {size: 0, kind: $2, base: null, node: null, " &
+       "finalizer: null};$n", [name, rope(ord(typ.kind))])
   prepend(p.g.typeInfo, s)
   add(p.g.typeInfo, n)
   addf(p.g.typeInfo, "$1.node = NNI$2;$n", [name, rope(typ.id)])
@@ -123,27 +123,27 @@ proc genEnumInfo(p: PProc, typ: PType, name: Rope) =
 
 proc genTypeInfo(p: PProc, typ: PType): Rope =
   let t = typ.skipTypes({tyGenericInst, tyDistinct, tyAlias, tySink, tyOwned})
-  result = "NTI$1" % [rope(t.id)]
+  result = formatRope("NTI$1", [rope(t.id)])
   if containsOrIncl(p.g.typeInfoGenerated, t.id): return
   case t.kind
   of tyDistinct:
     result = genTypeInfo(p, t.sons[0])
   of tyPointer, tyProc, tyBool, tyChar, tyCString, tyString, tyInt..tyUInt64:
     var s =
-      "var $1 = {size: 0,kind: $2,base: null,node: null,finalizer: null};$n" %
-      [result, rope(ord(t.kind))]
+      formatRope("var $1 = {size: 0,kind: $2,base: null,node: null,finalizer: null};$n",
+        [result, rope(ord(t.kind))])
     prepend(p.g.typeInfo, s)
   of tyVar, tyLent, tyRef, tyPtr, tySequence, tyRange, tySet:
     var s =
-      "var $1 = {size: 0,kind: $2,base: null,node: null,finalizer: null};$n" %
-              [result, rope(ord(t.kind))]
+      formatRope("var $1 = {size: 0,kind: $2,base: null,node: null,finalizer: null};$n",
+        [result, rope(ord(t.kind))])
     prepend(p.g.typeInfo, s)
     addf(p.g.typeInfo, "$1.base = $2;$n",
          [result, genTypeInfo(p, t.lastSon)])
   of tyArray:
     var s =
-      "var $1 = {size: 0,kind: $2,base: null,node: null,finalizer: null};$n" %
-              [result, rope(ord(t.kind))]
+      formatRope("var $1 = {size: 0,kind: $2,base: null,node: null,finalizer: null};$n",
+        [result, rope(ord(t.kind))])
     prepend(p.g.typeInfo, s)
     addf(p.g.typeInfo, "$1.base = $2;$n",
          [result, genTypeInfo(p, t.sons[1])])

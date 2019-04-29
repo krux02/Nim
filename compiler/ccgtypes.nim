@@ -589,7 +589,7 @@ proc getRecordDesc(m: BModule, typ: PType, name: Rope,
 
 proc getTupleDesc(m: BModule, typ: PType, name: Rope,
                   check: var IntSet): Rope =
-  result = "$1 $2 {$n" % [structOrUnion(typ), name]
+  result = formatRope("$1 $2 {$n", [structOrUnion(typ), name])
   var desc: Rope = nil
   for i in countup(0, sonsLen(typ) - 1):
     addf(desc, "$1 Field$2;$n",
@@ -952,7 +952,7 @@ proc genProcHeader(m: BModule, prc: PSym, asPtr: bool = false): Rope =
 
 proc genTypeInfo(m: BModule, t: PType; info: TLineInfo): Rope
 proc getNimNode(m: BModule): Rope =
-  result = "$1[$2]" % [m.typeNodesName, rope(m.typeNodes)]
+  result = formatRope("$1[$2]", [m.typeNodesName, rope(m.typeNodes)])
   inc(m.typeNodes)
 
 proc TINameForHcr(m: BModule, name: Rope): Rope =
@@ -1022,12 +1022,12 @@ proc discriminatorTableName(m: BModule, objtype: PType, d: PSym): Rope =
     objtype = objtype.sons[0].skipTypes(abstractPtrs)
   if objtype.sym == nil:
     internalError(m.config, d.info, "anonymous obj with discriminator")
-  result = "NimDT_$1_$2" % [rope($hashType(objtype)), rope(d.name.s.mangle)]
+  result = formatRope("NimDT_$1_$2", [rope($hashType(objtype)), rope(d.name.s.mangle)])
 
 proc discriminatorTableDecl(m: BModule, objtype: PType, d: PSym): Rope =
   discard cgsym(m, "TNimNode")
   var tmp = discriminatorTableName(m, objtype, d)
-  result = "TNimNode* $1[$2];$n" % [tmp, rope(lengthOrd(m.config, d.typ)+1)]
+  result = formatRope("TNimNode* $1[$2];$n", [tmp, rope(lengthOrd(m.config, d.typ)+1)])
 
 proc genTNimNodeArray(m: BModule, name: Rope, size: Rope) =
   if m.hcrOn:
@@ -1291,7 +1291,7 @@ proc genTypeInfo(m: BModule, t: PType; info: TLineInfo): Rope =
     m.typeInfoMarker[sig] = marker.str
     return prefixTI.rope & marker.str & ")".rope
 
-  result = "NTI$1_" % [rope($sig)]
+  result = formatRope("NTI$1_", [rope($sig)])
   m.typeInfoMarker[sig] = result
 
   let owner = t.skipTypes(typedescPtrs).owner.getModule
