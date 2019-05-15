@@ -64,6 +64,9 @@ type
     exitCode*: int
     msg*: string
     ccodeCheck*: string
+    cppcodeCheck*: string
+    objccodeCheck*: string
+    jscodeCheck*: string
     maxCodeSize*: int
     err*: TResultEnum
     targets*: set[TTarget]
@@ -220,6 +223,12 @@ proc parseSpec*(filename: string): TSpec =
           result.cmd = e.value
       of "ccodecheck":
         result.ccodeCheck = e.value
+      of "cppcodecheck":
+        result.cppcodeCheck = e.value
+      of "objccodecheck":
+        result.objccodeCheck = e.value
+      of "jscodecheck":
+        result.jscodeCheck = e.value
       of "maxcodesize":
         discard parseInt(e.value, result.maxCodeSize)
       of "target", "targets":

@@ -1,5 +1,6 @@
 discard """
 msg: "Hello World"
+target: c
 """
 
 static:

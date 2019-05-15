@@ -335,7 +335,12 @@ proc codegenCheck(test: TTest, target: TTarget, spec: TSpec, expectedMsg: var st
   try:
     let genFile = generatedFile(test, target)
     let contents = readFile(genFile).string
-    let check = spec.ccodeCheck
+    let check =
+      case target
+      of targetC: spec.ccodeCheck
+      of targetCpp: spec.cppcodeCheck
+      of targetObjC: spec.objccodeCheck
+      of targetJS: spec.jscodeCheck
     if check.len > 0:
       if check[0] == '\\':
         # little hack to get 'match' support:

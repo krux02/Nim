@@ -584,6 +584,9 @@ proc isJoinableSpec(spec: TSpec): bool =
     spec.nimout.len == 0 and
     spec.outputCheck != ocSubstr and
     spec.ccodeCheck.len == 0 and
+    spec.cppcodeCheck.len == 0 and
+    spec.objccodeCheck.len == 0 and
+    spec.jscodeCheck.len == 0 and
     (spec.targets == {} or spec.targets == {targetC})
 
 proc norm(s: var string) =

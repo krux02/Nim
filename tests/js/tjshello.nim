@@ -1,10 +1,9 @@
 discard """
   output: "Hello World"
   maxcodesize: 1000
-  ccodecheck: "!@'function'"
+  jscodecheck: "!@'function'"
 """
 
 import jsconsole
 
 console.log "Hello World"
-
