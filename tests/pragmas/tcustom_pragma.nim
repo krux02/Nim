@@ -62,8 +62,7 @@ block: # A bit more advanced case
   static:
     assert Subfield.hasCustomPragma(defaultValue)
     assert(Subfield.getCustomPragmaVal(defaultValue) == "catman")
-
-    assert hasCustomPragma(type(s.field), defaultValue)
+    assert hasCustomPragma(typeof(s.field), defaultValue)
 
   proc foo(s: var MySerializable) =
     static: assert(s.a.getCustomPragmaVal(defaultValue) == 5)
@@ -156,13 +155,20 @@ block:
   proc generic_proc[T]() =
     assert Annotated.hasCustomPragma(simpleAttr)
 
-
 #--------------------------------------------------------------------------
 # Pragma on proc type
 
-let a: proc(x: int) {.defaultValue(5).} = nil
+type
+  MyAnnotatedProcType {.defaultValue(4).} = proc(x: int): void
+
+let a {.defaultValue(4).}: proc(x: int)  = nil
+var b: MyAnnotatedProcType = nil
+var c: proc(x: int): void {.defaultValue(5).}  = nil
 static:
-  doAssert hasCustomPragma(a.type, defaultValue)
+  doAssert hasCustomPragma(a, defaultValue)
+  doAssert hasCustomPragma(MyAnnotatedProcType, defaultValue)
+  doAssert hasCustomPragma(b, defaultValue)
+  doAssert hasCustomPragma(typeof(c), defaultValue)
 
 # bug #8371
 template thingy {.pragma.}
@@ -249,3 +255,20 @@ block:
   var e {.fooBar("foo", 123, 'u').}: int
   doAssert(hasCustomPragma(e, fooBar))
   doAssert(getCustomPragmaVal(e, fooBar).c == 123)
+
+# issue #11511
+block:
+  template myAttr {. pragma .}
+
+  type TObj = object
+      a {. myAttr .}: int
+
+  macro hasMyAttr(t: typedesc): untyped =
+    let objTy = t.getType[1].getType
+    let recList = objTy[2]
+    let sym = recList[0]
+    assert sym.kind == nnkSym and sym.eqIdent("a")
+    let hasAttr = sym.hasCustomPragma("myAttr")
+    newLit(hasAttr)
+
+  doAssert hasMyAttr(TObj)
