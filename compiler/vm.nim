@@ -1615,6 +1615,22 @@ proc rawExecute(c: PCtx, start: int, tos: PStackFrame): TFullReg =
     of opcNSetLineInfo:
       decodeB(rkNode)
       regs[ra].node.info = regs[rb].node.info
+    of opcCallsiteLineinfo:
+      let imm = instr.regC - byteExcess
+      case imm
+      of 0: # getCallsiteFile
+        ensureKind(rkNode)
+        regs[ra].node = newStrNode(nkStrLit, toFullPath(c.config, c.callsiteLineinfo))
+        regs[ra].node.info = n.info
+        regs[ra].node.typ = n.typ
+      of 1: # getCallsiteLine
+        ensureKind(rkInt)
+        regs[ra].intVal = c.callsiteLineinfo.line.int
+      of 2: # getCallsiteColumn
+        ensureKind(rkInt)
+        regs[ra].intVal = c.callsiteLineinfo.col
+      else:
+        internalAssert c.config, false
     of opcEqIdent:
       decodeBC(rkInt)
       # aliases for shorter and easier to understand code below
@@ -2096,6 +2112,9 @@ proc evalMacroCall*(module: PSym; g: ModuleGraph;
   c.comesFromHeuristic.line = 0'u16
 
   c.callsite = nOrig
+  # it is `n.info`, not `nOrig.info` because `nOrig` only exists with
+  # `--experimental:callsiteAccess`.
+  c.callsiteLineinfo = n.info
   let start = genProc(c, sym)
 
   var tos = PStackFrame(prc: sym, comesFrom: 0, next: nil)
@@ -2124,6 +2143,7 @@ proc evalMacroCall*(module: PSym; g: ModuleGraph;
     else:
       dec(g.config.evalMacroCounter)
       c.callsite = nil
+      c.callsiteLineinfo = unknownLineInfo()
       localError(c.config, n.info, "expected " & $gp.len &
                  " generic parameter(s)")
   # temporary storage:
@@ -2133,3 +2153,4 @@ proc evalMacroCall*(module: PSym; g: ModuleGraph;
   if cyclicTree(result): globalError(c.config, n.info, "macro produced a cyclic tree")
   dec(g.config.evalMacroCounter)
   c.callsite = nil
+  c.callsiteLineinfo = unknownLineInfo()

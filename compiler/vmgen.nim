@@ -1277,6 +1277,12 @@ proc genMagic(c: PCtx; n: PNode; dest: var TDest; m: TMagic) =
       unused(c, n, dest)
       genBinaryStmt(c, n, opcNSetLineInfo)
     else: internalAssert c.config, false
+  of mCallsiteLineinfo:
+    case n[0].sym.name.s
+    of "getCallsiteFile": c.gABI(n, opcCallsiteLineinfo, dest, TRegister(0), 0)
+    of "getCallsiteLine": c.gABI(n, opcCallsiteLineinfo, dest, TRegister(0), 1)
+    of "getCallsiteColumn": c.gABI(n, opcCallsiteLineinfo, dest, TRegister(0), 2)
+    else: internalAssert c.config, false
   of mNHint:
     unused(c, n, dest)
     genBinaryStmt(c, n, opcNHint)

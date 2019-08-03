@@ -109,7 +109,7 @@ type
     opcNError,
     opcNWarning,
     opcNHint,
-    opcNGetLineInfo, opcNSetLineInfo,
+    opcNGetLineInfo, opcNSetLineInfo, opcCallsiteLineinfo,
     opcEqIdent,
     opcStrToIdent,
     opcGetImpl,
@@ -209,6 +209,9 @@ type
     prc*: PProc
     module*: PSym
     callsite*: PNode
+    # Since `callsite` is going away, this is a substitute for the old
+    # pattern ``lineInfo(callsite())`` that would otherwise not be available.
+    callsiteLineinfo*: TLineInfo
     mode*: TEvalMode
     features*: TSandboxFlags
     traceActive*: bool

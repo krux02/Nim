@@ -520,6 +520,14 @@ proc lineInfoObj*(n: NimNode): LineInfo {.compileTime.} =
   result.line = n.getLine
   result.column = n.getColumn
 
+when defined(nimCallsiteLineinfo):
+  proc getCallsiteLine(arg: NimNode): int {.magic: "CallsiteLineinfo", noSideEffect.}
+  proc getCallsiteColumn(arg: NimNode): int {.magic: "CallsiteLineinfo", noSideEffect.}
+  proc getCallsiteFile(arg: NimNode): string {.magic: "CallsiteLineinfo", noSideEffect.}
+
+  proc callsiteLineinfoObj*(): LineInfo {.compileTime.} =
+    ## Returns the line information of the macro call that is currently evaluated.
+
 proc lineInfo*(arg: NimNode): string {.compileTime.} =
   $arg.lineInfoObj
 

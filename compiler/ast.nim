@@ -657,7 +657,7 @@ type
     mNctPut, mNctLen, mNctGet, mNctHasNext, mNctNext,
 
     mNIntVal, mNFloatVal, mNSymbol, mNIdent, mNGetType, mNStrVal, mNSetIntVal,
-    mNSetFloatVal, mNSetSymbol, mNSetIdent, mNSetType, mNSetStrVal, mNLineInfo,
+    mNSetFloatVal, mNSetSymbol, mNSetIdent, mNSetType, mNSetStrVal, mNLineInfo, mCallsiteLineinfo,
     mNNewNimNode, mNCopyNimNode, mNCopyNimTree, mStrToIdent, mNSigHash, mNSizeOf,
     mNBindSym, mLocals, mNCallSite,
     mEqIdent, mEqNimrodNode, mSameNodeType, mGetImpl, mNGenSym,
