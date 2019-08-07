@@ -12,6 +12,7 @@
 
 ## Library additions
 
+- Custom pragma values have now an API for use in macros.
 
 ## Library changes
 
