@@ -230,6 +230,7 @@ proc testCompileOptionArg*(conf: ConfigRef; switch, arg: string, info: TLineInfo
     of "markandsweep": result = conf.selectedGC == gcMarkAndSweep
     of "generational": result = false
     of "destructors":  result = conf.selectedGC == gcDestructors
+    of "hooks":        result = conf.selectedGC == gcHooks
     of "go":           result = conf.selectedGC == gcGo
     of "none":         result = conf.selectedGC == gcNone
     of "stack", "regions": result = conf.selectedGC == gcRegions
@@ -266,7 +267,7 @@ proc testCompileOption*(conf: ConfigRef; switch: string, info: TLineInfo): bool 
   of "threadanalysis": result = contains(conf.globalOptions, optThreadAnalysis)
   of "stacktrace": result = contains(conf.options, optStackTrace)
   of "linetrace": result = contains(conf.options, optLineTrace)
-  of "debugger": result = contains(conf.options, optEndb)
+  of "debugger": result = contains(conf.globalOptions, optCDebug)
   of "profiler": result = contains(conf.options, optProfiler)
   of "memtracker": result = contains(conf.options, optMemTracker)
   of "checks", "x": result = conf.options * ChecksOptions == ChecksOptions
@@ -437,30 +438,43 @@ proc processSwitch*(switch, arg: string, pass: TCmdLinePass, info: TLineInfo;
     processOnOffSwitchG(conf, {optWholeProject}, arg, pass, info)
   of "gc":
     expectArg(conf, switch, arg, pass, info)
-    case arg.normalize
-    of "boehm":
-      conf.selectedGC = gcBoehm
-      defineSymbol(conf.symbols, "boehmgc")
-    of "refc":
-      conf.selectedGC = gcRefc
-    of "v2":
-      message(conf, info, warnDeprecated, "--gc:v2 is deprecated; using default gc")
-    of "markandsweep":
-      conf.selectedGC = gcMarkAndSweep
-      defineSymbol(conf.symbols, "gcmarkandsweep")
-    of "destructors":
-      conf.selectedGC = gcDestructors
-      defineSymbol(conf.symbols, "gcdestructors")
-    of "go":
-      conf.selectedGC = gcGo
-      defineSymbol(conf.symbols, "gogc")
-    of "none":
-      conf.selectedGC = gcNone
-      defineSymbol(conf.symbols, "nogc")
-    of "stack", "regions":
-      conf.selectedGC= gcRegions
-      defineSymbol(conf.symbols, "gcregions")
-    else: localError(conf, info, errNoneBoehmRefcExpectedButXFound % arg)
+    if pass in {passCmd2, passPP}:
+      case arg.normalize
+      of "boehm":
+        conf.selectedGC = gcBoehm
+        defineSymbol(conf.symbols, "boehmgc")
+      of "refc":
+        conf.selectedGC = gcRefc
+      of "v2":
+        message(conf, info, warnDeprecated, "--gc:v2 is deprecated; using default gc")
+      of "markandsweep":
+        conf.selectedGC = gcMarkAndSweep
+        defineSymbol(conf.symbols, "gcmarkandsweep")
+      of "destructors":
+        conf.selectedGC = gcDestructors
+        defineSymbol(conf.symbols, "gcdestructors")
+        incl conf.globalOptions, optSeqDestructors
+        incl conf.globalOptions, optTinyRtti
+        if pass in {passCmd2, passPP}:
+          defineSymbol(conf.symbols, "nimSeqsV2")
+          defineSymbol(conf.symbols, "nimV2")
+      of "hooks":
+        conf.selectedGC = gcHooks
+        defineSymbol(conf.symbols, "gchooks")
+        incl conf.globalOptions, optSeqDestructors
+        processOnOffSwitchG(conf, {optSeqDestructors}, arg, pass, info)
+        if pass in {passCmd2, passPP}:
+          defineSymbol(conf.symbols, "nimSeqsV2")
+      of "go":
+        conf.selectedGC = gcGo
+        defineSymbol(conf.symbols, "gogc")
+      of "none":
+        conf.selectedGC = gcNone
+        defineSymbol(conf.symbols, "nogc")
+      of "stack", "regions":
+        conf.selectedGC = gcRegions
+        defineSymbol(conf.symbols, "gcregions")
+      else: localError(conf, info, errNoneBoehmRefcExpectedButXFound % arg)
   of "warnings", "w":
     if processOnOffSwitchOrList(conf, {optWarns}, arg, pass, info): listWarnings(conf)
   of "warning": processSpecificNote(arg, wWarning, pass, info, switch, conf)
@@ -473,24 +487,18 @@ proc processSwitch*(switch, arg: string, pass: TCmdLinePass, info: TLineInfo;
   of "linetrace": processOnOffSwitch(conf, {optLineTrace}, arg, pass, info)
   of "debugger":
     case arg.normalize
-    of "on", "endb":
-      conf.options.incl optEndb
-      defineSymbol(conf.symbols, "endb")
-    of "off":
-      conf.options.excl optEndb
-      undefSymbol(conf.symbols, "endb")
-    of "native", "gdb":
-      incl(conf.globalOptions, optCDebug)
-      conf.options = conf.options + {optLineDir} - {optEndb}
+    of "on", "native", "gdb":
+      conf.globalOptions.incl optCDebug
+      conf.options.incl optLineDir
       #defineSymbol(conf.symbols, "nimTypeNames") # type names are used in gdb pretty printing
-      undefSymbol(conf.symbols, "endb")
+    of "off":
+      conf.globalOptions.excl optCDebug
     else:
-      localError(conf, info, "expected endb|gdb but found " & arg)
+      localError(conf, info, "expected native|gdb|on|off but found " & arg)
   of "g": # alias for --debugger:native
-    incl(conf.globalOptions, optCDebug)
-    conf.options = conf.options + {optLineDir} - {optEndb}
+    conf.globalOptions.incl optCDebug
+    conf.options.incl optLineDir
     #defineSymbol(conf.symbols, "nimTypeNames") # type names are used in gdb pretty printing
-    undefSymbol(conf.symbols, "endb")
   of "profiler":
     processOnOffSwitch(conf, {optProfiler}, arg, pass, info)
     if optProfiler in conf.options: defineSymbol(conf.symbols, "profiler")
@@ -513,7 +521,7 @@ proc processSwitch*(switch, arg: string, pass: TCmdLinePass, info: TLineInfo;
       undefSymbol(conf.symbols, "useNimRtl")
   of "oldnewlines":
     case arg.normalize
-    of "","on":
+    of "", "on":
       conf.oldNewlines = true
       defineSymbol(conf.symbols, "nimOldNewlines")
     of "off":
@@ -763,10 +771,18 @@ proc processSwitch*(switch, arg: string, pass: TCmdLinePass, info: TLineInfo;
     if pass in {passCmd2, passPP}:
       doAssert(conf != nil)
       incl(conf.features, destructor)
-      incl(conf.globalOptions, optNimV2)
+      incl(conf.globalOptions, optTinyRtti)
+      incl(conf.globalOptions, optOwnedRefs)
+      incl(conf.globalOptions, optSeqDestructors)
       defineSymbol(conf.symbols, "nimV2")
-      conf.selectedGC = gcDestructors
-      defineSymbol(conf.symbols, "gcdestructors")
+      conf.selectedGC = gcHooks
+      defineSymbol(conf.symbols, "gchooks")
+      defineSymbol(conf.symbols, "nimSeqsV2")
+      defineSymbol(conf.symbols, "nimOwnedEnabled")
+  of "seqsv2":
+    processOnOffSwitchG(conf, {optSeqDestructors}, arg, pass, info)
+    if pass in {passCmd2, passPP}:
+      defineSymbol(conf.symbols, "nimSeqsV2")
   of "stylecheck":
     case arg.normalize
     of "off": conf.globalOptions = conf.globalOptions - {optStyleHint, optStyleError}
@@ -788,6 +804,17 @@ proc processSwitch*(switch, arg: string, pass: TCmdLinePass, info: TLineInfo;
   of "expandmacro":
     expectArg(conf, switch, arg, pass, info)
     conf.macrosToExpand[arg] = "T"
+  of "oldgensym":
+    processOnOffSwitchG(conf, {optNimV019}, arg, pass, info)
+  of "useversion":
+    expectArg(conf, switch, arg, pass, info)
+    case arg
+    of "1.0":
+      discard "the default"
+    else:
+      localError(conf, info, "unknown Nim version; currently supported values are: {1.0}")
+  of "benchmarkvm":
+    processOnOffSwitchG(conf, {optBenchmarkVM}, arg, pass, info)
   of "":
     conf.projectName = "-"
   else:

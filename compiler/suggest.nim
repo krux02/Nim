@@ -261,21 +261,21 @@ proc getQuality(s: PSym): range[0..100] =
     if exp.kind in {tyUntyped, tyTyped, tyGenericParam, tyAnything}: return 50
   return 100
 
-template wholeSymTab(cond, section: untyped) =
+template wholeSymTab(cond, section: untyped) {.dirty.} =
   var isLocal = true
   var scopeN = 0
   for scope in walkScopes(c.currentScope):
     if scope == c.topLevelScope: isLocal = false
     dec scopeN
     for item in scope.symbols:
-      let it {.inject.} = item
-      var pm {.inject.}: PrefixMatch
+      let it = item
+      var pm: PrefixMatch
       if cond:
         outputs.add(symToSuggest(c.config, it, isLocal = isLocal, section, info, getQuality(it),
                                  pm, c.inTypeContext > 0, scopeN))
 
 proc suggestSymList(c: PContext, list, f: PNode; info: TLineInfo, outputs: var Suggestions) =
-  for i in 0 ..< sonsLen(list):
+  for i in 0 ..< len(list):
     if list.sons[i].kind == nkSym:
       suggestField(c, list.sons[i].sym, f, info, outputs)
     #else: InternalError(list.info, "getSymFromList")
@@ -283,9 +283,9 @@ proc suggestSymList(c: PContext, list, f: PNode; info: TLineInfo, outputs: var S
 proc suggestObject(c: PContext, n, f: PNode; info: TLineInfo, outputs: var Suggestions) =
   case n.kind
   of nkRecList:
-    for i in 0 ..< sonsLen(n): suggestObject(c, n.sons[i], f, info, outputs)
+    for i in 0 ..< len(n): suggestObject(c, n.sons[i], f, info, outputs)
   of nkRecCase:
-    var L = sonsLen(n)
+    var L = len(n)
     if L > 0:
       suggestObject(c, n.sons[0], f, info, outputs)
       for i in 1 ..< L: suggestObject(c, lastSon(n.sons[i]), f, info, outputs)
@@ -318,7 +318,7 @@ proc suggestCall(c: PContext, n, nOrig: PNode, outputs: var Suggestions) =
               ideCon)
 
 proc typeFits(c: PContext, s: PSym, firstArg: PType): bool {.inline.} =
-  if s.typ != nil and sonsLen(s.typ) > 1 and s.typ.sons[1] != nil:
+  if s.typ != nil and len(s.typ) > 1 and s.typ.sons[1] != nil:
     # special rule: if system and some weird generic match via 'tyUntyped'
     # or 'tyGenericParam' we won't list it either to reduce the noise (nobody
     # wants 'system.`-|` as suggestion
@@ -595,7 +595,7 @@ proc suggestExprNoCheck*(c: PContext, n: PNode) =
       var x = safeSemExpr(c, n.sons[0])
       if x.kind == nkEmpty or x.typ == nil: x = n.sons[0]
       addSon(a, x)
-      for i in 1..sonsLen(n)-1:
+      for i in 1..len(n)-1:
         # use as many typed arguments as possible:
         var x = safeSemExpr(c, n.sons[i])
         if x.kind == nkEmpty or x.typ == nil: break
@@ -641,7 +641,7 @@ proc suggestSentinel*(c: PContext) =
       var pm: PrefixMatch
       if filterSymNoOpr(it, nil, pm):
         outputs.add(symToSuggest(c.config, it, isLocal = isLocal, ideSug,
-            newLineInfo(c.config.m.trackPos.fileIndex, -1, -1), 0,
+            newLineInfo(c.config.m.trackPos.fileIndex, 0, -1), 0,
             PrefixMatch.None, false, scopeN))
 
   dec(c.compilesContextId)
