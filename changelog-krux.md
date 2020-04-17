@@ -15,5 +15,7 @@ This changelog contains all changes that are specific to the krux-nim branch
 
 ## Compiler changes
 
+- Tuple expressions are now parsed consistently as
+  `nnkTupleConstr` node. Will affect macros expecting nodes to be of `nnkPar`.
 
 ## Tool changes
