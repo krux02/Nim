@@ -10,6 +10,8 @@ This changelog contains all changes that are specific to the krux-nim branch
 - io.write nor strformat does not fall back to the $ operator anymore.
 - macros.newLit can be called on NimNode values as well.
 - the option type now has logical operators.
+- Added a new generic overload of `newLit` for distinct types in
+  `macros`
 
 ## Language changes
 
