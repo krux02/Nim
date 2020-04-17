@@ -217,7 +217,7 @@
 ## * `hashes module<hashes.html>`_ for helper functions for hashing
 
 
-import hashes, math, algorithm
+import hashes, math, algorithm, macros
 
 include "system/inclrtl"
 
@@ -605,7 +605,7 @@ template withValue*[A, B](t: var Table[A, B], key: A, value, body: untyped) =
   let hasKey = index >= 0
   if hasKey:
     var value {.inject.} = addr(t.data[index].val)
-    body
+    stripDoNode(body)
 
 template withValue*[A, B](t: var Table[A, B], key: A,
                           value, body1, body2: untyped) =
@@ -629,9 +629,9 @@ template withValue*[A, B](t: var Table[A, B], key: A,
   let hasKey = index >= 0
   if hasKey:
     var value {.inject.} = addr(t.data[index].val)
-    body1
+    stripDoNode(body1)
   else:
-    body2
+    stripDoNode(body2)
 
 
 iterator pairs*[A, B](t: Table[A, B]): (A, B) =

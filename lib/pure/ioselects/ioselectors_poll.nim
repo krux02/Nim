@@ -9,7 +9,7 @@
 
 # This module implements Posix poll().
 
-import posix, times
+import posix, times, macros
 
 # Maximum number of events that can be returned
 const MAX_POLL_EVENTS = 64
@@ -292,7 +292,7 @@ template withData*[T](s: Selector[T], fd: SocketHandle|int, value,
   s.checkFd(fdi)
   if fdi in s:
     var value = addr(s.getData(fdi))
-    body
+    stripDoNode(body)
 
 template withData*[T](s: Selector[T], fd: SocketHandle|int, value, body1,
                         body2: untyped) =
@@ -301,10 +301,9 @@ template withData*[T](s: Selector[T], fd: SocketHandle|int, value, body1,
   s.checkFd(fdi)
   if fdi in s:
     var value = addr(s.getData(fdi))
-    body1
+    stripDoNode(body1)
   else:
-    body2
-
+    stripDoNode(body2)
 
 proc getFd*[T](s: Selector[T]): int =
   return -1

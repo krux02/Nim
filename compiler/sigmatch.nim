@@ -1965,9 +1965,10 @@ proc incMatches(m: var TCandidate; r: TTypeRelation; convMatch = 1) =
   of isEqual: inc(m.exactMatches)
   of isNone: discard
 
-template matchesVoidProc(t: PType): bool =
+proc matchesVoidProc(t: PType): bool =
+  # used only for legacy optOldDoProc.
   (t.kind == tyProc and t.len == 1 and t[0] == nil) or
-    (t.kind == tyBuiltInTypeClass and t[0].kind == tyProc)
+  (t.kind == tyBuiltInTypeClass and t[0].kind == tyProc)
 
 proc paramTypesMatchAux(m: var TCandidate, f, a: PType,
                         argSemantized, argOrig: PNode): PNode =
@@ -2124,8 +2125,8 @@ proc paramTypesMatchAux(m: var TCandidate, f, a: PType,
       inc(m.genericMatches)
       m.fauxMatch = a.kind
       return arg
-    elif a.kind == tyVoid and f.matchesVoidProc and argOrig.kind == nkStmtList:
-      # lift do blocks without params to lambdas
+    elif optOldDoNode in c.config.legacyFeatures and a.kind == tyVoid and f.matchesVoidProc and argOrig.kind == nkStmtList:
+      # lift stmtList nodes to lambdas.
       let p = c.graph
       let lifted = c.semExpr(c, newProcNode(nkDo, argOrig.info, body = argOrig,
           params = nkFormalParams.newTree(p.emptyNode), name = p.emptyNode, pattern = p.emptyNode,

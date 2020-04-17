@@ -21,10 +21,15 @@ This changelog contains all changes that are specific to the krux-nim branch
 
 ## Language changes
 
+- A bug that automatically lifts nodes of kind `stmtList` into lambda
+  expressions has been fixed.
+- Code blocks that start with a `do` are now consistent of type
+  `nkDo`.
+- Tuple expressions are now parsed consistently as
+  `nnkTupleConstr` node. Will affect macros expecting tuples to be of
+  kind `nnkPar`.
 
 ## Compiler changes
 
-- Tuple expressions are now parsed consistently as
-  `nnkTupleConstr` node. Will affect macros expecting nodes to be of `nnkPar`.
 
 ## Tool changes
