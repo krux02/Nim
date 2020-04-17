@@ -250,8 +250,6 @@ template dataLen(t): untyped = len(t.data)
 
 include tableimpl
 
-proc rightSize*(count: Natural): int {.inline.}
-
 template get(t, key): untyped =
   ## retrieves the value at ``t[key]``. The value can be modified.
   ## If ``key`` is not in ``t``, the ``KeyError`` exception is raised.
@@ -579,15 +577,6 @@ proc `==`*[A, B](s, t: Table[A, B]): bool =
 
   equalsImpl(s, t)
 
-proc rightSize*(count: Natural): int {.inline.} =
-  ## Return the value of ``initialSize`` to support ``count`` items.
-  ##
-  ## If more items are expected to be added, simply add that
-  ## expected extra amount to the parameter before calling this.
-  ##
-  ## Internally, we want mustRehash(rightSize(x), x) == false.
-  result = nextPowerOfTwo(count * 3 div 2 + 4)
-
 proc indexBy*[A, B, C](collection: A, index: proc(x: B): C): Table[C, B] =
   ## Index the collection with the proc provided.
   # TODO: As soon as supported, change collection: A to collection: A[B]
@@ -766,19 +755,13 @@ iterator allValues*[A, B](t: Table[A, B]; key: A): B =
   ## Used if you have a table with duplicate keys (as a result of using
   ## `add proc<#add,Table[A,B],A,B>`_).
   ##
-  ## **Examples:**
-  ##
-  ## .. code-block::
-  ##   var a = {'a': 3, 'b': 5}.toTable
-  ##   for i in 1..3:
-  ##     a.add('z', 10*i)
-  ##   echo a # {'a': 3, 'b': 5, 'z': 10, 'z': 20, 'z': 30}
-  ##
-  ##   for v in a.allValues('z'):
-  ##     echo v
-  ##   # 10
-  ##   # 20
-  ##   # 30
+  runnableExamples:
+    import sequtils, algorithm
+
+    var a = {'a': 3, 'b': 5}.toTable
+    for i in 1..3: a.add('z', 10*i)
+    doAssert toSeq(a.pairs).sorted == @[('a', 3), ('b', 5), ('z', 10), ('z', 20), ('z', 30)]
+    doAssert sorted(toSeq(a.allValues('z'))) == @[10, 20, 30]
   var h: Hash = genHash(key) and high(t.data)
   let L = len(t)
   while isFilled(t.data[h].hcode):
@@ -1260,7 +1243,7 @@ proc enlarge[A, B](t: var OrderedTable[A, B]) =
       var j: Hash = eh and maxHash(t)
       while isFilled(t.data[j].hcode):
         j = nextTry(j, maxHash(t))
-      rawInsert(t, t.data, n[h].key, n[h].val, n[h].hcode, j)
+      rawInsert(t, t.data, move n[h].key, move n[h].val, n[h].hcode, j)
     h = nxt
 
 template forAllOrderedPairs(yieldStmt: untyped) {.dirty.} =
@@ -1522,7 +1505,7 @@ proc del*[A, B](t: var OrderedTable[A, B], key: A) =
         dec t.counter
       else:
         var j = -1 - rawGetKnownHC(t, n[h].key, n[h].hcode)
-        rawInsert(t, t.data, n[h].key, n[h].val, n[h].hcode, j)
+        rawInsert(t, t.data, move n[h].key, move n[h].val, n[h].hcode, j)
     h = nxt
 
 proc pop*[A, B](t: var OrderedTable[A, B], key: A, val: var B): bool {.since: (1, 1).} =
@@ -2232,7 +2215,7 @@ proc enlarge[A](t: var CountTable[A]) =
   var n: seq[tuple[key: A, val: int]]
   newSeq(n, len(t.data) * growthFactor)
   for i in countup(0, high(t.data)):
-    if t.data[i].val != 0: ctRawInsert(t, n, t.data[i].key, t.data[i].val)
+    if t.data[i].val != 0: ctRawInsert(t, n, move t.data[i].key, move t.data[i].val)
   swap(t.data, n)
 
 proc remove[A](t: var CountTable[A], key: A) =
@@ -2242,7 +2225,7 @@ proc remove[A](t: var CountTable[A], key: A) =
   for i in countup(0, high(t.data)):
     if t.data[i].val != 0:
       if t.data[i].key != key:
-        ctRawInsert(t, n, t.data[i].key, t.data[i].val)
+        ctRawInsert(t, n, move t.data[i].key, move t.data[i].val)
       else:
         removed = true
   swap(t.data, n)

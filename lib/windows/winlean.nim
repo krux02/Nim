@@ -10,8 +10,6 @@
 ## This module implements a small wrapper for some needed Win API procedures,
 ## so that the Nim compiler does not depend on the huge Windows module.
 
-{.deadCodeElim: on.}  # dce option deprecated
-
 import dynlib
 
 when defined(nimHasStyleChecks):
@@ -128,12 +126,10 @@ const
 
   CREATE_NO_WINDOW* = 0x08000000'i32
 
-when useWinUnicode:
-  proc getVersionExW*(lpVersionInfo: ptr OSVERSIONINFO): WINBOOL {.
-      stdcall, dynlib: "kernel32", importc: "GetVersionExW", sideEffect.}
-else:
-  proc getVersionExA*(lpVersionInfo: ptr OSVERSIONINFO): WINBOOL {.
-      stdcall, dynlib: "kernel32", importc: "GetVersionExA", sideEffect.}
+proc getVersionExW*(lpVersionInfo: ptr OSVERSIONINFO): WINBOOL {.
+    stdcall, dynlib: "kernel32", importc: "GetVersionExW", sideEffect.}
+proc getVersionExA*(lpVersionInfo: ptr OSVERSIONINFO): WINBOOL {.
+    stdcall, dynlib: "kernel32", importc: "GetVersionExA", sideEffect.}
 
 proc getVersion*(): DWORD {.stdcall, dynlib: "kernel32", importc: "GetVersion", sideEffect.}
 
@@ -963,13 +959,13 @@ type
                             dwRemoteAddressLength: DWORD,
                             lpdwBytesReceived: ptr DWORD,
                             lpOverlapped: POVERLAPPED): bool {.
-                            stdcall,gcsafe.}
+                            stdcall, gcsafe, raises: [].}
 
   WSAPROC_CONNECTEX* = proc (s: SocketHandle, name: ptr SockAddr, namelen: cint,
                              lpSendBuffer: pointer, dwSendDataLength: DWORD,
                              lpdwBytesSent: ptr DWORD,
                              lpOverlapped: POVERLAPPED): bool {.
-                             stdcall,gcsafe.}
+                             stdcall, gcsafe, raises: [].}
 
   WSAPROC_GETACCEPTEXSOCKADDRS* = proc(lpOutputBuffer: pointer,
                                        dwReceiveDataLength: DWORD,
@@ -979,7 +975,7 @@ type
                                        LocalSockaddrLength: ptr cint,
                                        RemoteSockaddr: ptr PSockAddr,
                                        RemoteSockaddrLength: ptr cint) {.
-                                       stdcall,gcsafe.}
+                                       stdcall, gcsafe, raises: [].}
 
 const
   WT_EXECUTEDEFAULT* = 0x00000000'i32

@@ -646,6 +646,8 @@ proc procTypeRel(c: var TCandidate, f, a: PType): TTypeRelation =
         return isNone
     when useEffectSystem:
       if compatibleEffects(f, a) != efCompat: return isNone
+    when defined(drnim):
+      if not c.c.graph.compatibleProps(c.c.graph, f, a): return isNone
 
   of tyNil:
     result = f.allowsNil
@@ -832,9 +834,6 @@ proc inferStaticParam*(c: var TCandidate, lhs: PNode, rhs: BiggestInt): bool =
   #
   if lhs.kind in nkCallKinds and lhs[0].kind == nkSym:
     case lhs[0].sym.magic
-    of mUnaryLt:
-      return inferStaticParam(c, lhs[1], rhs + 1)
-
     of mAddI, mAddU, mInc, mSucc:
       if lhs[1].kind == nkIntLit:
         return inferStaticParam(c, lhs[2], rhs - lhs[1].intVal)
@@ -1938,10 +1937,14 @@ proc localConvMatch(c: PContext, m: var TCandidate, f, a: PType,
   var call = newNodeI(nkCall, arg.info)
   call.add(f.n.copyTree)
   call.add(arg.copyTree)
-  result = c.semTryExpr(c, call)
+  # XXX: This would be much nicer if we don't use `semTryExpr` and
+  # instead we directly search for overloads with `resolveOverloads`:
+  result = c.semTryExpr(c, call, {efNoSem2Check})
 
   if result != nil:
     if result.typ == nil: return nil
+    # bug #13378, ensure we produce a real generic instantiation:
+    result = c.semExpr(c, call)
     # resulting type must be consistent with the other arguments:
     var r = typeRel(m, f[0], result.typ)
     if r < isGeneric: return nil
@@ -2001,6 +2004,7 @@ proc paramTypesMatchAux(m: var TCandidate, f, a: PType,
         let typ = newTypeS(tyStatic, c)
         typ.sons = @[evaluated.typ]
         typ.n = evaluated
+        arg = copyTree(arg) # fix #12864
         arg.typ = typ
         a = typ
       else:

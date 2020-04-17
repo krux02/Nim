@@ -281,6 +281,21 @@ when (NimMajor, NimMinor) <= (1, 0):
 else:
   zipImpl(s1, s2, seq[(S, T)])
 
+proc unzip*[S, T](s: openArray[(S, T)]): (seq[S], seq[T]) {.since: (1, 1).} =
+  ## Returns a tuple of two sequences split out from a sequence of 2-field tuples.
+  runnableExamples:
+    let
+      zipped = @[(1, 'a'), (2, 'b'), (3, 'c')]
+      unzipped1 = @[1, 2, 3]
+      unzipped2 = @['a', 'b', 'c']
+    assert zipped.unzip() == (unzipped1, unzipped2)
+    assert zip(unzipped1, unzipped2).unzip() == (unzipped1, unzipped2)
+  result[0] = newSeq[S](s.len)
+  result[1] = newSeq[T](s.len)
+  for i in 0..<s.len:
+    result[0][i] = s[i][0]
+    result[1][i] = s[i][1]
+
 proc distribute*[T](s: seq[T], num: Positive, spread = true): seq[seq[T]] =
   ## Splits and distributes a sequence `s` into `num` sub-sequences.
   ##
@@ -584,6 +599,25 @@ template keepItIf*(varSeq: seq, pred: untyped) =
           shallowCopy(varSeq[pos], varSeq[i])
       inc(pos)
   setLen(varSeq, pos)
+
+since (1, 1):
+  template countIt*(s, pred: untyped): int =
+    ## Returns a count of all the items that fulfilled the predicate.
+    ##
+    ## The predicate needs to be an expression using
+    ## the ``it`` variable for testing, like: ``countIt(@[1, 2, 3], it > 2)``.
+    ##
+    runnableExamples:
+      let numbers = @[-3, -2, -1, 0, 1, 2, 3, 4, 5, 6]
+      iterator iota(n: int): int =
+        for i in 0..<n: yield i
+      assert numbers.countIt(it < 0) == 3
+      assert countIt(iota(10), it < 2) == 2
+
+    var result = 0
+    for it {.inject.} in s:
+      if pred: result += 1
+    result
 
 proc all*[T](s: openArray[T], pred: proc(x: T): bool {.closure.}): bool =
   ## Iterates through a container and checks if every item fulfills the
