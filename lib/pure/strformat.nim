@@ -512,11 +512,6 @@ proc formatValue*(result: var string; value: string; specifier: string) =
       setLen(value, runeOffset(value, spec.precision))
   result.add alignString(value, spec.minimumWidth, spec.align, spec.fill)
 
-proc formatValue[T: not SomeInteger](result: var string; value: T;
-    specifier: string) =
-  mixin `$`
-  formatValue(result, $value, specifier)
-
 template formatValue(result: var string; value: char; specifier: string) =
   result.add value
 

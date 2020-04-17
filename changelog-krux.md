@@ -7,6 +7,8 @@ This changelog contains all changes that are specific to the krux-nim branch
 
 - remove lib/pure/collections/chains.nim (not used nor usable for anything)
 - The $ operator returns a string for every possible type.
+- io.write nor strformat does not fall back to the $ operator anymore.
+
 
 ## Language changes
 
