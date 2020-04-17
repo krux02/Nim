@@ -302,7 +302,7 @@ when defined(nimHasInstantiationOfInMacro):
     ## Useful to check proc symbols against generic symbols
     ## returned by `bindSym`.
 
-proc getType*(n: NimNode): NimNode {.magic: "NGetType", noSideEffect.}
+proc getType*(n: NimNode): NimNode {.magic: "NGetType", noSideEffect, deprecated: "Use either `getTypeInst` or `getTypeImpl`.".}
   ## With 'getType' you can access the node's `type`:idx:. A Nim type is
   ## mapped to a Nim AST too, so it's slightly confusing but it means the same
   ## API can be used to traverse types. Recursive types are flattened for you
@@ -310,7 +310,7 @@ proc getType*(n: NimNode): NimNode {.magic: "NGetType", noSideEffect.}
   ## resolve recursive types, you have to call 'getType' again. To see what
   ## kind of type it is, call `typeKind` on getType's result.
 
-proc getType*(n: typedesc): NimNode {.magic: "NGetType", noSideEffect.}
+proc getType*(n: typedesc): NimNode {.magic: "NGetType", noSideEffect, deprecated: "Use either `getTypeInst` or `getTypeImpl`.".}
   ## Version of ``getType`` which takes a ``typedesc``.
 
 proc typeKind*(n: NimNode): NimTypeKind {.magic: "NGetType", noSideEffect.}
@@ -739,7 +739,7 @@ when declared(float128):
 
 proc newLit*(arg: enum): NimNode {.compileTime.} =
   result = newCall(
-    arg.type.getTypeInst[1],
+    arg.type.getTypeInst,
     newLit(int(arg))
   )
 

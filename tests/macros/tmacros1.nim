@@ -60,3 +60,16 @@ macro foo(t: static Tuple): untyped =
   doAssert t.b == 12345
 
 foo((a: "foo", b: 12345))
+
+
+type
+  MyType = object
+    a,b,c: int
+
+macro bar(arg: typedesc) =
+  doAssert arg.getTypeInst.lispRepr ==
+    """(Sym "MyType")"""
+  doAssert arg.getTypeImpl.lispRepr ==
+    """(ObjectTy (Empty) (Empty) (RecList (IdentDefs (Sym "a") (Sym "int") (Empty)) (IdentDefs (Sym "b") (Sym "int") (Empty)) (IdentDefs (Sym "c") (Sym "int") (Empty))))"""
+
+bar(MyType)

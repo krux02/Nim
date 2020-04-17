@@ -12,6 +12,10 @@ This changelog contains all changes that are specific to the krux-nim branch
 - the option type now has logical operators.
 - Added a new generic overload of `newLit` for distinct types in
   `macros`
+- deprecate `getType` in favor of `getTypeInst`/`getTypeImpl`.
+- `getTypeInst` and `getTypeImpl` doesn't return types wrapped in
+  `typedesc` anymore.
+
 
 ## Language changes
 

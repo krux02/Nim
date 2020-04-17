@@ -453,7 +453,7 @@ proc opConv(c: PCtx; dest: var TFullReg, src: TFullReg, desttyp, srctyp: PType):
         dest.intVal = cast[BiggestInt](value)
     of tyBool:
       dest.ensureKind(rkInt)
-      dest.intVal = 
+      dest.intVal =
         case skipTypes(srctyp, abstractRange).kind
           of tyFloat..tyFloat64: int(src.floatVal != 0.0)
           else: int(src.intVal != 0)
@@ -1609,36 +1609,36 @@ proc rawExecute(c: PCtx, start: int, tos: PStackFrame): TFullReg =
         # getType opcode:
         ensureKind(rkNode)
         if regs[rb].kind == rkNode and regs[rb].node.typ != nil:
-          regs[ra].node = opMapTypeToAst(c.cache, regs[rb].node.typ, c.debug[pc])
+          regs[ra].node = opMapTypeToAst(c.cache, regs[rb].node.typ.skipTypes({tyTypeDesc}), c.debug[pc])
         elif regs[rb].kind == rkNode and regs[rb].node.kind == nkSym and regs[rb].node.sym.typ != nil:
-          regs[ra].node = opMapTypeToAst(c.cache, regs[rb].node.sym.typ, c.debug[pc])
+          regs[ra].node = opMapTypeToAst(c.cache, regs[rb].node.sym.typ.skipTypes({tyTypeDesc}), c.debug[pc])
         else:
           stackTrace(c, tos, pc, "node has no type")
       of 1:
         # typeKind opcode:
         ensureKind(rkInt)
         if regs[rb].kind == rkNode and regs[rb].node.typ != nil:
-          regs[ra].intVal = ord(regs[rb].node.typ.kind)
+          regs[ra].intVal = ord(regs[rb].node.typ.skipTypes({tyTypeDesc}).kind)
         elif regs[rb].kind == rkNode and regs[rb].node.kind == nkSym and regs[rb].node.sym.typ != nil:
-          regs[ra].intVal = ord(regs[rb].node.sym.typ.kind)
+          regs[ra].intVal = ord(regs[rb].node.sym.typ.skipTypes({tyTypeDesc}).kind)
         #else:
         #  stackTrace(c, tos, pc, "node has no type")
       of 2:
         # getTypeInst opcode:
         ensureKind(rkNode)
         if regs[rb].kind == rkNode and regs[rb].node.typ != nil:
-          regs[ra].node = opMapTypeInstToAst(c.cache, regs[rb].node.typ, c.debug[pc])
+          regs[ra].node = opMapTypeInstToAst(c.cache, regs[rb].node.typ.skipTypes({tyTypeDesc}), c.debug[pc])
         elif regs[rb].kind == rkNode and regs[rb].node.kind == nkSym and regs[rb].node.sym.typ != nil:
-          regs[ra].node = opMapTypeInstToAst(c.cache, regs[rb].node.sym.typ, c.debug[pc])
+          regs[ra].node = opMapTypeInstToAst(c.cache, regs[rb].node.sym.typ.skipTypes({tyTypeDesc}), c.debug[pc])
         else:
           stackTrace(c, tos, pc, "node has no type")
       else:
         # getTypeImpl opcode:
         ensureKind(rkNode)
         if regs[rb].kind == rkNode and regs[rb].node.typ != nil:
-          regs[ra].node = opMapTypeImplToAst(c.cache, regs[rb].node.typ, c.debug[pc])
+          regs[ra].node = opMapTypeImplToAst(c.cache, regs[rb].node.typ.skipTypes({tyTypeDesc}), c.debug[pc])
         elif regs[rb].kind == rkNode and regs[rb].node.kind == nkSym and regs[rb].node.sym.typ != nil:
-          regs[ra].node = opMapTypeImplToAst(c.cache, regs[rb].node.sym.typ, c.debug[pc])
+          regs[ra].node = opMapTypeImplToAst(c.cache, regs[rb].node.sym.typ.skipTypes({tyTypeDesc}), c.debug[pc])
         else:
           stackTrace(c, tos, pc, "node has no type")
     of opcNGetSize:
