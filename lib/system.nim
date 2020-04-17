@@ -2508,8 +2508,39 @@ template spliceImpl(s, a, L, b: untyped): untyped =
   # fill the hole:
   for i in 0 ..< b.len: s[a+i] = b[i]
 
-template `^^`(s, i: untyped): untyped =
-  (when i is BackwardsIndex: s.len - int(i) else: int(i))
+template `^^`*(s: untyped; i: BackwardsIndex): int =
+  ## General converter template to convert the Backwards index back to
+  ## a normal integer index. If your own type has a special conversion
+  ## from Backwards index to int, you can write your own overload,
+  ## otherwis it will be just default to this: `s.len - int(i)`.
+  ##
+  ## .. code-block:: nim
+  ##
+  ##   type
+  ##     MyType = object
+  ##
+  ##   template `^^`(a: MyType, b: BackwardsIndex): int =
+  ##     ## my conversion of `BackwardsIndex` for `MyType`
+  ##     1000 + int(b)
+  ##
+  ##   proc `[]`(arg: MyType; idx: int): int =
+  ##     idx
+  ##
+  ##   var mt: MyType
+  ##   echo mt[^1] # 1001
+  s.len - int(i)
+
+template `^^`*[Idx, T](a: array[Idx, T], i: BackwardsIndex): int =
+  ## Converter template specialized for the array type.
+  a.len - int(i) + int low(a)
+
+template `^^`*[Idx, T](a: array[Idx, T], i: Idx): int =
+  ## The default conversion from an idex type to an int is `int(i)`.
+  int(i)
+
+template `^^`*(s: untyped; i: int): int =
+  ## Do no conversion at all, when the input is already an integer.
+  i
 
 template `[]`*(s: string; i: int): char = arrGet(s, i)
 template `[]=`*(s: string; i: int; val: char) = arrPut(s, i, val)
@@ -2599,24 +2630,15 @@ proc `[]=`*[T, U, V](s: var seq[T], x: HSlice[U, V], b: openArray[T]) =
   else:
     spliceImpl(s, a, L, b)
 
-proc `[]`*[T](s: openArray[T]; i: BackwardsIndex): T {.inline.} =
-  system.`[]`(s, s.len - int(i))
+template `[]`*(s: untyped; i: BackwardsIndex): untyped =
+  ## Default support for `BackwardsIndex`. The `BackwardsIndex` is
+  ## resolved with `^^` to a normal `int`.
+  s[s ^^ i]
 
-proc `[]`*[Idx, T](a: array[Idx, T]; i: BackwardsIndex): T {.inline.} =
-  a[Idx(a.len - int(i) + int low(a))]
-proc `[]`*(s: string; i: BackwardsIndex): char {.inline.} = s[s.len - int(i)]
-
-proc `[]`*[T](s: var openArray[T]; i: BackwardsIndex): var T {.inline.} =
-  system.`[]`(s, s.len - int(i))
-proc `[]`*[Idx, T](a: var array[Idx, T]; i: BackwardsIndex): var T {.inline.} =
-  a[Idx(a.len - int(i) + int low(a))]
-
-proc `[]=`*[T](s: var openArray[T]; i: BackwardsIndex; x: T) {.inline.} =
-  system.`[]=`(s, s.len - int(i), x)
-proc `[]=`*[Idx, T](a: var array[Idx, T]; i: BackwardsIndex; x: T) {.inline.} =
-  a[Idx(a.len - int(i) + int low(a))] = x
-proc `[]=`*(s: var string; i: BackwardsIndex; x: char) {.inline.} =
-  s[s.len - int(i)] = x
+template `[]=`*(s: untyped; i: BackwardsIndex; x: untyped): untyped =
+  ## Default support for `BackwardsIndex`. The `BackwardsIndex` is
+  ## resolved with `^^` to a normal `int`.
+  s[s ^^ i] = x
 
 proc slurp*(filename: string): string {.magic: "Slurp".}
   ## This is an alias for `staticRead <#staticRead,string>`_.

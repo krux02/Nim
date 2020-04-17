@@ -20,4 +20,3 @@
 - The `define` and `undef` pragmas have been de-deprecated.
 
 ## Tool changes
-
