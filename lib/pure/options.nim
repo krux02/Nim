@@ -55,6 +55,32 @@
 ##   assert(result == none(int))
 ##   # It has no value:
 ##   assert(result.isNone)
+##
+## When you have a value of type ``Option[T]`` and you want to have
+## it's value of type ``T``, you can access the value with ``get``.
+## If you don't provide a fallback value there will be an exception.
+## With the ``or`` operator you can chain together several expressions
+## of type ``Option[T]`` and the whole expression will evaluate the
+## operand from left to right until an the operand that is not
+## none.  This operand will be returned.  If all operands are none, then
+## the expression evaluates to none. For convenience the last operand
+## of such an expression does not need to be of type ``Option[T]``, it
+## can be just of type ``T`` for the last fallback. If that is the
+## case the whole expression will be of type ``T``, because it could
+## not evaluate to none anymore.
+##
+## .. code-block:: nim
+##
+##   var myOpt: Option[string]
+##   # Pick the first option that is not none.
+##   myOpt = some("abc") or some("def")
+##   assert myOpt == some("abc")
+##   var myStr: string
+##   # Pick the first option that is not none with final fallback.
+##   myStr = none(string) or some("abc") or "fallback"
+##   assert myStr == "abc"
+##   myStr = none(string) or none(string) or "fallback"
+##   assert myStr == "fallback"
 
 import typetraits
 
@@ -75,7 +101,6 @@ type
       has: bool
 
   UnpackError* = object of Defect
-
 
 proc option*[T](val: T): Option[T] =
   ## Can be used to convert a pointer type (`ptr` or `ref` or `proc`) to an option type.
@@ -214,6 +239,26 @@ proc get*[T](self: var Option[T]): var T =
   if self.isNone:
     raise newException(UnpackError, "Can't obtain a value from a `none`")
   return self.val
+
+template `or`*[T](x: Option[T]; y: T): T =
+  ## When ``x`` is some return the content of ``x``. Otherwise
+  ## evaluate ``y`` and return it.  This operator can be used to
+  ## convert a value of type ``Option[T]`` into a value of type ``T``
+  ## by providing a fallback value in ``y``.
+  let xx = x
+  if xx.isSome:
+    xx.val
+  else:
+    y
+
+template `or`*[T](x, y: Option[T]): Option[T] =
+  ## When ``x`` is some, then return ``x``, else return
+  ## ``y``. Evaluate ``y`` only when necessary.
+  let xx = x
+  if xx.isSome:
+    xx
+  else:
+    y
 
 proc map*[T](self: Option[T], callback: proc (input: T)) =
   ## Applies a `callback` function to the value of the `Option`, if it has one.
@@ -513,3 +558,48 @@ when isMainModule:
     test "Ref type with overloaded `==`":
       let p = some(RefPerson.new())
       check p.isSome
+
+    test "logical operator()":
+      let strings = ["a", "b", "c", "d", "e"]
+      var sideEffects = 0
+
+      proc genSome(): Option[string] =
+        result = some(strings[sideEffects])
+        sideEffects += 1
+
+      proc genNone(): Option[string] =
+        result = none[string]()
+        sideEffects += 1
+
+      proc genStr(): string =
+        result = strings[sideEffects]
+        sideEffects += 1
+
+      proc reset(): void =
+        sideEffects = 0
+
+      # test ``or`` operator
+
+      check((genNone() or genNone() or genNone()) == none[string]())
+      check(sideEffects == 3)
+      reset()
+
+      check((genNone() or genSome()) == some("b"))
+      check(sideEffects == 2)
+      reset()
+
+      check((genNone() or genSome() or genSome()) == some("b"))
+      check(sideEffects == 2)
+      reset()
+
+      check((genNone() or genSome() or genStr()) == "b")
+      check(sideEffects == 2)
+      reset()
+
+      check((genNone() or genNone() or genStr()) == "c")
+      check(sideEffects == 3)
+      reset()
+
+      check((genSome() or genNone() or genSome() or "c") == "a")
+      check(sideEffects == 1)
+      reset()
