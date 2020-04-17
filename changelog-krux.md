@@ -15,7 +15,9 @@ This changelog contains all changes that are specific to the krux-nim branch
 - deprecate `getType` in favor of `getTypeInst`/`getTypeImpl`.
 - `getTypeInst` and `getTypeImpl` doesn't return types wrapped in
   `typedesc` anymore.
-
+- Using the ``BackwardsIndex`` on arrays that are not accessed by
+  integer types (for example enums or characters) is not supported
+  anymore.
 
 ## Language changes
 

@@ -696,14 +696,20 @@ proc len*(x: cstring): int {.magic: "LengthStr", noSideEffect.}
   ##   var str: cstring = "Hello world!"
   ##   len(str) # => 12
 
-proc len*(x: (type array)|array): int {.magic: "LengthArray", noSideEffect.}
-  ## Returns the length of an array or an array type.
+proc len*[T: array](x: typedesc[T]): int {.magic: "LengthArray", noSideEffect.}
+  ## Returns the length of an array type.
+  ## This is roughly the same as ``high(T)-low(T)+1``.
+  ##
+  ## .. code-block:: Nim
+  ##   echo len(array[3..8, int]) # => 6
+
+proc len*[T: array](x: T): int {.magic: "LengthArray", noSideEffect.}
+  ## Returns the length of an array.
   ## This is roughly the same as ``high(T)-low(T)+1``.
   ##
   ## .. code-block:: Nim
   ##   var arr = [1, 1, 1, 1, 1]
   ##   echo len(arr) # => 5
-  ##   echo len(array[3..8, int]) # => 6
 
 proc len*[T](x: seq[T]): int {.magic: "LengthSeq", noSideEffect.}
   ## Returns the length of a sequence.
