@@ -31,5 +31,6 @@ This changelog contains all changes that are specific to the krux-nim branch
 
 ## Compiler changes
 
+- alignment of types is forwarded to allocators
 
 ## Tool changes
