@@ -52,7 +52,7 @@ macro async2(prc: untyped): untyped =
 
   # Remove the 'closure' pragma.
   for i in 0 ..< result[4].len:
-    if result[4][i] == newIdentNode("async"):
+    if result[4][i].eqIdent("async"):
       result[4].del(i)
 
   result[6] = outerProcBody
