@@ -514,6 +514,7 @@ when not defined(js) and not defined(nimSeqsV2):
       len, reserved: int
       when defined(gogc):
         elemSize: int
+        elemAlign: int
     PGenericSeq {.exportc.} = ptr TGenericSeq
     # len and space without counting the terminating zero:
     NimStringDesc {.compilerproc, final.} = object of TGenericSeq
@@ -1129,6 +1130,13 @@ elif hostOS != "standalone":
   var programResult* {.compilerproc, exportc: "nim_program_result".}: int
     ## deprecated, prefer ``quit``
 
+proc align(address, alignment: int): int =
+  if alignment == 0: # Actually, this is illegal. This branch exists to actively
+                     # hide problems.
+    result = address
+  else:
+    result = (address + (alignment - 1)) and not (alignment - 1)
+
 when defined(nimdoc):
   proc quit*(errorcode: int = QuitSuccess) {.magic: "Exit", noreturn.}
     ## Stops the program immediately with an exit code.
@@ -1704,6 +1712,7 @@ when not defined(js) and defined(nimV2):
     TNimType {.compilerproc.} = object
       destructor: pointer
       size: int
+      align: int
       name: cstring
       traceImpl: pointer
       disposeImpl: pointer
@@ -1714,7 +1723,6 @@ when notJSnotNims and defined(nimSeqsV2):
   include "system/seqs_v2"
 
 {.pop.}
-
 
 when notJSnotNims:
   proc writeStackTrace*() {.tags: [], gcsafe, raises: [].}
@@ -1994,8 +2002,8 @@ proc abs*(x: int64): int64 {.magic: "AbsI", noSideEffect.} =
   result = if x < 0: -x else: x
 {.pop.}
 
-
 when not defined(js):
+
   proc likelyProc(val: bool): bool {.importc: "NIM_LIKELY", nodecl, noSideEffect.}
   proc unlikelyProc(val: bool): bool {.importc: "NIM_UNLIKELY", nodecl, noSideEffect.}
 
