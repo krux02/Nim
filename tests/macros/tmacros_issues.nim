@@ -1,9 +1,9 @@
 discard """
   nimout: '''
 IntLit 5
-proc (x: int): string => typeDesc[proc[string, int]]
-proc (x: int): void => typeDesc[proc[void, int]]
-proc (x: int) => typeDesc[proc[void, int]]
+proc (x: int): string => proc (x: int): string
+proc (x: int): void => proc (x: int)
+proc (x: int) => proc (x: int)
 x => seq[int]
 a
 s
@@ -73,7 +73,7 @@ block t9194:
   macro get(T: typedesc): untyped =
     # Get the X out of typedesc[X]
     let tmp = getTypeImpl(T)
-    result = newStrLitNode(getTypeImpl(tmp[1]).repr)
+    result = newStrLitNode(getTypeImpl(tmp).repr)
 
   echo Foo1.get
   echo Foo2.get
@@ -105,7 +105,7 @@ block t926:
 
 block t2211:
   macro showType(t:typed): untyped =
-    let ty = t.getType
+    let ty = t.getTypeInst
     echo t.repr, " => ", ty.repr
 
   showType(proc(x:int): string)
@@ -136,7 +136,7 @@ block t1140:
       while index < value.len and
           parse_until_symbol(node, value, index): discard
 
-  macro tmpli(body: untyped): typed =
+  macro tmpli(body: untyped): void =
       result = newStmtList()
       result.add parseExpr("result = \"\"")
       result.parse_template body[1].strVal

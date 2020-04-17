@@ -5,6 +5,8 @@ This changelog contains all changes that are specific to the krux-nim branch
 
 ## Standard library additions and changes
 
+- `getTypeInst` and `getTypeImpl` doesn't return types wrapped in
+  `typedesc` anymore. This really breaks stuff. Sorry, but it was necessary.
 - remove lib/pure/collections/chains.nim (not used nor usable for anything)
 - The $ operator returns a string for every possible type.
 - io.write nor strformat does not fall back to the $ operator anymore.
@@ -13,8 +15,6 @@ This changelog contains all changes that are specific to the krux-nim branch
 - Added a new generic overload of `newLit` for distinct types in
   `macros`
 - deprecate `getType` in favor of `getTypeInst`/`getTypeImpl`.
-- `getTypeInst` and `getTypeImpl` doesn't return types wrapped in
-  `typedesc` anymore.
 - Using the ``BackwardsIndex`` on arrays that are not accessed by
   integer types (for example enums or characters) is not supported
   anymore.

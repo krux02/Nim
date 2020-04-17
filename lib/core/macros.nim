@@ -746,13 +746,13 @@ proc newLit*[T](s: set[T]): NimNode {.compileTime.}
 proc newLit*(arg: tuple): NimNode {.compileTime.}
 
 proc newLit*(arg: object): NimNode {.compileTime.} =
-  result = nnkObjConstr.newTree(arg.type.getTypeInst[1])
+  result = nnkObjConstr.newTree(arg.type.getTypeInst)
   for a, b in arg.fieldPairs:
     result.add nnkExprColonExpr.newTree( newIdentNode(a), newLit(b) )
 
 proc newLit*(arg: ref object): NimNode {.compileTime.} =
   ## produces a new ref type literal node.
-  result = nnkObjConstr.newTree(arg.type.getTypeInst[1])
+  result = nnkObjConstr.newTree(arg.type.getTypeInst)
   for a, b in fieldPairs(arg[]):
     result.add nnkExprColonExpr.newTree(newIdentNode(a), newLit(b))
 
@@ -771,7 +771,7 @@ proc newLit*[T](arg: seq[T]): NimNode {.compileTime.} =
   )
   if arg.len == 0:
     # add type cast for empty seq
-    var typ = getTypeInst(typeof(arg))[1]
+    var typ = getTypeInst(typeof(arg))
     result = newCall(typ,result)
 
 proc newLit*[T](s: set[T]): NimNode {.compileTime.} =

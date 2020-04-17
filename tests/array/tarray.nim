@@ -265,12 +265,7 @@ block troof:
   y[3..5] = [1, 2, 3]
   echo y[3..5]
 
-
-  var d: array['a'..'c', string] = ["a", "b", "c"]
-  doAssert d[^1] == "c"
-
   # test for default implementation of backwards index
-
   type
     MyType = object
 

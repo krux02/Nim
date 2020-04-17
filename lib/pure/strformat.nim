@@ -438,6 +438,12 @@ proc formatValue*[T: SomeInteger](result: var string; value: T;
       " of 'x', 'X', 'b', 'd', 'o' but got: " & spec.typ)
   result.add formatInt(value, radix, spec)
 
+proc formatValue*(result: var string; value: bool; specifier: string) =
+  if value:
+    result.add "true"
+  else:
+    result.add "false"
+
 proc formatValue*(result: var string; value: SomeFloat; specifier: string) =
   ## Standard format implementation for ``SomeFloat``. It makes little
   ## sense to call this directly, but it is required to exist

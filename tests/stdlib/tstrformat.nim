@@ -112,7 +112,7 @@ type
   AnimalRef = ref Animal
 
 proc print_object(animalAddr: AnimalRef) =
-  echo fmt"Received {animalAddr[]}"
+  echo fmt"Received {$animalAddr[]}"
 
 print_object(AnimalRef(name: "Foo", species: "Bar"))
 
