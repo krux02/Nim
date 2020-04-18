@@ -2125,10 +2125,9 @@ proc paramTypesMatchAux(m: var TCandidate, f, a: PType,
       inc(m.genericMatches)
       m.fauxMatch = a.kind
       return arg
-    elif optOldDoNode in c.config.legacyFeatures and a.kind == tyVoid and f.matchesVoidProc and argOrig.kind == nkStmtList:
-      # lift stmtList nodes to lambdas.
+    elif optOldDoNode in c.config.legacyFeatures and a.kind == tyVoid and f.matchesVoidProc and arg.kind == nkStmtList:
       let p = c.graph
-      let lifted = c.semExpr(c, newProcNode(nkDo, argOrig.info, body = argOrig,
+      let lifted = c.semExpr(c, newProcNode(nkDo, arg.info, body = arg,
           params = nkFormalParams.newTree(p.emptyNode), name = p.emptyNode, pattern = p.emptyNode,
           genericParams = p.emptyNode, pragmas = p.emptyNode, exceptions = p.emptyNode), {})
       if f.kind == tyBuiltInTypeClass:
@@ -2424,8 +2423,7 @@ proc matchesAux(c: PContext, n, nOrig: PNode,
           m.typedescMatched = false
           incl(marker, formal.position)
           n[a] = prepareOperand(c, formal.typ, n[a])
-          arg = paramTypesMatch(m, formal.typ, n[a].typ,
-                                    n[a], nOrig[a])
+          arg = paramTypesMatch(m, formal.typ, n[a].typ, n[a], if nOrig != nil: nOrig[a] else: nil)
           if arg != nil and m.baseTypeMatch and container != nil:
             container.add arg
             incrIndexType(container.typ)
@@ -2463,7 +2461,7 @@ proc matchesAux(c: PContext, n, nOrig: PNode,
           m.typedescMatched = false
           n[a] = prepareOperand(c, formal.typ, n[a])
           arg = paramTypesMatch(m, formal.typ, n[a].typ,
-                                    n[a], nOrig[a])
+                                    n.sons[a], if nOrig != nil: nOrig.sons[a] else: nil)
           if arg == nil:
             noMatch()
             return
