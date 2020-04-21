@@ -69,6 +69,7 @@ type
   SomePointer = ptr | ref | pointer
 
 when defined(nimHasTypeIsRecursive):
+  # Misnomer. It is about recursive ref and seq types.
   proc isRecursivePointer(t: typedesc): bool {.magic: "TypeTrait".}
 else:
   template isRecursivePointer(t: typedesc): bool = false

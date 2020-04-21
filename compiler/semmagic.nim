@@ -114,13 +114,6 @@ const
                    tyMagicGenerics +
                    {tyCompositeTypeClass}
 
-proc uninstantiate(t: PType): PType =
-  result = case t.kind
-    of tyMagicGenerics: t
-    of tyUserDefinedGenerics: t.base
-    of tyCompositeTypeClass: uninstantiate t[1]
-    else: t
-
 proc getTypeDescNode(typ: PType, sym: PSym, info: TLineInfo): PNode =
   var resType = newType(tyTypeDesc, sym)
   rawAddSon(resType, typ)
@@ -161,23 +154,6 @@ proc evalTypeTrait(c: PContext; traitCall: PNode, operand: PType, context: PSym)
     result = newStrNode(nkStrLit, operand.typeToString(preferTypeName))
     result.typ = getSysType(c.graph, traitCall[1].info, tyString)
     result.info = traitCall.info
-  of "arity":
-    result = newIntNode(nkIntLit, operand.len - ord(operand.kind==tyProc))
-    result.typ = newType(tyInt, context)
-    result.info = traitCall.info
-  of "genericHead":
-    var arg = operand
-    case arg.kind
-    of tyGenericInst:
-      result = getTypeDescNode(arg.base, operand.owner, traitCall.info)
-    # of tySequence: # this doesn't work
-    #   var resType = newType(tySequence, operand.owner)
-    #   result = toNode(resType, traitCall.info) # doesn't work yet
-    else:
-      localError(c.config, traitCall.info, "expected generic type, got: type $2 of kind $1" % [arg.kind.toHumanStr, typeToString(operand)])
-      result = newType(tyError, context).toNode(traitCall.info)
-  of "stripGenericParams":
-    result = uninstantiate(operand).toNode(traitCall.info)
   of "supportsCopyMem":
     let t = operand.skipTypes({tyVar, tyLent, tyGenericInst, tyAlias, tySink, tyInferred})
     let complexObj = containsGarbageCollectedRef(t) or
@@ -187,21 +163,6 @@ proc evalTypeTrait(c: PContext; traitCall: PNode, operand: PType, context: PSym)
     var operand = operand.skipTypes({tyGenericInst})
     let cond = operand.kind == tyTuple and operand.n != nil
     result = newIntNodeT(toInt128(ord(cond)), traitCall, c.graph)
-  of "tupleLen":
-    var operand = operand.skipTypes({tyGenericInst})
-    assert operand.kind == tyTuple, $operand.kind
-    result = newIntNodeT(toInt128(operand.len), traitCall, c.graph)
-  of "distinctBase":
-    var arg = operand.skipTypes({tyGenericInst})
-    if arg.kind == tyDistinct:
-      while arg.kind == tyDistinct:
-        arg = arg.base
-        arg = arg.skipTypes(skippedTypes + {tyGenericInst})
-      result = getTypeDescNode(arg, operand.owner, traitCall.info)
-    else:
-      localError(c.config, traitCall.info,
-        "distinctBase expects a distinct type as argument. The given type was " & typeToString(operand))
-      result = newType(tyError, context).toNode(traitCall.info)
   of "isRecursivePointer":
     let operand = operand.skipTypes({tyGenericInst})
     let cond = isRecursivePointer(operand)
@@ -563,4 +524,3 @@ proc magicsAfterOverloadResolution(c: PContext, n: PNode,
       message(c.config, n.info, warnUnsafeDefault, typeToString(constructed))
   else:
     result = n
-

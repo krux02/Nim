@@ -21,43 +21,6 @@ proc name*(t: typedesc): string {.magic: "TypeTrait".}
   ##
   ## Alias for system.`$`(t) since Nim v0.20.
 
-proc arity*(t: typedesc): int {.magic: "TypeTrait".} =
-  ## Returns the arity of the given type. This is the number of "type"
-  ## components or the number of generic parameters a given type ``t`` has.
-  runnableExamples:
-    assert arity(seq[string]) == 1
-    assert arity(array[3, int]) == 2
-    assert arity((int, int, float, string)) == 4
-
-proc genericHead*(t: typedesc): typedesc {.magic: "TypeTrait".}
-  ## Accepts an instantiated generic type and returns its
-  ## uninstantiated form.
-  ##
-  ## For example:
-  ## * `seq[int].genericHead` will be just `seq`
-  ## * `seq[int].genericHead[float]` will be `seq[float]`
-  ##
-  ## A compile-time error will be produced if the supplied type
-  ## is not generic.
-  ##
-  ## See also:
-  ## * `stripGenericParams <#stripGenericParams,typedesc>`_
-  ##
-  ## Example:
-  ##
-  ## .. code-block:: nim
-  ##   type
-  ##     Functor[A] = concept f
-  ##       type MatchedGenericType = genericHead(f.type)
-  ##         # `f` will be a value of a type such as `Option[T]`
-  ##         # `MatchedGenericType` will become the `Option` type
-
-
-proc stripGenericParams*(t: typedesc): typedesc {.magic: "TypeTrait".}
-  ## This trait is similar to `genericHead <#genericHead,typedesc>`_, but
-  ## instead of producing error for non-generic types, it will just return
-  ## them unmodified.
-
 proc supportsCopyMem*(t: typedesc): bool {.magic: "TypeTrait".}
   ## This trait returns true iff the type ``t`` is safe to use for
   ## `copyMem`:idx:.
@@ -67,80 +30,20 @@ proc supportsCopyMem*(t: typedesc): bool {.magic: "TypeTrait".}
 proc isNamedTuple*(T: typedesc): bool {.magic: "TypeTrait".}
   ## Return true for named tuples, false for any other type.
 
-proc distinctBase*(T: typedesc): typedesc {.magic: "TypeTrait".}
-  ## Returns base type for distinct types, works only for distinct types.
-  ## compile time error otherwise
-
-since (1, 1):
-  template distinctBase*[T](a: T): untyped =
-    ## overload for values
-    runnableExamples:
-      type MyInt = distinct int
-      doAssert 12.MyInt.distinctBase == 12
-    distinctBase(type(a))(a)
-
-proc tupleLen*(T: typedesc[tuple]): int {.magic: "TypeTrait", since: (1, 1).}
-  ## Return number of elements of `T`
-
-since (1, 1):
-  template tupleLen*(t: tuple): int =
-    ## Return number of elements of `t`
-    tupleLen(type(t))
-
-since (1, 1):
-  template get*(T: typedesc[tuple], i: static int): untyped =
-    ## Return `i`th element of `T`
-    # Note: `[]` currently gives: `Error: no generic parameters allowed for ...`
-    type(default(T)[i])
-
-  type StaticParam*[value: static type] = object
-    ## used to wrap a static value in `genericParams`
-
-# NOTE: See https://github.com/nim-lang/Nim/issues/13758 - `import std/macros` does not work on OpenBSD
 import macros
 
-macro genericParamsImpl(T: typedesc): untyped =
-  # auxiliary macro needed, can't do it directly in `genericParams`
-  result = newNimNode(nnkTupleConstr)
-  var impl = getTypeImpl(T)
-  expectKind(impl, nnkBracketExpr)
-  impl = impl[1]
-  while true:
-    case impl.kind
-      of nnkSym:
-        impl = impl.getImpl
-        continue
-      of nnkTypeDef:
-        impl = impl[2]
-        continue
-      of nnkBracketExpr:
-        for i in 1..<impl.len:
-          let ai = impl[i]
-          var ret: NimNode
-          case ai.typeKind
-          of ntyTypeDesc:
-            ret = ai
-          of ntyStatic: doAssert false
-          else:
-            since (1, 1):
-              ret = newTree(nnkBracketExpr, @[bindSym"StaticParam", ai])
-          result.add ret
-        break
-      else:
-        error "wrong kind: " & $impl.kind
+macro distinctBase*[T: distinct](t: typedesc[T]): typedesc =
+  ## Returns the base type for the distinct types.
+  let impl = getTypeImpl(t)
+  impl.expectKind nnkDistinctTy
+  return impl[0]
 
-since (1, 1):
-  template genericParams*(T: typedesc): untyped =
-    ## return tuple of generic params for generic `T`
-    runnableExamples:
-      type Foo[T1, T2]=object
-      doAssert genericParams(Foo[float, string]) is (float, string)
-      type Bar[N: static float, T] = object
-      doAssert genericParams(Bar[1.0, string]) is (StaticParam[1.0], string)
-      doAssert genericParams(Bar[1.0, string]).get(0).value == 1.0
-
-    type T2 = T
-    genericParamsImpl(T2)
+macro distinctBase*[T: distinct](value: T): untyped =
+  ## Returns `value` converted back to its distinct base type.
+  let impl = value.getTypeImpl
+  impl.expectKind nnkDistinctTy
+  result = newCall(impl[0], value)
+  echo result.lispRepr
 
 when isMainModule:
   static:

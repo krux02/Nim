@@ -152,6 +152,8 @@ proc fitLiteral(c: ConfigRef, n: PNode): PNode {.deprecated: "no substitute".} =
   if typ.kind in tyUInt..tyUInt32:
     result.intVal = result.intVal and castToInt64(lastOrd(c, typ))
 
+import astalgo
+
 proc evalOp(m: TMagic, n, a, b, c: PNode; g: ModuleGraph): PNode =
   # b and c may be nil
   result = nil
@@ -167,7 +169,8 @@ proc evalOp(m: TMagic, n, a, b, c: PNode; g: ModuleGraph): PNode =
       result = newIntNodeT(bitnot(getInt(a)).maskBytes(int(n.typ.size)), n, g)
     else:
       result = newIntNodeT(bitnot(getInt(a)), n, g)
-  of mLengthArray: result = newIntNodeT(lengthOrd(g.config, a.typ), n, g)
+  of mLengthArray:
+    result = newIntNodeT(lengthOrd(g.config, a.typ), n, g)
   of mLengthSeq, mLengthOpenArray, mLengthStr:
     if a.kind == nkNilLit:
       result = newIntNodeT(Zero, n, g)
@@ -629,6 +632,10 @@ proc getConstExpr(m: PSym, n: PNode; g: ModuleGraph): PNode =
         # It doesn't matter if the argument is const or not for mLengthArray.
         # This fixes bug #544.
         result = newIntNodeT(lengthOrd(g.config, n[1].typ), n, g)
+      of mLengthTuple:
+        let typ = n[1].typ.skipTypes({tyGenericInst, tyTypeDesc})
+        assert typ.kind == tyTuple, $typ.kind
+        result = newIntNodeT(toInt128(typ.len), n, g)
       of mSizeOf:
         result = foldSizeOf(g.config, n, nil)
       of mAlignOf:

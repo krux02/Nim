@@ -613,7 +613,7 @@ type
     mParseExprToAst, mParseStmtToAst, mExpandToAst, mQuoteAst,
     mInc, mDec, mOrd,
     mNew, mNewFinalize, mNewSeq, mNewSeqOfCap,
-    mLengthOpenArray, mLengthStr, mLengthArray, mLengthSeq,
+    mLengthOpenArray, mLengthStr, mLengthArray, mLengthTuple, mLengthSeq,
     mIncl, mExcl, mCard, mChr,
     mGCref, mGCunref,
     mAddI, mSubI, mMulI, mDivI, mModI,
@@ -684,7 +684,7 @@ type
 const
   ctfeWhitelist* = {mNone, mSucc,
     mPred, mInc, mDec, mOrd, mLengthOpenArray,
-    mLengthStr, mLengthArray, mLengthSeq,
+    mLengthStr, mLengthArray, mLengthTuple, mLengthSeq,
     mArrGet, mArrPut, mAsgn, mDestroy,
     mIncl, mExcl, mCard, mChr,
     mAddI, mSubI, mMulI, mDivI, mModI,

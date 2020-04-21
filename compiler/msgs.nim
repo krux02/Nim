@@ -286,7 +286,7 @@ macro callIgnoringStyle(theProc: typed, first: typed,
   for arg in children(args[0][1]):
     if arg.kind == nnkNilLit: continue
     let typeInst = getTypeInst(arg)
-    if getTypeKind(arg) != nnkEnumTy or
+    if arg.typeKind != ntyEnum or
        typeInst != typForegroundColor and
        typeInst != typBackgroundColor and
        typeInst != typStyle and

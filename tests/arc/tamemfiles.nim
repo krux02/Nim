@@ -100,7 +100,7 @@ proc load(path: string, delim=" "): Table[MemSlice, seq[char]] =
   for line in memSlices(f, eat='\0'):
     stderr.write "loop 1a\n"
     splitr.split(line, cols, 2)
-    stderr.write "loop 1b; cols: ", cols, "\n"
+    stderr.write "loop 1b; cols: ", $cols, "\n"
     let cs = cast[cstring](cols[0].data)
     stderr.write "loop 1c\n"        #..reports exception here, but
     nwSq[0] = cs[0]                 #..actually doing out of bounds here

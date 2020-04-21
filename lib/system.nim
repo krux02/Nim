@@ -706,6 +706,20 @@ proc len*[T: array](x: T): int {.magic: "LengthArray", noSideEffect.}
   ##   var arr = [1, 1, 1, 1, 1]
   ##   echo len(arr) # => 5
 
+when defined(nimHasLenOnTupleProc):
+  proc len*[T: tuple](x: typedesc[T]): int {.magic: "LengthTuple", noSideEffect.}
+    ## Returns the number of elements of a tuple type.
+    ##
+    ## .. code-block:: Nim
+    ##   echo len((1, 2.3, "abc")) # => 3
+
+  proc len*[T: tuple](x: T): int {.magic: "LengthTuple", noSideEffect.}
+    ## Returns the numble of elements of a tuple.
+    ##
+    ## .. code-block:: Nim
+    ##   var tup = (1, 2.3, "abc")
+    ##   echo len(tup) # => 3
+
 proc len*[T](x: seq[T]): int {.magic: "LengthSeq", noSideEffect.}
   ## Returns the length of a sequence.
   ##

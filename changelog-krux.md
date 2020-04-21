@@ -18,6 +18,8 @@ This changelog contains all changes that are specific to the krux-nim branch
 - Using the ``BackwardsIndex`` on arrays that are not accessed by
   integer types (for example enums or characters) is not supported
   anymore.
+- Removed arity, genericHead, stripGenericParams, genericParams from
+  typetraits module.
 
 ## Language changes
 
