@@ -31,18 +31,21 @@ static: assert(ref int is testTypesym(ref int))
 static: assert(void is testTypesym(void))
 
 
-macro tts2 (t:typed, idx:int): untyped =
-    var ty = t.getType
-    if ty.typekind == ntyTypedesc:
-        # skip typedesc get to the real type
-        ty = ty[1].getType
+macro tts2 (t:typed, idx: static[int]): untyped =
+  var ty = t.getTypeImpl
+  if ty.typekind == ntyTypedesc:
+      # skip typedesc get to the real type
+      ty = ty[1].getTypeImpl
 
-    if ty.kind == nnkSym: return ty
-    assert ty.kind == nnkBracketExpr
-    return ty[idx.intval.int]
-type TestFN2 = proc(a:int,b:float):string
+  result = ty[0][idx]
+  if idx != 0:
+    result = result[1]
+  echo result.repr
+
+type TestFN2 = proc(a:int,b,c:float):string
+
 static:
-    assert(tts2(TestFN2, 0) is TestFN2)
-    assert(tts2(TestFN2, 1) is string)
-    assert(tts2(TestFN2, 2) is int)
-    assert(tts2(TestFN2, 3) is float)
+    assert(tts2(TestFN2, 0) is string)
+    assert(tts2(TestFN2, 1) is int)
+    assert(tts2(TestFN2, 2) is float)
+    assert(tts2(proc(a:int,b,c:float):string, 3) is float)
