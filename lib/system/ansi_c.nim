@@ -12,8 +12,6 @@
 # All symbols are prefixed with 'c_' to avoid ambiguities
 
 {.push hints:off, stack_trace: off, profiler: off.}
-when not defined(nimHasHotCodeReloading):
-  {.pragma: nonReloadable.}
 
 proc c_memchr*(s: pointer, c: cint, n: csize_t): pointer {.
   importc: "memchr", header: "<string.h>".}
@@ -154,7 +152,7 @@ proc c_fwrite*(buf: pointer, size, n: csize_t, f: CFilePtr): cint {.
 proc c_fflush(f: CFilePtr): cint {.
   importc: "fflush", header: "<stdio.h>".}
 
-proc rawWrite*(f: CFilePtr, s: cstring) {.compilerproc, nonReloadable, inline.} =
+proc rawWrite*(f: CFilePtr, s: cstring) {.compilerproc, inline.} =
   # we cannot throw an exception here!
   discard c_fwrite(s, 1, cast[csize_t](s.len), f)
   discard c_fflush(f)

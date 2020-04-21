@@ -82,7 +82,6 @@ type                          # please make sure we have under 32 options
     optMixedMode              # true if some module triggered C++ codegen
     optListFullPaths          # use full paths in toMsgFilename
     optNoNimblePath
-    optHotCodeReloading
     optDynlibOverrideAll
     optSeqDestructors         # active if the implementation uses the new
                               # string/seq implementation based on destructors
@@ -319,8 +318,6 @@ proc hasHint*(conf: ConfigRef, note: TNoteKind): bool =
 
 proc hasWarn*(conf: ConfigRef, note: TNoteKind): bool =
   optWarns in conf.options and note in conf.notes
-
-proc hcrOn*(conf: ConfigRef): bool = return optHotCodeReloading in conf.globalOptions
 
 template depConfigFields*(fn) {.dirty.} =
   fn(target)

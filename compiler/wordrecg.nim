@@ -51,7 +51,6 @@ type
     wFastcall, wClosure, wNoconv, wOn, wOff, wChecks, wRangeChecks,
     wBoundChecks, wOverflowChecks, wNilChecks,
     wFloatChecks, wNanChecks, wInfChecks, wStyleChecks, wStaticBoundchecks,
-    wNonReloadable, wExecuteOnReload,
     wAssertions, wPatterns, wTrMacros, wSinkInference, wWarnings,
     wHints, wOptimization, wRaises, wWrites, wReads, wSize, wEffects, wTags,
     wRequires, wEnsures, wInvariant, wAssume, wAssert,
@@ -139,8 +138,6 @@ const
     "noconv", "on", "off", "checks", "rangechecks", "boundchecks",
     "overflowchecks", "nilchecks",
     "floatchecks", "nanchecks", "infchecks", "stylechecks", "staticboundchecks",
-    "nonreloadable", "executeonreload",
-
     "assertions", "patterns", "trmacros", "sinkinference", "warnings", "hints",
     "optimization", "raises", "writes", "reads", "size", "effects", "tags",
     "requires", "ensures", "invariant", "assume", "assert",
@@ -199,8 +196,6 @@ proc canonPragmaSpelling*(w: TSpecialWord): string =
   of wNanChecks: "nanChecks"
   of wInfChecks: "infChecks"
   of wStyleChecks: "styleChecks"
-  of wNonReloadable: "nonReloadable"
-  of wExecuteOnReload: "executeOnReload"
   of wDeadCodeElimUnused: "deadCodeElim"
   of wCompileTime: "compileTime"
   of wFieldChecks: "fieldChecks"

@@ -282,8 +282,6 @@ type
                       # the calling side of the macro, not from the
                       # implementation.
     sfGenSym          # symbol is 'gensym'ed; do not add to symbol table
-    sfNonReloadable   # symbol will be left as-is when hot code reloading is on -
-                      # meaning that it won't be renamed and/or changed in any way
     sfGeneratedOp     # proc is a generated '='; do not inject destructors in it
                       # variable is generated closure environment; requires early
                       # destruction for --newruntime.
@@ -487,7 +485,6 @@ type
     nfDefaultParam # an automatically inserter default parameter
     nfDefaultRefsParam # a default param value references another parameter
                        # the flag is applied to proc default values and to calls
-    nfExecuteOnReload  # A top-level statement that will be executed during reloads
 
   TNodeFlags* = set[TNodeFlag]
   TTypeFlag* = enum   # keep below 32 for efficiency reasons (now: ~40)
@@ -673,7 +670,7 @@ type
 
     mNIntVal, mNFloatVal, mNGetType, mNStrVal, mNSetIntVal,
     mNSetFloatVal, mNSetStrVal, mNLineInfo,
-    mNNewNimNode, mNCopyNimNode, mNCopyNimTree, mStrToIdent, mNSigHash, mNSizeOf,
+    mNNewNimNode, mNCopyNimNode, mNCopyNimTree, mStrToIdent, mNSizeOf, mNSigHash
     mNBindSym, mNCallSite,
     mEqIdent, mEqNimrodNode, mSameNodeType, mGetImpl, mNGenSym,
     mNHint, mNWarning, mNError,
@@ -1002,8 +999,7 @@ const
   PersistentNodeFlags*: TNodeFlags = {nfBase2, nfBase8, nfBase16,
                                       nfDotSetter, nfDotField,
                                       nfIsRef, nfIsPtr, nfPreventCg, nfLL,
-                                      nfFromTemplate, nfDefaultRefsParam,
-                                      nfExecuteOnReload}
+                                      nfFromTemplate, nfDefaultRefsParam}
   namePos* = 0
   patternPos* = 1    # empty except for term rewriting macros
   genericParamsPos* = 2

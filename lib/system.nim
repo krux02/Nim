@@ -480,12 +480,6 @@ when not defined(niminheritable):
   {.pragma: inheritable.}
 when not defined(nimunion):
   {.pragma: unchecked.}
-when not defined(nimHasHotCodeReloading):
-  {.pragma: nonReloadable.}
-when defined(hotCodeReloading):
-  {.pragma: hcrInline, inline.}
-else:
-  {.pragma: hcrInline.}
 
 {.push profiler: off.}
 let nimvm* {.magic: "Nimvm", compileTime.}: bool = false
@@ -3043,6 +3037,3 @@ export widestrs
 
 import system/io
 export io
-
-when not defined(createNimHcr):
-  include nimhcr

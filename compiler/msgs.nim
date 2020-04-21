@@ -277,20 +277,20 @@ proc msgWriteln*(conf: ConfigRef; s: string, flags: MsgFlags = {}) =
 
 macro callIgnoringStyle(theProc: typed, first: typed,
                         args: varargs[typed]): untyped =
-  let typForegroundColor = bindSym"ForegroundColor".getType
-  let typBackgroundColor = bindSym"BackgroundColor".getType
-  let typStyle = bindSym"Style".getType
-  let typTerminalCmd = bindSym"TerminalCmd".getType
+  let typForegroundColor = getTypeInst(bindSym"ForegroundColor")
+  let typBackgroundColor = getTypeInst(bindSym"BackgroundColor")
+  let typStyle = getTypeInst(bindSym"Style")
+  let typTerminalCmd = getTypeInst(bindSym"TerminalCmd")
   result = newCall(theProc)
   if first.kind != nnkNilLit: result.add(first)
   for arg in children(args[0][1]):
     if arg.kind == nnkNilLit: continue
-    let typ = arg.getType
-    if typ.kind != nnkEnumTy or
-       typ != typForegroundColor and
-       typ != typBackgroundColor and
-       typ != typStyle and
-       typ != typTerminalCmd:
+    let typeInst = getTypeInst(arg)
+    if getTypeKind(arg) != nnkEnumTy or
+       typeInst != typForegroundColor and
+       typeInst != typBackgroundColor and
+       typeInst != typStyle and
+       typeInst != typTerminalCmd:
       result.add(arg)
 
 macro callStyledWriteLineStderr(args: varargs[typed]): untyped =

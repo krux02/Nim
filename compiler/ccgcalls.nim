@@ -233,11 +233,6 @@ template genParamLoop(params) {.dirty.} =
     if params != nil: params.add(~", ")
     params.add(genArgNoParam(p, ri[i]))
 
-proc addActualSuffixForHCR(res: var Rope, module: PSym, sym: PSym) =
-  if sym.flags * {sfImportc, sfNonReloadable} == {} and sym.loc.k == locProc and
-      (sym.typ.callConv == ccInline or sym.owner.id == module.id):
-    res = res & "_actual".rope
-
 proc genPrefixCall(p: BProc, le, ri: PNode, d: var TLoc) =
   var op: TLoc
   # this is a hotspot in the compiler
@@ -249,10 +244,7 @@ proc genPrefixCall(p: BProc, le, ri: PNode, d: var TLoc) =
   assert(typ.len == typ.n.len)
   for i in 1..<ri.len:
     genParamLoop(params)
-  var callee = rdLoc(op)
-  if p.hcrOn and ri[0].kind == nkSym:
-    callee.addActualSuffixForHCR(p.module.module, ri[0].sym)
-  fixupCall(p, le, ri, d, callee, params)
+  fixupCall(p, le, ri, d, op.r, params)
 
 proc genClosureCall(p: BProc, le, ri: PNode, d: var TLoc) =
 
@@ -276,9 +268,9 @@ proc genClosureCall(p: BProc, le, ri: PNode, d: var TLoc) =
 
   template genCallPattern {.dirty.} =
     if tfIterator in typ.flags:
-      lineF(p, cpsStmts, PatIter & ";$n", [rdLoc(op), pl, pl.addComma, rawProc])
+      lineF(p, cpsStmts, PatIter & ";$n", [op.r, pl, pl.addComma, rawProc])
     else:
-      lineF(p, cpsStmts, PatProc & ";$n", [rdLoc(op), pl, pl.addComma, rawProc])
+      lineF(p, cpsStmts, PatProc & ";$n", [op.r, pl, pl.addComma, rawProc])
 
   let rawProc = getRawProcType(p, typ)
   let canRaise = p.config.exc == excGoto and canRaiseDisp(p, ri[0])
@@ -308,9 +300,9 @@ proc genClosureCall(p: BProc, le, ri: PNode, d: var TLoc) =
       var list: TLoc
       initLoc(list, locCall, d.lode, OnUnknown)
       if tfIterator in typ.flags:
-        list.r = PatIter % [rdLoc(op), pl, pl.addComma, rawProc]
+        list.r = PatIter % [op.r, pl, pl.addComma, rawProc]
       else:
-        list.r = PatProc % [rdLoc(op), pl, pl.addComma, rawProc]
+        list.r = PatProc % [op.r, pl, pl.addComma, rawProc]
       genAssignment(p, d, list, {}) # no need for deep copying
       if canRaise: raiseExit(p)
     else:

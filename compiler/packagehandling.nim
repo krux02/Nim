@@ -55,7 +55,6 @@ proc withPackageName*(conf: ConfigRef; path: AbsoluteFile): AbsoluteFile =
   let x = getPackageName(conf, path.string)
   let (p, file, ext) = path.splitFile
   if x == "stdlib":
-    # Hot code reloading now relies on 'stdlib_system' names etc.
     result = p / RelativeFile((x & '_' & file) & ext)
   else:
     result = p / RelativeFile(fakePackageName(conf, path))

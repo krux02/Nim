@@ -1,8 +1,8 @@
 discard """
   nimout: '''
-instantiation 1 with typeDesc[int] and typeDesc[float]
-instantiation 2 with typeDesc[float] and typeDesc[string]
-instantiation 3 with typeDesc[string] and typeDesc[string]
+instantiation 1 with int and float
+instantiation 2 with float and string
+instantiation 3 with string and string
 counter: 3
 '''
   output: "int\nfloat\nint\nstring"

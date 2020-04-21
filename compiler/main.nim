@@ -95,9 +95,7 @@ proc commandCompileToC(graph: ModuleGraph) =
   cgenWriteModules(graph.backend, conf)
   if conf.cmd != cmdRun:
     extccomp.callCCompiler(conf)
-    # for now we do not support writing out a .json file with the build instructions when HCR is on
-    if not conf.hcrOn:
-      extccomp.writeJsonBuildInstructions(conf)
+    extccomp.writeJsonBuildInstructions(conf)
     if optGenScript in graph.config.globalOptions:
       writeDepsFile(graph)
 
@@ -209,12 +207,6 @@ proc mainCommand*(graph: ModuleGraph) =
       quit "compiler wasn't built with JS code generator"
     else:
       conf.cmd = cmdCompileToJS
-      if conf.hcrOn:
-        # XXX: At the moment, system.nim cannot be compiled in JS mode
-        # with "-d:useNimRtl". The HCR option has been processed earlier
-        # and it has added this define implictly, so we must undo that here.
-        # A better solution might be to fix system.nim
-        undefSymbol(conf.symbols, "useNimRtl")
       commandCompileToJS(graph)
   of "doc0":
     when defined(leanCompiler):

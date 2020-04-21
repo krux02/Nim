@@ -27,18 +27,11 @@ iterator mycountup(a, b: int): int =
     yield res
     inc(res)
 
-when true:
-  iterator pairs*[A, B](t: TTable[A, B]): tuple[key: A, val: B] =
-    ## iterates over any (key, value) pair in the table `t`.
-    for h in mycountup(0, high(t.data)):
-      var k = t.data[h].key
-      if t.data[h].slot == seFilled: yield (k, t.data[h].val)
-else:
-  iterator pairs*(t: TTable[int, string]): tuple[key: int, val: string] =
-    ## iterates over any (key, value) pair in the table `t`.
-    for h in mycountup(0, high(t.data)):
-      var k = t.data[h].key
-      if t.data[h].slot == seFilled: yield (k, t.data[h].val)
+iterator pairs*[A, B](t: TTable[A, B]): tuple[key: A, val: B] =
+  ## iterates over any (key, value) pair in the table `t`.
+  for h in mycountup(0, high(t.data)):
+    var k = t.data[h].key
+    if t.data[h].slot == seFilled: yield (k, t.data[h].val)
 
 proc initTable*[A, B](initialSize=64): TTable[A, B] =
   ## creates a new hash table that is empty. `initialSize` needs to be

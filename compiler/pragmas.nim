@@ -24,7 +24,7 @@ const
     ## common pragmas for declarations, to a good approximation
   procPragmas* = declPragmas + {FirstCallConv..LastCallConv,
     wMagic, wNoSideEffect, wSideEffect, wNoreturn, wNosinks, wDynlib, wHeader,
-    wCompilerProc, wNonReloadable, wCore, wProcVar, wVarargs, wCompileTime, wMerge,
+    wCompilerProc, wCore, wProcVar, wVarargs, wCompileTime, wMerge,
     wBorrow, wImportCompilerProc, wThread,
     wAsmNoStackFrame, wDiscardable, wNoInit, wCodegenDecl,
     wGensym, wInject, wRaises, wTags, wLocks, wDelegator, wGcSafe,
@@ -35,7 +35,7 @@ const
   templatePragmas* = {wDeprecated, wError, wGensym, wInject, wDirty,
     wDelegator, wExportNims, wUsed, wPragma}
   macroPragmas* = declPragmas + {FirstCallConv..LastCallConv,
-    wMagic, wNoSideEffect, wCompilerProc, wNonReloadable, wCore,
+    wMagic, wNoSideEffect, wCompilerProc, wCore,
     wDiscardable, wGensym, wInject, wDelegator}
   iteratorPragmas* = declPragmas + {FirstCallConv..LastCallConv, wNoSideEffect, wSideEffect,
     wMagic, wBorrow,
@@ -923,8 +923,6 @@ proc singlePragma(c: PContext, sym: PSym, n: PNode, i: var int,
         cppDefine(c.graph.config, sym.name.s)
         recordPragma(c, it, "cppdefine", sym.name.s)
         if sfFromGeneric notin sym.flags: markCompilerProc(c, sym)
-      of wNonReloadable:
-        sym.flags.incl sfNonReloadable
       of wProcVar:
         noVal(c, it)
         incl(sym.flags, sfProcvar)

@@ -14,7 +14,7 @@
 
 import
   ropes, os, strutils, osproc, platform, condsyms, options, msgs,
-  lineinfos, std / sha1, streams, pathutils, sequtils, times, strtabs
+  lineinfos, std / sha1, streams, pathutils, times, strtabs
 
 type
   TInfoCCProp* = enum         # properties of the C compiler:
@@ -617,8 +617,7 @@ proc getLinkerExe(conf: ConfigRef; compiler: TSystemCC): string =
            elif optMixedMode in conf.globalOptions and conf.cmd != cmdCompileToCpp: CC[compiler].cppCompiler
            else: getCompilerExe(conf, compiler, AbsoluteFile"")
 
-proc getCompileCFileCmd*(conf: ConfigRef; cfile: Cfile,
-                         isMainFile = false; produceOutput = false): string =
+proc getCompileCFileCmd(conf: ConfigRef; cfile: Cfile, produceOutput: bool): string =
   let c = conf.cCompiler
   # We produce files like module.nim.cpp, so the absolute Nim filename is not
   # cfile.name but `cfile.cname.changeFileExt("")`:
@@ -632,7 +631,7 @@ proc getCompileCFileCmd*(conf: ConfigRef; cfile: Cfile,
   if exe.len == 0: exe = getCompilerExe(conf, c, cfile.cname)
 
   if needsExeExt(conf): exe = addFileExt(exe, "exe")
-  if (optGenDynLib in conf.globalOptions or (conf.hcrOn and not isMainFile)) and
+  if (optGenDynLib in conf.globalOptions) and
       ospNeedsPIC in platform.OS[conf.target.targetOS].props:
     options.add(' ' & CC[c].pic)
 
@@ -693,6 +692,9 @@ proc getCompileCFileCmd*(conf: ConfigRef; cfile: Cfile,
     "nim", quoteShell(getPrefixDir(conf)),
     "lib", quoteShell(conf.libpath),
     "vccplatform", vccplatform(conf)])
+
+proc getCompileCFileCmd*(conf: ConfigRef; cfile: Cfile): string =
+  getCompileCFileCmd(conf, cfile, produceOutput = false)
 
 proc footprint(conf: ConfigRef; cfile: Cfile): SecureHash =
   result = secureHash(
@@ -787,44 +789,6 @@ proc getLinkCmd(conf: ConfigRef; output: AbsoluteFile,
         "nim", quoteShell(getPrefixDir(conf)),
         "lib", quoteShell(conf.libpath),
         "vccplatform", vccplatform(conf)])
-    # On windows the debug information for binaries is emitted in a separate .pdb
-    # file and the binaries (.dll and .exe) contain a full path to that .pdb file.
-    # This is a problem for hot code reloading because even when we copy the .dll
-    # and load the copy so the build process may overwrite the original .dll on
-    # the disk (windows locks the files of running binaries) the copy still points
-    # to the original .pdb (and a simple copy of the .pdb won't help). This is a
-    # problem when a debugger is attached to the program we are hot-reloading.
-    # This problem is nonexistent on Unix since there by default debug symbols
-    # are embedded in the binaries so loading a copy of a .so will be fine. There
-    # is the '/Z7' flag for the MSVC compiler to embed the debug info of source
-    # files into their respective .obj files but the linker still produces a .pdb
-    # when a final .dll or .exe is linked so the debug info isn't embedded.
-    # There is also the issue that even when a .dll is unloaded the debugger
-    # still keeps the .pdb for that .dll locked. This is a major problem and
-    # because of this we cannot just alternate between 2 names for a .pdb file
-    # when rebuilding a .dll - instead we need to accumulate differently named
-    # .pdb files in the nimcache folder - this is the easiest and most reliable
-    # way of being able to debug and rebuild the program at the same time. This
-    # is accomplished using the /PDB:<filename> flag (there also exists the
-    # /PDBALTPATH:<filename> flag). The only downside is that the .pdb files are
-    # at least 300kb big (when linking statically to the runtime - or else 5mb+)
-    # and will quickly accumulate. There is a hacky solution: we could try to
-    # delete all .pdb files with a pattern and swallow exceptions.
-    #
-    # links about .pdb files and hot code reloading:
-    # https://ourmachinery.com/post/dll-hot-reloading-in-theory-and-practice/
-    # https://ourmachinery.com/post/little-machines-working-together-part-2/
-    # https://github.com/fungos/cr
-    # https://fungos.github.io/blog/2017/11/20/cr.h-a-simple-c-hot-reload-header-only-library/
-    # on forcing the debugger to unlock a locked .pdb of an unloaded library:
-    # https://blog.molecular-matters.com/2017/05/09/deleting-pdb-files-locked-by-visual-studio/
-    # and a bit about the .pdb format in case that is ever needed:
-    # https://github.com/crosire/blink
-    # http://www.debuginfo.com/articles/debuginfomatch.html#pdbfiles
-    if conf.hcrOn and isVSCompatible(conf):
-      let t = now()
-      let pdb = output.string & "." & format(t, "MMMM-yyyy-HH-mm-") & $t.nanosecond & ".pdb"
-      result.add " /link /PDB:" & pdb
   if optCDebug in conf.globalOptions and conf.cCompiler == ccVcc:
     result.add " /Zi /FS /Od"
 
@@ -910,12 +874,6 @@ proc getObjFilePath(conf: ConfigRef, f: Cfile): string =
   if noAbsolutePaths(conf): f.obj.extractFilename
   else: f.obj.string
 
-proc hcrLinkTargetName(conf: ConfigRef, objFile: string, isMain = false): AbsoluteFile =
-  let basename = splitFile(objFile).name
-  let targetName = if isMain: basename & ".exe"
-                   else: platform.OS[conf.target.targetOS].dllFrmt % basename
-  result = conf.getNimcacheDir / RelativeFile(targetName)
-
 proc displayProgressCC(conf: ConfigRef, path, compileCmd: string): string =
   if conf.hasHint(hintCC):
     if optListCmd in conf.globalOptions or conf.verbosity > 1:
@@ -936,10 +894,10 @@ proc callCCompiler*(conf: ConfigRef) =
   let prettyCb = proc (idx: int) =
     if prettyCmds[idx].len > 0: echo prettyCmds[idx]
 
-  for idx, it in conf.toCompile:
+  for it in conf.toCompile.items:
     # call the C compiler for the .c file:
     if CfileFlag.Cached in it.flags: continue
-    let compileCmd = getCompileCFileCmd(conf, it, idx == conf.toCompile.len - 1, produceOutput=true)
+    let compileCmd = getCompileCFileCmd(conf, it, produceOutput=true)
     if optCompileOnly notin conf.globalOptions:
       cmds.add(compileCmd)
       prettyCmds.add displayProgressCC(conf, $it.cname, compileCmd)
@@ -958,54 +916,23 @@ proc callCCompiler*(conf: ConfigRef) =
       objfiles.add(quoteShell(
           addFileExt(objFile, CC[conf.cCompiler].objExt)))
 
-    if conf.hcrOn: # lets assume that optCompileOnly isn't on
-      cmds = @[]
-      let mainFileIdx = conf.toCompile.len - 1
-      for idx, x in conf.toCompile:
-        # don't relink each of the many binaries (one for each source file) if the nim code is
-        # cached because that would take too much time for small changes - the only downside to
-        # this is that if an external-to-link file changes the final target wouldn't be relinked
-        if CfileFlag.Cached in x.flags: continue
-        # we pass each object file as if it is the project file - a .dll will be created for each such
-        # object file in the nimcache directory, and only in the case of the main project file will
-        # there be probably an executable (if the project is such) which will be copied out of the nimcache
-        let objFile = conf.getObjFilePath(x)
-        let buildDll = idx != mainFileIdx
-        let linkTarget = conf.hcrLinkTargetName(objFile, not buildDll)
-        cmds.add(getLinkCmd(conf, linkTarget, objfiles & " " & quoteShell(objFile), buildDll))
-        # try to remove all .pdb files for the current binary so they don't accumulate endlessly in the nimcache
-        # for more info check the comment inside of getLinkCmd() where the /PDB:<filename> MSVC flag is used
-        if isVSCompatible(conf):
-          for pdb in walkFiles(objFile & ".*.pdb"):
-            discard tryRemoveFile(pdb)
-      # execute link commands in parallel - output will be a bit different
-      # if it fails than that from execLinkCmd() but that doesn't matter
-      prettyCmds = map(prettyCmds, proc (curr: string): string = return curr.replace("CC", "Link"))
-      execCmdsInParallel(conf, cmds, prettyCb)
-      # only if not cached - copy the resulting main file from the nimcache folder to its originally intended destination
-      if CfileFlag.Cached notin conf.toCompile[mainFileIdx].flags:
-        let mainObjFile = getObjFilePath(conf, conf.toCompile[mainFileIdx])
-        var src = conf.hcrLinkTargetName(mainObjFile, true)
-        var dst = conf.prepareToWriteOutput
-        copyFileWithPermissions(src.string, dst.string)
-    else:
-      for x in conf.toCompile:
-        let objFile = if noAbsolutePaths(conf): x.obj.extractFilename else: x.obj.string
-        objfiles.add(' ')
-        objfiles.add(quoteShell(objFile))
-      let mainOutput = if optGenScript notin conf.globalOptions: conf.prepareToWriteOutput
-                       else: AbsoluteFile(conf.projectName)
-      linkCmd = getLinkCmd(conf, mainOutput, objfiles)
-      if optCompileOnly notin conf.globalOptions:
-        const MaxCmdLen = when defined(windows): 8_000 else: 32_000
-        if linkCmd.len > MaxCmdLen:
-          # Windows's command line limit is about 8K (don't laugh...) so C compilers on
-          # Windows support a feature where the command line can be passed via ``@linkcmd``
-          # to them.
-          linkViaResponseFile(conf, linkCmd)
-        else:
-          execLinkCmd(conf, linkCmd)
-        maybeRunDsymutil(conf, mainOutput)
+    for x in conf.toCompile:
+      let objFile = if noAbsolutePaths(conf): x.obj.extractFilename else: x.obj.string
+      objfiles.add(' ')
+      objfiles.add(quoteShell(objFile))
+    let mainOutput = if optGenScript notin conf.globalOptions: conf.prepareToWriteOutput
+                     else: AbsoluteFile(conf.projectName)
+    linkCmd = getLinkCmd(conf, mainOutput, objfiles)
+    if optCompileOnly notin conf.globalOptions:
+      const MaxCmdLen = when defined(windows): 8_000 else: 32_000
+      if linkCmd.len > MaxCmdLen:
+        # Windows's command line limit is about 8K (don't laugh...) so C compilers on
+        # Windows support a feature where the command line can be passed via ``@linkcmd``
+        # to them.
+        linkViaResponseFile(conf, linkCmd)
+      else:
+        execLinkCmd(conf, linkCmd)
+      maybeRunDsymutil(conf, mainOutput)
   else:
     linkCmd = ""
   if optGenScript in conf.globalOptions:

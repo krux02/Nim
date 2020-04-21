@@ -564,18 +564,6 @@ proc processSwitch*(switch, arg: string, pass: TCmdLinePass, info: TLineInfo;
     processOnOffSwitch(conf, {optMemTracker}, arg, pass, info)
     if optMemTracker in conf.options: defineSymbol(conf.symbols, "memtracker")
     else: undefSymbol(conf.symbols, "memtracker")
-  of "hotcodereloading":
-    processOnOffSwitchG(conf, {optHotCodeReloading}, arg, pass, info)
-    if conf.hcrOn:
-      defineSymbol(conf.symbols, "hotcodereloading")
-      defineSymbol(conf.symbols, "useNimRtl")
-      # hardcoded linking with dynamic runtime for MSVC for smaller binaries
-      # should do the same for all compilers (wherever applicable)
-      if isVSCompatible(conf):
-        extccomp.addCompileOptionCmd(conf, "/MD")
-    else:
-      undefSymbol(conf.symbols, "hotcodereloading")
-      undefSymbol(conf.symbols, "useNimRtl")
   of "oldnewlines":
     case arg.normalize
     of "", "on":

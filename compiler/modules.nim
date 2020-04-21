@@ -98,10 +98,6 @@ proc importModule*(graph: ModuleGraph; s: PSym, fileIdx: FileIndex): PSym =
   result = compileModule(graph, fileIdx, {})
   graph.addDep(s, fileIdx)
   # keep track of import relationships
-  if graph.config.hcrOn:
-    graph.importDeps.mgetOrPut(FileIndex(s.position), @[]).add(fileIdx)
-  #if sfSystemModule in result.flags:
-  #  localError(result.info, errAttemptToRedefine, result.name.s)
   # restore the notes for outer module:
   graph.config.notes =
     if s.owner.id == graph.config.mainPackageId or isDefined(graph.config, "booting"): graph.config.mainPackageNotes

@@ -2727,8 +2727,6 @@ proc semExpr(c: PContext, n: PNode, flags: TExprFlags = {}): PNode =
     case whichKeyword(pragmaName)
     of wExplain:
       flags.incl efExplain
-    of wExecuteOnReload:
-      finalNodeFlags.incl nfExecuteOnReload
     else:
       # what other pragmas are allowed for expressions? `likely`, `unlikely`
       invalidPragma(c, n)
