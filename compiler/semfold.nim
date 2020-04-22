@@ -169,8 +169,6 @@ proc evalOp(m: TMagic, n, a, b, c: PNode; g: ModuleGraph): PNode =
       result = newIntNodeT(bitnot(getInt(a)).maskBytes(int(n.typ.size)), n, g)
     else:
       result = newIntNodeT(bitnot(getInt(a)), n, g)
-  of mLengthArray:
-    result = newIntNodeT(lengthOrd(g.config, a.typ), n, g)
   of mLengthSeq, mLengthOpenArray, mLengthStr:
     if a.kind == nkNilLit:
       result = newIntNodeT(Zero, n, g)

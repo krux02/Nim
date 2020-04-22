@@ -1015,7 +1015,7 @@ proc genMagic(c: PCtx; n: PNode; dest: var TDest; m: TMagic) =
     c.gABC(n, opcNewStr, dest, tmp)
     c.freeTemp(tmp)
     # XXX buggy
-  of mLengthOpenArray, mLengthArray, mLengthSeq:
+  of mLengthOpenArray, mLengthSeq:
     genUnaryABI(c, n, dest, opcLenSeq)
   of mLengthStr:
     genUnaryABI(c, n, dest, opcLenStr)

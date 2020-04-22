@@ -1936,7 +1936,7 @@ proc genMagic(p: PProc, n: PNode, r: var TCompRes) =
       r.res = "nimCopy(null, $1, $2)" % [x.rdLoc, genTypeInfo(p, n.typ)]
   of mDestroy: discard "ignore calls to the default destructor"
   of mOrd: genOrd(p, n, r)
-  of mLengthStr, mLengthSeq, mLengthOpenArray, mLengthArray:
+  of mLengthStr, mLengthSeq, mLengthOpenArray:
     unaryExpr(p, n, r, "", "($1 != null ? $2.length : 0)")
   of mHigh:
     unaryExpr(p, n, r, "", "($1 != null ? ($2.length-1) : -1)")

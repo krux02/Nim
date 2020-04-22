@@ -1683,7 +1683,8 @@ proc genArrayLen(p: BProc, e: PNode, d: var TLoc, op: TMagic) =
     lineCg(p, cpsStmts, "$1 = $2;$n", [tmp.r, x])
     putIntoDest(p, d, e, tmp.r)
   of tyArray:
-    # YYY: length(sideeffect) is optimized away incorrectly?
+    # happens in iterator on openarray. Semfold sees it as `len` on
+    # `openArray`, but after iterator inlining the type is known as `tyArray`.
     if op == mHigh: putIntoDest(p, d, e, rope(lastOrd(p.config, typ)))
     else: putIntoDest(p, d, e, rope(lengthOrd(p.config, typ)))
   else: internalError(p.config, e.info, "genArrayLen()")
@@ -2245,7 +2246,7 @@ proc genMagicExpr(p: BProc, e: PNode, d: var TLoc, op: TMagic) =
     putIntoDest(p,d,e, "((NI)offsetof($1, $2))" % [tname, member])
   of mChr: genSomeCast(p, e, d)
   of mOrd: genOrd(p, e, d)
-  of mLengthArray, mHigh, mLengthStr, mLengthSeq, mLengthOpenArray:
+  of mHigh, mLengthStr, mLengthSeq, mLengthOpenArray:
     genArrayLen(p, e, d, op)
   of mGCref: unaryStmt(p, e, d, "if ($1) { #nimGCref($1); }$n")
   of mGCunref: unaryStmt(p, e, d, "if ($1) { #nimGCunref($1); }$n")
