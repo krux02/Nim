@@ -69,8 +69,10 @@ type
   SomePointer = ptr | ref | pointer
 
 when defined(nimHasTypeIsRecursive):
-  # Misnomer. It is about recursive ref and seq types.
   proc isRecursivePointer(t: typedesc): bool {.magic: "TypeTrait".}
+    ## Returns true if the type could potentionally end up in infinite
+    ## recursing when printing all elements. The rules are complicated.
+    #TODO(Arne): rename it.
 else:
   template isRecursivePointer(t: typedesc): bool = false
 
@@ -93,11 +95,12 @@ proc `$`*[T: tuple|object](x: T): string =
       result.add(": ")
 
     when isRecursivePointer(typeof(value)):
-      if cast[pointer](value) == nil:
-        # nil can always be printed safely
-        result.add "nil"
+      when value is SomePointer:
+        if value == nil:
+          result.add "nil"
+        else:
+          result.add "..."
       else:
-        # value may cycle back to origin, don't print it.
         result.add("...")
     else:
       result.addQuoted(value)

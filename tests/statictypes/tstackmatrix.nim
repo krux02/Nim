@@ -1,5 +1,4 @@
 discard """
-  output: "(M: 3, N: 3, fp: 1.0)"
 """
 
 # bug #6843
@@ -26,4 +25,7 @@ var
     [7'f64, 8, 9]
   ]
   m = stackMatrix(data)
-echo m
+
+import strutils
+
+doAssert startsWith($m, "(M: 3, N: 3, fp: ")

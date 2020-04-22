@@ -75,7 +75,7 @@ someProc()
 import macros, strutils
 
 macro gen(T: typedesc): untyped =
-  let typeSym = getTypeImpl(T)[1]
+  let typeSym = getTypeImpl(T)
   let param = genSym(nskParam, "s")
   let value = nnkBracketExpr.newTree(param, newIntLitNode(0))
   result = newProc(
