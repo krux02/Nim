@@ -1,0 +1,58 @@
+The goal of this compiler fork is to create a refactored bare bones
+version of Nim where I can can respond faster to bug
+reports. Deprecated features won't stay for long. The goal is to
+remove all WTFs from the codebase.
+
+* TODO
+** inject base type fields into node (make iterating fields easier).
+** DONE use nnkTupleConstr consistently (replace nnkPar where necessary)
+** raise error on union at compile time
+** add entry to tutorial about init pattern (inheritable types should provide init and newMyType)
+** rename down cast / up cast
+** new statement: ~includedFrom "foo.nim"~ ~template includedFrom(x: string) = discard~
+** nimi for included nim files
+** deprecated flag on export statements (non breaking pattern to change module of something)
+** generic typedesc T should not be visible anymore in the getImpl of generic instantiations.
+** getImpl warning when it is not used on proc template macro symbols.
+** deprecate ~pro new[T](var T): void~
+** Generic ~==~ for Object Variants
+** forbid/warn overload ~foobar(arg: untyped)~ ~foobar(arg: int)~
+** forbid defining magic procs in user code.
+** test for tensors
+** validate links in nimdoc automatically
+** cleanup system.nim
+*** ensure automatically that all compilation branches js C C++ define the same set of symbols
+*** move cint, cfloat, cstring to ctypes.nim ("compatible string" WTF!?)
+*** move/create jsNumber, jsString, jsObject to jstypes.nim
+*** remove unsigned (%) operators
+** support ~toOpenArray~ in the VM
+** fix crash on ~seq[MySimdType]~
+** document cast behavior for different sized integers in the spec
+** Refactor nkPostfix export marker and backticks around identifiers into flags on identifiers.
+** default pattern for module test
+** allow conversion of ~seq[byte](mystring)~ and ~string(mySeqofBytes)~.
+** make every path relative to the current file (helper for it)
+** move documentation comments to identifier/symbol properties
+** move export marker to identifier/symbol properties
+** remove MyType.field access
+** getTypeInst, getTypeImpl fix needs a better/compatible solution.
+** inconsistency, getType: (BracketExpr (Sym "ref") ...) vs. getTypeInst  (RefTy ...)
+** provide ~getTypeInstSkipAlias~ as substitution of ~typetraits.genericParams~
+** fix ~proc len*[TOpenArray: openArray|varargs](x: TOpenArray): int~ (WTF)
+** consistent argument names in stdlib functions
+** allow builtins to be macros (suits semantics better)
+** WTF is ~type Foo[T: static typedesc] = object~ supposed to mean?
+** make every test runable with ~testament run file.nim~ from any directory
+** require full path names in ~nim c myfile.nim~
+** refactor unittests module to not use local templates anymore
+** remove any knowlege about nimble from the compiler
+** refactor typetraits. Move sizeof/alignof to typetraits. Ensure all typetraits do have a macro API.
+** restrict usage of typedesc https://github.com/nim-lang/Nim/pull/11959
+** remove language feature "bind many"
+** callsite as experimental https://github.com/nim-lang/Nim/pull/11864
+** revisit how nodes get their line information
+** change ~enforceVoidContext~ to ~tyVoid~
+** fix parser to read negative literals
+** fix literals of type ~int~
+** Tutorial, Nim for C++ Developers: class type member -> template with typedesc argument
+** full c lib wrapper
