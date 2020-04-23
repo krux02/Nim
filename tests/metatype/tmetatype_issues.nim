@@ -17,7 +17,7 @@ import typetraits, macros
 
 block t898:
   proc measureTime(e: auto) =
-    echo e.type.name
+    echo typeof(e).name
 
   proc generate(a: int): void =
     discard

@@ -955,7 +955,7 @@ template newSeqWith*(len: int, init: untyped): untyped =
     import random
     var seqRand = newSeqWith(20, rand(10))
 
-  var result = newSeq[type(init)](len)
+  var result = newSeq[typeof(init)](len)
   for i in 0 ..< len:
     result[i] = init
   result

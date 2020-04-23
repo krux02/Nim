@@ -12,5 +12,4 @@ proc foo(a: static[string]): KK[a.len] =
 var x = foo "test"
 
 import typetraits
-static: echo x.x.type.name
-
+static: echo typeof(x.x).name

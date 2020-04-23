@@ -50,7 +50,7 @@ proc `=`*[T](a: var myseq[T]; b: myseq[T]) =
   a.len = b.len
   a.cap = b.cap
   if b.data != nil:
-    a.data = cast[type(a.data)](alloc(a.cap * sizeof(T)))
+    a.data = cast[typeof(a.data)](alloc(a.cap * sizeof(T)))
     inc allocCount
     when supportsCopyMem(T):
       copyMem(a.data, b.data, a.cap * sizeof(T))
@@ -70,7 +70,7 @@ proc resize[T](s: var myseq[T]) =
   if s.cap == 0: s.cap = 8
   else: s.cap = (s.cap * 3) shr 1
   if s.data == nil: inc allocCount
-  s.data = cast[type(s.data)](realloc(s.data, s.cap * sizeof(T)))
+  s.data = cast[typeof(s.data)](realloc(s.data, s.cap * sizeof(T)))
 
 proc reserveSlot[T](x: var myseq[T]): ptr T =
   if x.len >= x.cap: resize(x)
@@ -94,7 +94,7 @@ proc grow*[T](x: var myseq[T]; newLen: int; value: T) =
   if x.cap == 0: x.cap = newLen
   else: x.cap = max(newLen, (x.cap * 3) shr 1)
   if x.data == nil: inc allocCount
-  x.data = cast[type(x.data)](realloc(x.data, x.cap * sizeof(T)))
+  x.data = cast[typeof(x.data)](realloc(x.data, x.cap * sizeof(T)))
   for i in x.len..<newLen:
     x.data[i] = value
   x.len = newLen
@@ -118,7 +118,7 @@ template `[]=`*[T](x: myseq[T]; i: Natural; y: T) =
 proc createSeq*[T](elems: varargs[T]): myseq[T] =
   result.cap = elems.len
   result.len = elems.len
-  result.data = cast[type(result.data)](alloc(result.cap * sizeof(T)))
+  result.data = cast[typeof(result.data)](alloc(result.cap * sizeof(T)))
   inc allocCount
   when supportsCopyMem(T):
     copyMem(result.data, unsafeAddr(elems[0]), result.cap * sizeof(T))

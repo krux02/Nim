@@ -16,7 +16,7 @@ proc `=sink`*[T](dest: var ConstPtr[T], src: ConstPtr[T]) {.inline.} =
   dest.val = src.val
 
 proc newConstPtr*[T](val: sink T): ConstPtr[T] {.inline.} =
-  result.val = cast[type(result.val)](alloc(sizeof(result.val[])))
+  result.val = cast[typeof(result.val)](alloc(sizeof(result.val[])))
   reset(result.val[])
   result.val[] = val
 

@@ -12,10 +12,10 @@ type
   CB[T] = proc (v: T)
 
 proc testGeneric[T](val: TT[T], cb: CB[T]) =
-  echo val.type.name
+  echo typeof(val).name
   echo $val.val
 
 var tt = new(TT[seq[string]])
-echo tt.type.name
+echo typeof(tt).name
 tt.testGeneric( proc (v: int) =
     echo $v )

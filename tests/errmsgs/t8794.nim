@@ -1,10 +1,10 @@
 discard """
-  cmd: "nim check $options $file"
-  errormsg: ""
-  nimout: '''
-t8794.nim(39, 27) Error: undeclared field: 'a3' for type m8794.Foo3 [declared in m8794.nim(1, 6)]
+  errormsg: '''
+undeclared field: 'a3' for type m8794.Foo3 [declared in m8794.nim(1, 6)]
 '''
+line: 39
 """
+
 
 
 
@@ -36,4 +36,4 @@ proc getFun[T](): T =
   var a: T
   a
 
-discard getFun[type(x2)]().a3
+discard getFun[typeof(x2)]().a3

@@ -13,10 +13,10 @@ type
 
 proc defaultFoo: Foo = discard
 proc defaultInt: int = 1
-proc defaultTInt(T: type): int = 2
+proc defaultTInt(x: typedesc): int = 2
 proc defaultTFoo[T](x: typedesc[T]): Foo = discard
 proc defaultTOldSchool[T](x: typedesc[T]): T = discard
-proc defaultTModern(T: type): T = discard
+proc defaultTModern(x: typedesc): x = discard
 
 proc specializedDefault(T: type int): int = 10
 proc specializedDefault(T: type string): string = "default"
@@ -47,7 +47,7 @@ when true:
   test 2:
     proc t1[T](val: T = defaultFoo()) =
       static:
-        assert type(val).name == "int"
+        assert typeof(val).name == "int"
         assert T.name == "int"
 
       consumeInt val
@@ -63,26 +63,26 @@ when true:
 
   test 3:
     proc tInt[T](val = defaultInt()): string =
-      return type(val).name
+      return typeof(val).name
 
     doAssert tInt[int]() == "int"
     doAssert tInt[string]() == "int"
 
     proc tInt2[T](val = defaultTInt(T)): string =
-      return type(val).name
+      return typeof(val).name
 
     doAssert tInt2[int]() == "int"
     doAssert tInt2[string]() == "int"
 
     proc tDefTModern[T](val = defaultTModern(T)): string =
-      return type(val).name
+      return typeof(val).name
 
     doAssert tDefTModern[int]() == "int"
     doAssert tDefTModern[string]() == "string"
     doAssert tDefTModern[Foo]() == "Foo"
 
     proc tDefTOld[T](val = defaultTOldSchool(T)): string =
-      return type(val).name
+      return typeof(val).name
 
     doAssert tDefTOld[int]() == "int"
     doAssert tDefTOld[string]() == "string"
@@ -90,7 +90,7 @@ when true:
 
   test 4:
     proc t[T](val: T = defaultTFoo(T)): string =
-      return type(val).name
+      return typeof(val).name
 
     doAssert t[int]() == "int"
     doAssert t[Foo]() == "Foo"
@@ -109,7 +109,7 @@ when true:
     doAssert t2(5) == "510"
     doAssert t2("string ") == "string default"
 
-    proc t3[T](a: T, b = specializedDefault(type(a))): auto =
+    proc t3[T](a: T, b = specializedDefault(typeof(a))): auto =
       return $a & $b
 
     doAssert t3(100) == "10010"
@@ -142,4 +142,3 @@ when true:
     foo(10)
     foo(1)
     foo(10)
-

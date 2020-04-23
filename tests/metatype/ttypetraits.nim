@@ -1,6 +1,28 @@
 import typetraits
 import macros
 
+
+static:
+  doAssert $typeof(42) == "int"
+  doAssert int.name == "int"
+
+const a1 = name(int)
+const a2 = $(int)
+const a3 = $int
+doAssert a1 == "int"
+doAssert a2 == "int"
+doAssert a3 == "int"
+
+proc fun[T: typedesc](t: T) =
+  const a1 = name(t)
+  const a2 = $(t)
+  const a3 = $t
+  doAssert a1 == "int"
+  doAssert a2 == "int"
+  doAssert a3 == "int"
+
+fun(int)
+
 block: # isNamedTuple
   type Foo1 = typeof((a:1,))
   type Foo2 = typeof((Field0:1,))

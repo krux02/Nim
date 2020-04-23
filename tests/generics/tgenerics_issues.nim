@@ -69,8 +69,8 @@ block t1050_5597:
   type ArrayType[T] = distinct T
 
   proc arrayItem(a: ArrayType): auto =
-    static: echo(name(type(a).T))
-    result = (type(a).T)(4)
+    static: echo(name(typeof(a).T))
+    result = (typeof(a).T)(4)
 
   var arr: ArrayType[int]
   echo arrayItem(arr)
@@ -334,7 +334,7 @@ block t1056:
     TMat2[T] = TMatrix[2,2,T]
 
   proc echoMatrix(a: TMatrix) =
-    echo a.type.name
+    echo typeof(a).name
     echo TMatrix.N
 
   proc echoMat2(a: TMat2) =
@@ -415,7 +415,7 @@ block t5106:
     var a = U[T(1)](1)
     var b = U[T(2)](2)
     var c = a + b
-    echo c.type.name
+    echo typeof(c).name
 
   block:
     type T = object
@@ -432,7 +432,7 @@ block t5106:
     var a = U[T(f: 1)](1)
     var b = U[T(f: 2)](2)
     var c = a + b
-    echo c.type.name
+    echo typeof(c).name
 
   block:
     type T = distinct array[0..0, int]
@@ -448,7 +448,7 @@ block t5106:
     var a = U[T([1])](1)
     var b = U[T([2])](2)
     var c = a + b
-    echo c.type.name
+    echo typeof(c).name
 
 
 

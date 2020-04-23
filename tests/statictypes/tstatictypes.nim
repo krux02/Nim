@@ -173,7 +173,7 @@ echo s
 
 block: #13529
   block:
-    type Foo[T: static type] = object
+    type Foo[T: static typedesc] = object
     var foo: Foo["test"]
     doAssert $foo == "()"
     doAssert foo.T is string
@@ -194,7 +194,7 @@ block: #13529
     fun(1)
     fun(1.2)
   block: # routines also work
-    proc fun(a: static type) = (const a2 = a)
+    proc fun(a: static typedesc) = (const a2 = a)
     fun(1)
     fun(1.2)
 

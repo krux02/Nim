@@ -91,7 +91,7 @@ proc `=sink`*[T](dest: var UniquePtr[T], src: UniquePtr[T]) {.inline.} =
   dest.val = src.val
 
 proc newUniquePtr*[T](val: sink T): UniquePtr[T] =
-  result.val = cast[type(result.val)](alloc(sizeof(result.val[])))
+  result.val = cast[typeof(result.val)](alloc(sizeof(result.val[])))
   reset(result.val[])
   result.val[] = val
 
@@ -132,7 +132,7 @@ proc `=sink`*[T](dest: var ConstPtr[T], src: ConstPtr[T]) {.inline.} =
   dest.val = src.val
 
 proc newConstPtr*[T](val: sink T): ConstPtr[T] =
-  result.val = cast[type(result.val)](alloc(sizeof(result.val[])))
+  result.val = cast[typeof(result.val)](alloc(sizeof(result.val[])))
   reset(result.val[])
   result.val[] = val
 

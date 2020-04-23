@@ -36,7 +36,7 @@ proc `=`*[T](a: var opt[T]; b: opt[T]) =
     inc deallocCount
     a.data = nil
   if b.data != nil:
-    a.data = cast[type(a.data)](alloc(sizeof(T)))
+    a.data = cast[typeof(a.data)](alloc(sizeof(T)))
     inc allocCount
     when supportsCopyMem(T):
       copyMem(a.data, b.data, sizeof(T))
@@ -50,7 +50,7 @@ proc `=sink`*[T](a: var opt[T]; b: opt[T]) =
   a.data = b.data
 
 proc createOpt*[T](x: T): opt[T] =
-  result.data = cast[type(result.data)](alloc(sizeof(T)))
+  result.data = cast[typeof(result.data)](alloc(sizeof(T)))
   inc allocCount
   result.data[] = x
 

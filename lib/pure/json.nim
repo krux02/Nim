@@ -1459,7 +1459,7 @@ when isMainModule:
       m9: Q9(42)
     )
 
-    doAssert(obj == to(%obj, type(obj)))
+    doAssert(obj == to(%obj, typeof(obj)))
 
     when not defined(js):
       const fragments = """[1,2,3] {"hi":3} 12 [] """

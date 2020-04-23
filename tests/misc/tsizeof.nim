@@ -44,11 +44,11 @@ macro testSizeAlignOf(args: varargs[untyped]): untyped =
       let
         c_size = c_sizeof(`arg`)
         nim_size = sizeof(`arg`)
-        c_align = c_alignof(type(`arg`))
+        c_align = c_alignof(typeof(`arg`))
         nim_align = alignof(`arg`)
 
       if nim_size != c_size or nim_align != c_align:
-        var msg = strAlign(`arg`.type.name & ": ")
+        var msg = strAlign(typeof(`arg`).name & ": ")
         if nim_size != c_size:
           msg.add  " size(got, expected):  " & $nim_size & " != " & $c_size
         if nim_align != c_align:
@@ -78,7 +78,7 @@ macro c_offsetof(fieldAccess: typed): int32 =
   ## Bullet proof implementation that works on actual offsetof operator
   ## in the c backend. Assuming of course this implementation is
   ## correct.
-  let s = if fieldAccess.kind == nnkCheckedFieldExpr: fieldAccess[0] 
+  let s = if fieldAccess.kind == nnkCheckedFieldExpr: fieldAccess[0]
           else: fieldAccess
   let a = s[0].getTypeInst
   let b = s[1]
@@ -165,8 +165,6 @@ type
     Value31, Value32, Value33
 
 proc transformObjectconfigPacked(arg: NimNode): NimNode =
-  let debug = arg.kind == nnkPragmaExpr
-
   if arg.eqIdent("objectconfig"):
     result = ident"packed"
   else:
@@ -346,7 +344,8 @@ testinstance:
       c: char
       d: int32  # unaligned
 
-  const trivialSize = sizeof(TrivialType) # needs to be able to evaluate at compile time
+  # needs to be able to evaluate at compile time
+  const trivialSize {.used.} = sizeof(TrivialType)
 
   proc main(): void =
     var t : TrivialType

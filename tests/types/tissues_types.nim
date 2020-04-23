@@ -36,7 +36,7 @@ block t5648:
   proc main() =
     var f = create(Foo)
     f.bar = 3
-    echo f.type.name
+    echo typeof(f).name
 
     discard realloc(f, 0)
 

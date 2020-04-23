@@ -58,23 +58,23 @@ block tgenericdefaults:
   var x1: TFoo[int, float]
 
   static:
-    assert type(x1.x) is int
-    assert type(x1.y) is float
-    assert type(x1.z) is int
+    assert typeof(x1.x) is int
+    assert typeof(x1.y) is float
+    assert typeof(x1.z) is int
 
   var x2: TFoo[string, R = float, U = seq[int]]
 
   static:
-    assert type(x2.x) is string
-    assert type(x2.y) is seq[int]
-    assert type(x2.z) is float
+    assert typeof(x2.x) is string
+    assert typeof(x2.y) is seq[int]
+    assert typeof(x2.z) is float
 
   var x3: TBar[float]
 
   static:
-    assert type(x3.x) is float
-    assert type(x3.y) is array[4, float]
-    assert type(x3.z) is float
+    assert typeof(x3.x) is float
+    assert typeof(x3.y) is array[4, float]
+    assert typeof(x3.z) is float
 
 
 
@@ -217,7 +217,7 @@ block tptrinheritance:
 block tsigtypeop:
   type Vec3[T] = array[3, T]
 
-  proc foo(x: Vec3, y: Vec3.T, z: x.T): x.type.T =
+  proc foo(x: Vec3, y: Vec3.T, z: x.T): typeof(x).T =
     return 10
 
   var y: Vec3[int] = [1, 2, 3]
