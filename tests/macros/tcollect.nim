@@ -45,7 +45,7 @@ macro collect(body): untyped =
 
   let v = newTree(nnkVarSection,
      newTree(nnkIdentDefs, res, newTree(nnkBracketExpr, bindSym"seq",
-     newCall(bindSym"type", body)), newEmptyNode()))
+     newCall(bindSym"typeof", body)), newEmptyNode()))
 
   result = newTree(nnkStmtListExpr, v, t(body, res), res)
   #echo repr result

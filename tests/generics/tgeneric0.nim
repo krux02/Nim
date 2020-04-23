@@ -99,7 +99,7 @@ block tgeneric2:
     Obj = object
       field: Table[string, string]
   var t: Obj
-  discard initTable[type(t.field), string]()
+  discard initTable[typeof(t.field), string]()
 
 
 

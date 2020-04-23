@@ -624,7 +624,7 @@ when declared(float128):
 
 proc newLit*(arg: enum): NimNode {.compileTime.} =
   result = newCall(
-    arg.type.getTypeInst,
+    getTypeInst(typeof(arg)),
     newLit(int(arg))
   )
 
@@ -634,13 +634,13 @@ proc newLit*[T](s: set[T]): NimNode {.compileTime.}
 proc newLit*(arg: tuple): NimNode {.compileTime.}
 
 proc newLit*(arg: object): NimNode {.compileTime.} =
-  result = nnkObjConstr.newTree(arg.type.getTypeInst)
+  result = nnkObjConstr.newTree(typeof(arg).getTypeInst)
   for a, b in arg.fieldPairs:
     result.add nnkExprColonExpr.newTree( newIdentNode(a), newLit(b) )
 
 proc newLit*(arg: ref object): NimNode {.compileTime.} =
   ## produces a new ref type literal node.
-  result = nnkObjConstr.newTree(arg.type.getTypeInst)
+  result = nnkObjConstr.newTree(getTypeInst(typeof(arg)))
   for a, b in fieldPairs(arg[]):
     result.add nnkExprColonExpr.newTree(newIdentNode(a), newLit(b))
 

@@ -23,11 +23,11 @@ x()
 
 template volatileLoad[T](x: ptr T): T =
   var res: T
-  {.emit: [res, " = (*(", type(x[]), " volatile*)", x, ");"].}
+  {.emit: [res, " = (*(", typeof(x[]), " volatile*)", x, ");"].}
   res
 
 template volatileStore[T](x: ptr T; y: T) =
-  {.emit: ["*((", type(x[]), " volatile*)(", x, ")) = ", y, ";"].}
+  {.emit: ["*((", typeof(x[]), " volatile*)(", x, ")) = ", y, ";"].}
 
 proc main =
   var st: int

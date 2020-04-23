@@ -26,7 +26,7 @@ type
   ObjectContainer = concept C
     C.len is Ordinal
     for v in items(C):
-      v.type is tuple|object
+      typeof(v) is tuple|object
 
 proc foo(c: ObjectContainer) =
   echo "Container"
@@ -56,11 +56,11 @@ type
 
     typeproc T
     T.typeproc
-    typeproc o.type
-    o.type.typeproc
+    typeproc typeof(o)
+    typeof(o).typeproc
 
-    o.to(type string)
-    o.to(type JsonValue)
+    o.to(typeof(string))
+    o.to(typeof(JsonValue))
 
     refproc(r, intref)
     varproc(v)
@@ -114,7 +114,7 @@ echo usedToFail, " ", working
 type TaggedType[T; Key: static[string]] = T
 
 proc setKey*[DT](dt: DT, key: static[string]): TaggedType[DT, key] =
-  result = cast[type(result)](dt)
+  result = cast[typeof(result)](dt)
 
 type Students = object
    id : seq[int]

@@ -1,6 +1,6 @@
 import typetraits
 
-template typeLen(x): int = x.type.name.len
+template typeLen(x): int = typeof(x).name.len
 
 template bunchOfChecks(x) =
   x.typeLen > 3
@@ -53,4 +53,3 @@ no string is ConceptUsingTemplate1
 ok int is ConceptUsingTemplate2
 no float is ConceptUsingTemplate2
 no string is ConceptUsingTemplate2
-

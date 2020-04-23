@@ -12,17 +12,17 @@ discard """
 var x: range[-1'f32..1'f32]
 doAssert x.low == -1'f32
 doAssert x.high == 1'f32
-doAssert x.type.low == -1'f32
-doAssert x.type.high == 1'f32
+doAssert typeof(x).low == -1'f32
+doAssert typeof(x).high == 1'f32
 var y: range[-1'f64..1'f64]
 doAssert y.low == -1'f64
 doAssert y.high == 1'f64
-doAssert y.type.low == -1'f64
-doAssert y.type.high == 1'f64
+doAssert typeof(y).low == -1'f64
+doAssert typeof(y).high == 1'f64
 
 # bug #11972
 var num: uint8
-doAssert num.high.float == 255.0
+doAssert typeof(num).high.float == 255.0
 
 echo high(uint64)
 echo high(int64)

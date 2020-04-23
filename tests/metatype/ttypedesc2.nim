@@ -52,7 +52,7 @@ block: #issue #12704
     let b = $(str, "asdf")
   fun()
 
-proc hasDefault1(T: type = int): auto = return T.name
+proc hasDefault1(T: typedesc = int): auto = return T.name
 doAssert hasDefault1(int) == "int"
 doAssert hasDefault1(string) == "string"
 doAssert hasDefault1() == "int"

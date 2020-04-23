@@ -41,8 +41,8 @@ block t5983:
   type EUR = distinct float
 
   type CurrencyAmount = concept c
-    type t = c.type
-    const name = c.type.name
+    type t = typeof(c)
+    const name = typeof(c).name
     name in currencies
 
   proc `$`(x: CurrencyAmount): string =

@@ -15,7 +15,7 @@ block:
   proc default[T](t: typedesc[T]): T {.inline.} = discard
 
   static:
-    var x = default(type(0))
+    var x = default(typeof(0))
 
 # #6379
 import algorithm

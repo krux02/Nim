@@ -82,8 +82,8 @@ template delImplIdx(t, i) =
         var j = i         # The correctness of this depends on (h+1) in nextTry,
         var r = j         # though may be adaptable to other simple sequences.
         t.data[i].hcode = 0              # mark current EMPTY
-        t.data[i].key = default(type(t.data[i].key))
-        t.data[i].val = default(type(t.data[i].val))
+        t.data[i].key = default(typeof(t.data[i].key))
+        t.data[i].val = default(typeof(t.data[i].val))
         while true:
           i = (i + 1) and msk            # increment mod table size
           if isEmpty(t.data[i].hcode):   # end of collision cluster; So all done

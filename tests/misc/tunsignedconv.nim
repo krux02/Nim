@@ -46,7 +46,7 @@ var n64 = ar[v64]
 block t4176:
   var yyy: uint8 = 0
   yyy = yyy - 127
-  doAssert type(yyy) is uint8
+  doAssert typeof(yyy) is uint8
 
 # bug #13661
 

@@ -33,12 +33,11 @@ proc digest(T: typedesc, data: ptr byte, dataLen: uint): Digest[T.bits] =
   result = ctx.finish()
 
 var h = Hash128.digest(nil, 0)
-echo h.type.name
+echo typeof(h).name
 
 proc finish(hmac: var HMAC): Digest[HMAC.HashType.bits] =
   discard
 
 var hm: HMAC[Hash256]
 var d = hm.finish
-echo d.type.name
-
+echo typeof(d).name

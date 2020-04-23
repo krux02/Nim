@@ -83,7 +83,7 @@ echo "#############"
 macro gt2(a: typed): string =
   let prefix = "gt2(" & $a & "): \t"
   result = quote do:
-    `prefix` & `a`.type.name
+    `prefix` & typeof(`a`).name
 
 echo gt2(Foo) # Foo  shouldn't this be typeDesc[Foo] ?
 echo gt2(Bar) # Bar  shouldn't this be typeDesc[Bar] ?

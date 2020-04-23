@@ -3,7 +3,7 @@ type
     V = var
     D = distinct
     P = ptr
-    T = type
+    T = typedesc
     S = static
     OBJ = object
     TPL = tuple
@@ -28,11 +28,11 @@ static:
   assert int is int
   assert int is T
   assert int is SomeInteger
-  assert seq[int] is type
-  assert seq[int] is type[seq]
-  assert seq[int] isnot type[seq[float]]
-  assert i isnot type[int]
-  assert type(i) is type[int]
+  assert seq[int] is typedesc
+  assert seq[int] is typedesc[seq]
+  assert seq[int] isnot typedesc[seq[float]]
+  assert i isnot typedesc[int]
+  assert typeof(i) is typedesc[int]
   assert x isnot T
   assert y isnot S
   assert z isnot enum
@@ -43,4 +43,3 @@ static:
   # XXX: These cases don't work properly at the moment:
   # assert type[int] isnot int
   # assert type(int) isnot int
-

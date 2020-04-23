@@ -6,7 +6,7 @@ type
     y: U
 
 proc getTypeName1(t: typedesc): string = t.name
-proc getTypeName2(t: type): string = t.name
+proc getTypeName2(t: typedesc): string = t.name
 
 proc foo(T: type float, a: auto): string =
   result = "float " & $(a.len > 5)
@@ -14,7 +14,7 @@ proc foo(T: type float, a: auto): string =
 proc foo(T: typedesc[TFoo], a: int): string =
   result = "TFoo "  & $(a)
 
-proc foo(T: type[int or bool]): string =
+proc foo(T: typedesc[int or bool]): string =
   var a: T
   a = 10
   result = "int or bool " & ($a)
@@ -31,7 +31,7 @@ test "types can be used as proc params":
 
   var f = 10.0
   check ((foo(float, "long string") == "float true"))
-  check ((foo(type(f), [1, 2, 3]) == "float false"))
+  check ((foo(typedesc(f), [1, 2, 3]) == "float false"))
 
   check ((foo(int) == "int or bool 10"))
 
@@ -59,4 +59,3 @@ reject:
 
 reject:
   foo seq[int], ss
-

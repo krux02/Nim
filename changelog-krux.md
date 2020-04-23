@@ -37,5 +37,6 @@ This changelog contains all changes that are specific to the krux-nim branch
 
 - alignment of types is forwarded to allocators
 - hot code reloading has been removed (unmaintainable)
+- something for concepts broke (sorry)
 
 ## Tool changes

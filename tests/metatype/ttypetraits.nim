@@ -2,20 +2,20 @@ import typetraits
 import macros
 
 block: # isNamedTuple
-  type Foo1 = (a:1,).type
-  type Foo2 = (Field0:1,).type
-  type Foo3 = ().type
+  type Foo1 = typeof((a:1,))
+  type Foo2 = typeof((Field0:1,))
+  type Foo3 = typeof(())
   type Foo4 = object
   type Foo5[T] = tuple[x:int, y: T]
   type Foo6[T] = (T,)
 
-  doAssert (a:1,).type.isNamedTuple
+  doAssert typeof((a:1,)).isNamedTuple
   doAssert Foo1.isNamedTuple
   doAssert Foo2.isNamedTuple
   doAssert isNamedTuple(tuple[key: int])
   doAssert not Foo3.isNamedTuple
   doAssert not Foo4.isNamedTuple
-  doAssert not (1,).type.isNamedTuple
+  doAssert not typeof((1,)).isNamedTuple
   doAssert isNamedTuple(Foo5[int8])
   doAssert not isNamedTuple(Foo5)
   doAssert not isNamedTuple(Foo6[int8])
@@ -54,7 +54,7 @@ block distinctBase:
     type
       Foo[T] = distinct seq[T]
     var a: Foo[int]
-    doAssert a.type.distinctBase is seq[int]
+    doAssert typeof(a).distinctBase is seq[int]
 
   block:
     # simplified from https://github.com/nim-lang/Nim/pull/8531#issuecomment-410436458
@@ -121,8 +121,8 @@ block: # tupleLen
   doAssert ().len == 0
   doAssert (1,).len == 1
   doAssert (int,).len == 1
-  doAssert type(x).len == 2
-  doAssert type(x).default.len == 2
+  doAssert typeof(x).len == 2
+  doAssert typeof(x).default.len == 2
   type T1 = (int,float)
   type T2 = T1
   doAssert T2.len == 2

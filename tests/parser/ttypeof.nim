@@ -13,10 +13,10 @@ proc foob(x: int): string = "foo"
 proc barb(x: string): int = 12
 
 echo(foob(10).barb()) # works
-echo(type(10).name()) # doesn't work
+echo(typeof(10).name()) # doesn't work
 
-echo(name(type(10))) # works
-echo((type(10)).name()) # works
+echo(name(typeof(10))) # works
+echo((typeof(10)).name()) # works
 
 
 # test that 'addr' still works

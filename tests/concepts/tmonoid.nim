@@ -5,8 +5,8 @@ discard """
 # bug #3686
 
 type Monoid = concept x, y
-  x + y is type(x)
-  type(z(type(x))) is type(x)
+  x + y is typeof(x)
+  typeof(z(typeof(x))) is typeof(x)
 
 proc z(x: typedesc[int]): int = 0
 
@@ -17,9 +17,8 @@ type AdditiveMonoid* = concept x, y, type T
   x + y is T
 
   # some redundant checks to test an alternative approaches:
-  type TT = type(x)
-  x + y is type(x)
+  type TT = typeof(x)
+  x + y is typeof(x)
   x + y is TT
 
 doAssert(1 is AdditiveMonoid)
-

@@ -84,12 +84,12 @@ reject bindArg(int, string, "test", "nest", 10, 20)
 echo "ok"
 
 #11058:
-template test(S: type, U: type) =
+template test(S: typedesc, U: typedesc) =
   discard
 
 test(int, float)
 
-proc test2(S: type, U: type) =
+proc test2(S: typedesc, U: typedesc) =
   discard
 
 test2(float, int)

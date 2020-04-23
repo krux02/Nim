@@ -543,7 +543,7 @@ template filterIt*(s, pred: untyped): untyped =
     assert acceptable == @[-2.0, 24.5, 44.31]
     assert notAcceptable == @[-272.15, 99.9, -113.44]
 
-  var result = newSeq[type(s[0])]()
+  var result = newSeq[typeof(s[0])]()
   for it {.inject.} in items(s):
     if pred: result.add(it)
   result
@@ -761,8 +761,8 @@ macro toSeq*(arg: untyped): untyped =
     let
       myRange = 1..5
       mySet: set[int8] = {5'i8, 3, 1}
-    assert type(myRange) is HSlice[system.int, system.int]
-    assert type(mySet) is set[int8]
+    assert typeof(myRange) is HSlice[system.int, system.int]
+    assert typeof(mySet) is set[int8]
 
     let
       mySeq1 = toSeq(myRange)

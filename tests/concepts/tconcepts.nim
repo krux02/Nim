@@ -159,7 +159,7 @@ block overload_precedence:
 
 
 block templates:
-  template typeLen(x): int = x.type.name.len
+  template typeLen(x): int = typeof(x).name.len
 
   template bunchOfChecks(x) =
     x.typeLen > 3
@@ -219,12 +219,12 @@ block titerable:
   type
     Iterable[T] = concept x
       for value in x:
-        type(value) is T
+        typeof(value) is T
 
   proc sum[T](iter: Iterable[T]): T =
     static: echo T.name
     for element in iter:
-      static: echo element.type.name
+      static: echo typeof(element).name
       result += element
 
   doAssert sum([1, 2, 3, 4, 5]) == 15
@@ -243,7 +243,7 @@ block tmanual:
       c.len is Ordinal
       items(c) is T
       for value in c:
-        type(value) is T
+        typeof(value) is T
 
   proc takesIntContainer(c: Container[int]) =
     for e in c: echo e
@@ -319,8 +319,8 @@ block treversable:
 
 block tmonoid:
   type Monoid = concept x, y
-    x + y is type(x)
-    type(z(type(x))) is type(x)
+    x + y is typeof(x)
+    typeof(z(typeof(x))) is typeof(x)
 
   proc z(x: typedesc[int]): int = 0
 
@@ -331,8 +331,8 @@ block tmonoid:
     x + y is T
 
     # some redundant checks to test an alternative approaches:
-    type TT = type(x)
-    x + y is type(x)
+    type TT = typeof(x)
+    x + y is typeof(x)
     x + y is TT
 
   doAssert(1 is AdditiveMonoid)
@@ -358,12 +358,12 @@ block tesqofconcept:
 
 block tvectorspace:
   type VectorSpace[K] = concept x, y
-    x + y is type(x)
-    zero(type(x)) is type(x)
-    -x is type(x)
-    x - y is type(x)
+    x + y is typeof(x)
+    zero(typeof(x)) is typeof(x)
+    -x is typeof(x)
+    x - y is typeof(x)
     var k: K
-    k * x is type(x)
+    k * x is typeof(x)
 
   proc zero(T: typedesc): T = 0
 

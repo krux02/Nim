@@ -26,13 +26,13 @@ type
 
     # more complicated static param inference cases
     m.data is array[TotalElements, T]
-    m.foo(array[0..FromFoo, type m[int, 10]])
+    m.foo(array[0..FromFoo, typeof(m[int, 10])])
 
   MyMatrix[M, K: static[int]; T] = object
     data: array[M*K, T]
 
 # adaptor for the concept's non-matching expectations
-template N(M: type MyMatrix): untyped = M.K
+template N(M: typedesc[MyMatrix]): untyped = M.K
 
 proc `[]`(m: MyMatrix; r, c: int): m.T =
   m.data[r * m.K + c]
@@ -78,4 +78,3 @@ static:
 echo x.myMatrixProc
 echo x.genericMatrixProc
 echo x.implicitMatrixProc
-

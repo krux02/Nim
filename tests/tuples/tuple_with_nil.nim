@@ -283,7 +283,7 @@ proc writeformat(o: var Writer; i: SomeInteger; fmt: Format) =
   if not (fmt.typ in {ftBin, ftOct, ftHex, ftDec}):
     raise newException(FormatError, "Integer variable must of one of the following types: b,o,x,X,d,n")
 
-  var base: type(i)
+  var base: typeof(i)
   var len = 0
   case fmt.typ:
   of ftDec:
@@ -301,8 +301,8 @@ proc writeformat(o: var Writer; i: SomeInteger; fmt: Format) =
 
   if fmt.sign != fsMinus or i < 0: len.inc
 
-  var x: type(i) = abs(i)
-  var irev: type(i) = 0
+  var x: typeof(i) = abs(i)
+  var irev: typeof(i) = 0
   var ilen = 0
   while x > 0.SomeInteger:
     len.inc
@@ -658,7 +658,7 @@ proc literal(b: bool): NimNode {.compiletime, nosideeffect.} =
 
 proc literal[T](x: T): NimNode {.compiletime, nosideeffect.} =
   ## Return the nim literal of value `x`.
-  when type(x) is enum:
+  when typeof(x) is enum:
     result = ($x).ident
   else:
     result = newLit(x)

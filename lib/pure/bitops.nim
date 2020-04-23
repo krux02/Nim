@@ -607,7 +607,7 @@ proc rotateRightBits*(value: uint64;
   let amount = amount and 63
   result = (value shr amount) or (value shl ( (-amount) and 63))
 
-proc repeatBits[T: SomeUnsignedInt](x: SomeUnsignedInt; retType: type[T]): T {.
+proc repeatBits[T: SomeUnsignedInt](x: SomeUnsignedInt; retType: typedesc[T]): T {.
   noSideEffect.} =
   result = x
   var i = 1

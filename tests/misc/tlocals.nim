@@ -22,7 +22,7 @@ proc test(baz: int, qux: var int): int =
   var foo: Foo2[int]
   let bar = "abc"
   let c1 = locals()
-  doAssert numFields(c1.foo.type) == 1
+  doAssert numFields(typeof(c1.foo)) == 1
   doAssert c1.bar == "abc"
   doAssert c1.baz == 123
   doAssert c1.result == 0

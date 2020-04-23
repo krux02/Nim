@@ -5,16 +5,16 @@ output: "8\n8\n4"
 import
   macros, typetraits
 
-template selectType(x: int): type =
+template selectType(x: int): typedesc =
   when x < 10:
     int
   else:
     string
 
-template simpleTypeTempl: type =
+template simpleTypeTempl: typedesc =
   string
 
-macro typeFromMacro: type = bindSym"string"
+macro typeFromMacro: typedesc = bindSym"string"
 
 # The tests below check that the result variable of the
 # selected type matches the literal types in the code:
@@ -70,9 +70,9 @@ var m3: getBase(32)
 
 static:
   # assert m1.type.name == "MpUintBase[uint64]"
-  assert m1.lo.type.name == "uint64"
-  assert m2.lo.type.name == "uint32"
-  assert m3.type.name == "MpUintBase[system.uint32]"
+  assert typeof(m1.lo).name == "uint64"
+  assert typeof(m2.lo).name == "uint32"
+  assert typeof(m3).name == "MpUintBase[system.uint32]"
 
 # https://github.com/nim-lang/Nim/issues/7379
 

@@ -9,12 +9,11 @@ import typetraits
 type
   S[N: static[int]] = object
   T[A,B: static[int]] = object
-  
+
   C = S[1]
 
 var
   x: T[1,1]
   y: T[C.N, C.N]
 
-echo y.type.name
-
+echo typeof(y).name

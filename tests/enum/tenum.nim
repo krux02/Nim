@@ -21,7 +21,7 @@ block tenum1:
   # Bug #4066
   macro genEnum(): untyped = newNimNode(nnkEnumTy).add(newEmptyNode(), newIdentNode("geItem1"))
   type GeneratedEnum = genEnum()
-  doAssert(type(geItem1) is GeneratedEnum)
+  doAssert(typeof(geItem1) is GeneratedEnum)
 
 
 
@@ -84,7 +84,7 @@ block thole:
     hFirst = (0,"first")
     hSecond = (32,"second")
     hThird = (64,"third")
-    
+
   var x = @[0,32,64] # This is just to avoid the compiler inlining the value of the enum
 
   echo Holed(x[0]),ord Holed(x[0]),Holed(x[1]),ord Holed(x[1]),Holed(x[2]),ord Holed(x[2])
