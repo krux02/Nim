@@ -18,7 +18,6 @@ remove all WTFs from the codebase.
 ** Generic ~==~ for Object Variants
 ** forbid/warn overload ~foobar(arg: untyped)~ ~foobar(arg: int)~
 ** forbid defining magic procs in user code.
-** test for tensors
 ** validate links in nimdoc automatically
 ** cleanup system.nim
 *** ensure automatically that all compilation branches js C C++ define the same set of symbols

@@ -201,13 +201,13 @@ when defined(nimNewTypedesc):
       ## The type coercion ``static(x)`` can be used to force the compile-time
       ## evaluation of the given expression ``x``.
 
-    `type`*[T] {.magic: "Type".}
+    `type`*[T] {.magic: "Type", deprecated.}
       ## Meta type representing the type of all type values.
       ##
       ## The coercion ``type(x)`` can be used to obtain the type of the given
       ## expression ``x``.
 else:
-  proc `type`*(x: untyped): typedesc {.magic: "TypeOf", noSideEffect, compileTime.} =
+  proc `type`*(x: untyped): typedesc {.magic: "TypeOf", noSideEffect, compileTime, deprecated.} =
     ## Builtin `type` operator for accessing the type of an expression.
     ## Cannot be overloaded.
     discard
