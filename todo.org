@@ -55,3 +55,4 @@ remove all WTFs from the codebase.
 ** fix literals of type ~int~
 ** Tutorial, Nim for C++ Developers: class type member -> template with typedesc argument
 ** full c lib wrapper
+** remove all traces on ~nOrig~
