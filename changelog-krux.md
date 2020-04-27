@@ -38,5 +38,7 @@ This changelog contains all changes that are specific to the krux-nim branch
 - alignment of types is forwarded to allocators
 - hot code reloading has been removed (unmaintainable)
 - something for concepts broke (sorry)
+- pragma `this` is no longer supported.
+- statement `using` is no longer supported.
 
 ## Tool changes

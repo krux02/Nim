@@ -1256,11 +1256,8 @@ proc semProcTypeNode(c: PContext, n, genericParams: PNode,
     for j in 0..<a.len-2:
       var arg = newSymG(skParam, a[j], c)
       if not hasType and not hasDefault and kind notin {skTemplate, skMacro}:
-        let param = strTableGet(c.signatures, arg.name)
-        if param != nil: typ = param.typ
-        else:
-          localError(c.config, a.info, "typeless parameters are obsolete")
-          typ = errorType(c)
+        localError(c.config, a[j].info, "parameter needs a type")
+        typ = errorType(c)
       let lifted = liftParamType(c, kind, genericParams, typ,
                                  arg.name.s, arg.info)
       let finalType = if lifted != nil: lifted else: typ.skipIntLit
@@ -1582,7 +1579,7 @@ proc applyTypeSectionPragmas(c: PContext; pragmas, operand: PNode): PNode =
         discard "User-defined pragma"
       else:
         let sym = searchInScopes(c, ident)
-        if sym != nil and sfCustomPragma in sym.flags: 
+        if sym != nil and sfCustomPragma in sym.flags:
           discard "Custom user pragma"
         else:
           # we transform ``(arg1, arg2: T) {.m, rest.}`` into ``m((arg1, arg2: T) {.rest.})`` and

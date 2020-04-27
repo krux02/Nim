@@ -181,7 +181,7 @@ type
     nkIncludeStmt,        # an include statement
     nkBindStmt,           # a bind statement
     nkMixinStmt,          # a mixin statement
-    nkUsingStmt,          # an using statement
+    nkUsingStmt,          # unused
     nkCommentStmt,        # a comment statement
     nkStmtListExpr,       # a statement list followed by an expr; this is used
                           # to allow powerful multi-line templates
@@ -324,7 +324,6 @@ const
   sfWrittenTo* = sfBorrow             # param is assigned to
   sfEscapes* = sfProcvar              # param escapes
   sfBase* = sfDiscriminant
-  sfIsSelf* = sfOverriden             # param is 'self'
   sfCustomPragma* = sfRegister        # symbol is custom pragma template
 
 const

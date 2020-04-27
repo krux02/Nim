@@ -56,3 +56,9 @@ remove all WTFs from the codebase.
 ** Tutorial, Nim for C++ Developers: class type member -> template with typedesc argument
 ** full c lib wrapper
 ** remove all traces on ~nOrig~
+** DONE remove ~this~ pragma
+** wtf is up with ~cast[type(foo.bar)](expr)~? Why does it still work even after ~`type`~ is removed from ~system.nim~
+** require argument types for macros and templates
+** DONE remove ~using~ statement
+** remove ~ast~ based function overloading
+** remove experimental code reordering

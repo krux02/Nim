@@ -3,7 +3,7 @@ discard """
   output: '''works 34
 34
 defined
-3'''
+'''
 """
 
 {.experimental: "codeReordering".}
@@ -29,15 +29,3 @@ foo()
 
 type
   T = int
-
-
-when not declared(goo):
-  proc goo(my, omy) = echo my
-
-when not declared(goo):
-  proc goo(my, omy) = echo omy
-
-using
-  my, omy: int
-
-goo(3, 4)

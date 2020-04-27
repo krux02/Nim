@@ -503,9 +503,6 @@ proc lsub(g: TSrcGen; n: PNode): int =
   of nkVarSection, nkLetSection:
     if n.len > 1: result = MaxLineLen + 1
     else: result = lsons(g, n) + len("var_")
-  of nkUsingStmt:
-    if n.len > 1: result = MaxLineLen + 1
-    else: result = lsons(g, n) + len("using_")
   of nkReturnStmt:
     if n.len > 0 and n[0].kind == nkAsgn:
       result = len("return_") + lsub(g, n[0][1])
@@ -1348,7 +1345,7 @@ proc gsub(g: var TSrcGen, n: PNode, c: TContext) =
     initContext(a)
     incl(a.flags, rfInConstExpr)
     gsection(g, n, a, tkConst, "const")
-  of nkVarSection, nkLetSection, nkUsingStmt:
+  of nkVarSection, nkLetSection:
     if n.len == 0: return
     if n.kind == nkVarSection: putWithSpace(g, tkVar, "var")
     elif n.kind == nkLetSection: putWithSpace(g, tkLet, "let")

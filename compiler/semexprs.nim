@@ -2788,7 +2788,6 @@ proc semExpr(c: PContext, n: PNode, flags: TExprFlags = {}): PNode =
   of nkForStmt, nkParForStmt: result = semFor(c, n, flags)
   of nkCaseStmt: result = semCase(c, n, flags)
   of nkReturnStmt: result = semReturn(c, n)
-  of nkUsingStmt: result = semUsing(c, n)
   of nkAsmStmt: result = semAsm(c, n)
   of nkYieldStmt: result = semYield(c, n)
   of nkPragma: pragma(c, c.p.owner, n, stmtPragmas, true)

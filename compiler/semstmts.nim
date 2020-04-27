@@ -357,29 +357,6 @@ proc isDiscardUnderscore(v: PSym): bool =
     v.flags.incl(sfGenSym)
     result = true
 
-proc semUsing(c: PContext; n: PNode): PNode =
-  result = c.graph.emptyNode
-  if not isTopLevel(c): localError(c.config, n.info, errXOnlyAtModuleScope % "using")
-  for i in 0..<n.len:
-    var a = n[i]
-    if c.config.cmd == cmdIdeTools: suggestStmt(c, a)
-    if a.kind == nkCommentStmt: continue
-    if a.kind notin {nkIdentDefs, nkVarTuple, nkConstDef}: illFormedAst(a, c.config)
-    checkMinSonsLen(a, 3, c.config)
-    if a[^2].kind != nkEmpty:
-      let typ = semTypeNode(c, a[^2], nil)
-      for j in 0..<a.len-2:
-        let v = semIdentDef(c, a[j], skParam)
-        styleCheckDef(c.config, v)
-        onDef(a[j].info, v)
-        v.typ = typ
-        strTableIncl(c.signatures, v)
-    else:
-      localError(c.config, a.info, "'using' section must have a type")
-    var def: PNode
-    if a[^1].kind != nkEmpty:
-      localError(c.config, a.info, "'using' sections cannot contain assignments")
-
 proc hasEmpty(typ: PType): bool =
   if typ.kind in {tySequence, tyArray, tySet}:
     result = typ.lastSon.kind == tyEmpty
@@ -1476,9 +1453,9 @@ proc semProcAnnotation(c: PContext, prc: PNode;
       let ident = considerQuotedIdent(c, key)
       if strTableGet(c.userPragmas, ident) != nil:
         continue # User defined pragma
-      else: 
+      else:
         let sym = searchInScopes(c, ident)
-        if sym != nil and sfCustomPragma in sym.flags: 
+        if sym != nil and sfCustomPragma in sym.flags:
           continue # User custom pragma
 
     # we transform ``proc p {.m, rest.}`` into ``m(do: proc p {.rest.})`` and

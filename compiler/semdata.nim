@@ -128,10 +128,8 @@ type
     inParallelStmt*: int
     instTypeBoundOp*: proc (c: PContext; dc: PSym; t: PType; info: TLineInfo;
                             op: TTypeAttachedOp; col: int): PSym {.nimcall.}
-    selfName*: PIdent
     cache*: IdentCache
     graph*: ModuleGraph
-    signatures*: TStrTable
     recursiveDep*: string
     suggestionsMade*: bool
     features*: set[Feature]
@@ -251,7 +249,6 @@ proc newContext*(graph: ModuleGraph; module: PSym): PContext =
   result.unknownIdents = initIntSet()
   result.cache = graph.cache
   result.graph = graph
-  initStrTable(result.signatures)
   result.typesWithOps = @[]
   result.features = graph.config.features
 
