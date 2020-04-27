@@ -69,8 +69,6 @@ type
     ceAbort, ceYes, ceAll, ceNo, ceNone
   Pattern = Regex | Peg
 
-using pattern: Pattern
-
 var
   filenames: seq[string] = @[]
   pattern = ""
@@ -354,7 +352,7 @@ proc doReplace(si: SearchInfo, mi: MatchInfo, i: int, r: string;
     newBuf.add(mi.match)
     inc(curLine, countLineBreaks(mi.match, 0, mi.match.len-1))
 
-proc processFile(pattern; filename: string; counter: var int, errors: var int) =
+proc processFile(pattern: Pattern; filename: string; counter: var int, errors: var int) =
   var filenameShown = false
   template beforeHighlight =
     if not filenameShown and optVerbose notin options and not oneline:
@@ -494,7 +492,7 @@ proc styleInsensitive(s: string): string =
         addx()
     else: addx()
 
-proc walker(pattern; dir: string; counter: var int, errors: var int) =
+proc walker(pattern: Pattern; dir: string; counter: var int, errors: var int) =
   if existsDir(dir):
     for kind, path in walkDir(dir):
       case kind

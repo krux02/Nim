@@ -33,9 +33,8 @@ remove all WTFs from the codebase.
 ** make every path relative to the current file (helper for it)
 ** move documentation comments to identifier/symbol properties
 ** move export marker to identifier/symbol properties
-** remove MyType.field access
 ** getTypeInst, getTypeImpl fix needs a better/compatible solution.
-** inconsistency, getType: (BracketExpr (Sym "ref") ...) vs. getTypeInst  (RefTy ...)
+** DONE inconsistency, getType: (BracketExpr (Sym "ref") ...) vs. getTypeInst  (RefTy ...)  (deprecated getType)
 ** provide ~getTypeInstSkipAlias~ as substitution of ~typetraits.genericParams~
 ** fix ~proc len*[TOpenArray: openArray|varargs](x: TOpenArray): int~ (WTF)
 ** consistent argument names in stdlib functions
@@ -56,9 +55,16 @@ remove all WTFs from the codebase.
 ** Tutorial, Nim for C++ Developers: class type member -> template with typedesc argument
 ** full c lib wrapper
 ** remove all traces on ~nOrig~
-** DONE remove ~this~ pragma
 ** wtf is up with ~cast[type(foo.bar)](expr)~? Why does it still work even after ~`type`~ is removed from ~system.nim~
+  semTypeNode returns only a PType, it should return a PNode.
 ** require argument types for macros and templates
+** remove MyType.field access
+** DONE remove ~this~ pragma
 ** DONE remove ~using~ statement
 ** remove ~ast~ based function overloading
 ** remove experimental code reordering
+** error on compile time var at runtime
+** makes pragmas importable
+** remove term rewriting macros
+** remove dot operator
+** remove pragma explain

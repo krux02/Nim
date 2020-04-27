@@ -32,7 +32,7 @@ import
   ast, strutils, trees, magicsys, options,
   nversion, msgs, idents, types, tables,
   ropes, math, passes, ccgutils, wordrecg, renderer,
-  intsets, cgmeth, lowerings, sighashes, modulegraphs, lineinfos, rodutils,
+  intsets, cgmeth, lowerings, modulegraphs, lineinfos, rodutils,
   transf, injectdestructors, sourcemap, json, sets
 
 

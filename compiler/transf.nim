@@ -21,7 +21,7 @@
 import
   options, ast, astalgo, trees, msgs,
   idents, renderer, types, semfold, magicsys, cgmeth,
-  lowerings, liftlocals,
+  lowerings,
   modulegraphs, lineinfos
 
 proc transformBody*(g: ModuleGraph, prc: PSym, cache: bool): PNode
@@ -1120,8 +1120,6 @@ proc transformBody*(g: ModuleGraph, prc: PSym, cache: bool): PNode =
     result = liftLambdas(g, prc, prc.ast[bodyPos], c.tooEarly)
     result = processTransf(c, result, prc)
     liftDefer(c, result)
-    result = liftLocalsIfRequested(prc, result, g.cache, g.config)
-
     if prc.isIterator:
       result = g.transformClosureIterator(prc, result)
 

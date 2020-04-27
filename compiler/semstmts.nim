@@ -381,25 +381,6 @@ proc makeDeref(n: PNode): PNode =
     result.add a
     t = skipTypes(baseTyp, {tyGenericInst, tyAlias, tySink, tyOwned})
 
-proc fillPartialObject(c: PContext; n: PNode; typ: PType) =
-  if n.len == 2:
-    let x = semExprWithType(c, n[0])
-    let y = considerQuotedIdent(c, n[1])
-    let obj = x.typ.skipTypes(abstractPtrs)
-    if obj.kind == tyObject and tfPartial in obj.flags:
-      let field = newSym(skField, getIdent(c.cache, y.s), obj.sym, n[1].info)
-      field.typ = skipIntLit(typ)
-      field.position = obj.n.len
-      obj.n.add newSymNode(field)
-      n[0] = makeDeref x
-      n[1] = newSymNode(field)
-      n.typ = field.typ
-    else:
-      localError(c.config, n.info, "implicit object field construction " &
-        "requires a .partial object, but got " & typeToString(obj))
-  else:
-    localError(c.config, n.info, "nkDotNode requires 2 children")
-
 proc setVarType(c: PContext; v: PSym, typ: PType) =
   if v.typ != nil and not sameTypeOrNil(v.typ, typ):
     localError(c.config, v.info, "inconsistent typing for reintroduced symbol '" &
@@ -534,11 +515,6 @@ proc semVarOrLet(c: PContext, n: PNode, symkind: TSymKind): PNode =
       message(c.config, a.info, warnEachIdentIsTuple)
 
     for j in 0..<a.len-2:
-      if a[j].kind == nkDotExpr:
-        fillPartialObject(c, a[j],
-          if a.kind != nkVarTuple: typ else: tup[j])
-        addToVarSection(c, result, n, a)
-        continue
       var v = semIdentDef(c, a[j], symkind)
       styleCheckDef(c.config, v)
       onDef(a[j].info, v)
@@ -1038,29 +1014,7 @@ proc typeDefLeftSidePass(c: PContext, typeSection: PNode, i: int) =
   checkSonsLen(typeDef, 3, c.config)
   var name = typeDef[0]
   var s: PSym
-  if name.kind == nkDotExpr and typeDef[2].kind == nkObjectTy:
-    let pkgName = considerQuotedIdent(c, name[0])
-    let typName = considerQuotedIdent(c, name[1])
-    let pkg = c.graph.packageSyms.strTableGet(pkgName)
-    if pkg.isNil or pkg.kind != skPackage:
-      localError(c.config, name.info, "unknown package name: " & pkgName.s)
-    else:
-      let typsym = pkg.tab.strTableGet(typName)
-      if typsym.isNil:
-        s = semIdentDef(c, name[1], skType)
-        onDef(name[1].info, s)
-        s.typ = newTypeS(tyObject, c)
-        s.typ.sym = s
-        s.flags.incl sfForward
-        pkg.tab.strTableAdd s
-        addInterfaceDecl(c, s)
-      elif typsym.kind == skType and sfForward in typsym.flags:
-        s = typsym
-        addInterfaceDecl(c, s)
-      else:
-        localError(c.config, name.info, typsym.name.s & " is not a type that can be forwarded")
-        s = typsym
-  else:
+  when true:
     s = semIdentDef(c, name, skType)
     onDef(name.info, s)
     s.typ = newTypeS(tyForward, c)
@@ -1072,21 +1026,6 @@ proc typeDefLeftSidePass(c: PContext, typeSection: PNode, i: int) =
         typeDefLeftSidePass(c, typeSection, i)
         return
       pragma(c, s, name[1], typePragmas)
-    if sfForward in s.flags:
-      # check if the symbol already exists:
-      let pkg = c.module.owner
-      if not isTopLevel(c) or pkg.isNil:
-        localError(c.config, name.info, "only top level types in a package can be 'package'")
-      else:
-        let typsym = pkg.tab.strTableGet(s.name)
-        if typsym != nil:
-          if sfForward notin typsym.flags or sfNoForward notin typsym.flags:
-            typeCompleted(typsym)
-            typsym.info = s.info
-          else:
-            localError(c.config, name.info, "cannot complete type '" & s.name.s & "' twice; " &
-                    "previous type completion was here: " & c.config$typsym.info)
-          s = typsym
     # add it here, so that recursive types are possible:
     if sfGenSym notin s.flags: addInterfaceDecl(c, s)
     elif s.owner == nil: s.owner = getCurrOwner(c)
@@ -1099,7 +1038,7 @@ proc typeDefLeftSidePass(c: PContext, typeSection: PNode, i: int) =
 proc typeSectionLeftSidePass(c: PContext, n: PNode) =
   # process the symbols on the left side for the whole type section, before
   # we even look at the type definitions on the right
-  for i in 0..<n.len:
+  for i in 0 ..< n.len:
     var a = n[i]
     when defined(nimsuggest):
       if c.config.cmd == cmdIdeTools:
@@ -1107,7 +1046,8 @@ proc typeSectionLeftSidePass(c: PContext, n: PNode) =
         suggestStmt(c, a)
         dec c.inTypeContext
     if a.kind == nkCommentStmt: continue
-    if a.kind != nkTypeDef: illFormedAst(a, c.config)
+    if a.kind != nkTypeDef:
+      illFormedAst(a, c.config)
     typeDefLeftSidePass(c, n, i)
 
 proc checkCovariantParamsUsages(c: PContext; genericType: PType) =

@@ -65,7 +65,7 @@ type
     wWrite, wGensym, wInject, wDirty, wInheritable, wThreadVar, wEmit,
     wAsmNoStackFrame,
     wImplicitStatic, wGlobal, wCodegenDecl, wUnchecked, wGuard, wLocks,
-    wPartial, wExplain, wLiftLocals,
+    wExplain,
 
     wAuto, wBool, wCatch, wChar, wClass, wCompl
     wConst_cast, wDefault, wDelete, wDouble, wDynamic_cast,
@@ -150,7 +150,7 @@ const
     "computedgoto", "injectstmt", "experimental",
     "write", "gensym", "inject", "dirty", "inheritable", "threadvar", "emit",
     "asmnostackframe", "implicitstatic", "global", "codegendecl", "unchecked",
-    "guard", "locks", "partial", "explain", "liftlocals",
+    "guard", "locks", "explain",
 
     "auto", "bool", "catch", "char", "class", "compl",
     "const_cast", "default", "delete", "double",
@@ -205,7 +205,6 @@ proc canonPragmaSpelling*(w: TSpecialWord): string =
   of wAsmNoStackFrame: "asmNoStackFrame"
   of wImplicitStatic: "implicitStatic"
   of wCodegenDecl: "codegenDecl"
-  of wLiftLocals: "liftLocals"
   of wLocalPassc: "localPassc"
   of wWarningAsError: "warningAsError"
   else: specialWords[w]

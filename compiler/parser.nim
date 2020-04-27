@@ -938,9 +938,8 @@ proc parsePragma(p: var TParser): PNode =
     dec p.em.doIndentMore
     dec p.em.keepIndents
 
-proc identVis(p: var TParser; allowDot=false): PNode =
+proc identVis(p: var TParser): PNode =
   #| identVis = symbol OPR?  # postfix position
-  #| identVisDot = symbol '.' optInd symbol OPR?
   var a = parseSymbol(p)
   if p.tok.tokType == tkOpr:
     when defined(nimpretty):
@@ -949,15 +948,13 @@ proc identVis(p: var TParser; allowDot=false): PNode =
     result.add(newIdentNodeP(p.tok.ident, p))
     result.add(a)
     getTok(p)
-  elif p.tok.tokType == tkDot and allowDot:
-    result = dotExpr(p, a)
   else:
     result = a
 
-proc identWithPragma(p: var TParser; allowDot=false): PNode =
+proc identWithPragma(p: var TParser): PNode =
   #| identWithPragma = identVis pragma?
   #| identWithPragmaDot = identVisDot pragma?
-  var a = identVis(p, allowDot)
+  var a = identVis(p)
   if p.tok.tokType == tkCurlyDotLe:
     result = newNodeP(nkPragmaExpr, p)
     result.add(a)
@@ -969,7 +966,6 @@ type
   TDeclaredIdentFlag = enum
     withPragma,               # identifier may have pragma
     withBothOptional          # both ':' and '=' parts are optional
-    withDot                   # allow 'var ident.ident = value'
   TDeclaredIdentFlags = set[TDeclaredIdentFlag]
 
 proc parseIdentColonEquals(p: var TParser, flags: TDeclaredIdentFlags): PNode =
@@ -983,7 +979,7 @@ proc parseIdentColonEquals(p: var TParser, flags: TDeclaredIdentFlags): PNode =
   while true:
     case p.tok.tokType
     of tkSymbol, tkAccent:
-      if withPragma in flags: a = identWithPragma(p, allowDot=withDot in flags)
+      if withPragma in flags: a = identWithPragma(p)
       else: a = parseSymbol(p)
       if a.kind == nkEmpty: return
     else: break
@@ -2057,7 +2053,7 @@ proc parseTypeDef(p: var TParser): PNode =
   #|             indAndComment? / identVisDot genericParamList? pragma '=' optInd typeDefAux
   #|             indAndComment?
   result = newNodeP(nkTypeDef, p)
-  var identifier = identVis(p, allowDot=true)
+  var identifier = identVis(p)
   var identPragma = identifier
   var pragma: PNode
   var genericParam: PNode
@@ -2106,7 +2102,7 @@ proc parseVarTuple(p: var TParser): PNode =
   optInd(p, result)
   # progress guaranteed
   while p.tok.tokType in {tkSymbol, tkAccent}:
-    var a = identWithPragma(p, allowDot=true)
+    var a = identWithPragma(p)
     result.add(a)
     if p.tok.tokType != tkComma: break
     getTok(p)
@@ -2123,13 +2119,15 @@ proc parseVariable(p: var TParser): PNode =
     eat(p, tkEquals)
     optInd(p, result)
     result.add(parseExpr(p))
-  else: result = parseIdentColonEquals(p, {withPragma, withDot})
+  else:
+    result = parseIdentColonEquals(p, {withPragma})
   result[^1] = postExprBlocks(p, result[^1])
   indAndComment(p, result)
 
 proc parseConstant(p: var TParser): PNode =
   #| constant = (varTuple / identWithPragma) (colon typeDesc)? '=' optInd expr indAndComment
-  if p.tok.tokType == tkParLe: result = parseVarTuple(p)
+  if p.tok.tokType == tkParLe:
+    result = parseVarTuple(p)
   else:
     result = newNodeP(nkConstDef, p)
     result.add(identWithPragma(p))
@@ -2141,7 +2139,6 @@ proc parseConstant(p: var TParser): PNode =
       result.add(p.emptyNode)
   eat(p, tkEquals)
   optInd(p, result)
-  #add(result, parseStmtListExpr(p))
   result.add(parseExpr(p))
   result[^1] = postExprBlocks(p, result[^1])
   indAndComment(p, result)

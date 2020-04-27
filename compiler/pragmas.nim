@@ -28,7 +28,7 @@ const
     wBorrow, wImportCompilerProc, wThread,
     wAsmNoStackFrame, wDiscardable, wNoInit, wCodegenDecl,
     wGensym, wInject, wRaises, wTags, wLocks, wDelegator, wGcSafe,
-    wConstructor, wLiftLocals, wStackTrace, wLineTrace, wNoDestroy,
+    wConstructor, wStackTrace, wLineTrace, wNoDestroy,
     wRequires, wEnsures}
   converterPragmas* = procPragmas
   methodPragmas* = procPragmas+{wBase}-{wImportCpp}
@@ -63,7 +63,7 @@ const
     wPure, wHeader, wCompilerProc, wCore, wFinal, wSize, wShallow,
     wIncompleteStruct, wByCopy, wByRef,
     wInheritable, wGensym, wInject, wRequiresInit, wUnchecked, wUnion, wPacked,
-    wBorrow, wGcSafe, wPartial, wExplain, wPackage}
+    wBorrow, wGcSafe, wExplain}
   fieldPragmas* = declPragmas + {
     wGuard, wBitsize, wCursor, wRequiresInit} - {wExportNims, wNodecl} # why exclude these?
   varPragmas* = declPragmas + {wVolatile, wRegister, wThreadVar,
@@ -190,7 +190,7 @@ proc processImportObjC(c: PContext; s: PSym, extname: string, info: TLineInfo) =
   incl(s.flags, sfNamedParamCall)
   excl(s.flags, sfForward)
   let m = s.getModule()
-  incl(m.flags, sfCompileToObjc)
+  incl(m.flags, sfCompileToObjC)
 
 proc newEmptyStrNode(c: PContext; n: PNode): PNode {.noinline.} =
   result = newNodeIT(nkStrLit, n.info, getSysType(c.graph, n.info, tyString))
@@ -959,10 +959,6 @@ proc singlePragma(c: PContext, sym: PSym, n: PNode, i: var int,
         noVal(c, it)
         if sym.typ == nil or tfFinal in sym.typ.flags: invalidPragma(c, it)
         else: incl(sym.typ.flags, tfInheritable)
-      of wPackage:
-        noVal(c, it)
-        if sym.typ == nil: invalidPragma(c, it)
-        else: incl(sym.flags, sfForward)
       of wAcyclic:
         noVal(c, it)
         if sym.typ == nil: invalidPragma(c, it)
@@ -1099,11 +1095,6 @@ proc singlePragma(c: PContext, sym: PSym, n: PNode, i: var int,
         noVal(c, it)
         if sym.kind != skType or sym.typ == nil: invalidPragma(c, it)
         else: incl(sym.typ.flags, tfByCopy)
-      of wPartial:
-        noVal(c, it)
-        if sym.kind != skType or sym.typ == nil: invalidPragma(c, it)
-        else:
-          incl(sym.typ.flags, tfPartial)
       of wInject, wGensym:
         # We check for errors, but do nothing with these pragmas otherwise
         # as they are handled directly in 'evalTemplate'.
@@ -1159,7 +1150,6 @@ proc singlePragma(c: PContext, sym: PSym, n: PNode, i: var int,
         noVal(c, it)
         if sym == nil: invalidPragma(c, it)
         else: sym.flags.incl sfUsed
-      of wLiftLocals: discard
       of wRequires, wInvariant, wAssume, wAssert:
         pragmaProposition(c, it)
       of wEnsures:

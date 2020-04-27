@@ -242,10 +242,7 @@ proc ccgIntroducedPtr(conf: ConfigRef; s: PSym, retType: PType): bool =
   elif tfByCopy in pt.flags: return false
   case pt.kind
   of tyObject:
-    if s.typ.sym != nil and sfForward in s.typ.sym.flags:
-      # forwarded objects are *always* passed by pointers for consistency!
-      result = true
-    elif (optByRef in s.options) or (getSize(conf, pt) > conf.target.floatSize * 3):
+    if (optByRef in s.options) or (getSize(conf, pt) > conf.target.floatSize * 3):
       result = true           # requested anyway
     elif retType != nil and retType.kind == tyLent:
       result = true
@@ -856,12 +853,11 @@ proc getTypeDescAux(m: BModule, origTyp: PType, check: var IntSet): Rope =
           addForwardStructFormat(m, structOrUnion(t), result)
         assert m.forwTypeCache[sig] == result
       m.typeCache[sig] = result # always call for sideeffects:
-      if not incompleteType(t):
-        let recdesc = if t.kind != tyTuple: getRecordDesc(m, t, result, check)
-                      else: getTupleDesc(m, t, result, check)
-        if not isImportedType(t):
-          m.s[cfsTypes].add(recdesc)
-        elif tfIncompleteStruct notin t.flags: addAbiCheck(m, t, result)
+      let recdesc = if t.kind != tyTuple: getRecordDesc(m, t, result, check)
+                    else: getTupleDesc(m, t, result, check)
+      if not isImportedType(t):
+        m.s[cfsTypes].add(recdesc)
+      elif tfIncompleteStruct notin t.flags: addAbiCheck(m, t, result)
   of tySet:
     # Don't use the imported name as it may be scoped: 'Foo::SomeKind'
     result = $t.kind & '_' & t.lastSon.typeName & $t.lastSon.hashType
@@ -996,11 +992,9 @@ proc genTypeInfoAux(m: BModule, typ, origType: PType, name: Rope;
   var base: Rope
   if typ.len > 0 and typ.lastSon != nil:
     var x = typ.lastSon
-    if typ.kind == tyObject: x = x.skipTypes(skipPtrs)
-    if typ.kind == tyPtr and x.kind == tyObject and incompleteType(x):
-      base = rope("0")
-    else:
-      base = genTypeInfo(m, x, info)
+    if typ.kind == tyObject:
+      x = x.skipTypes(skipPtrs)
+    base = genTypeInfo(m, x, info)
   else:
     base = rope("0")
   genTypeInfoAuxBase(m, typ, origType, name, base, info)
@@ -1093,9 +1087,6 @@ proc genObjectFields(m: BModule, typ, origType: PType, n: PNode, expr: Rope;
 
 proc genObjectInfo(m: BModule, typ, origType: PType, name: Rope; info: TLineInfo) =
   if typ.kind == tyObject:
-    if incompleteType(typ):
-      localError(m.config, info, "request for RTTI generation for incomplete object: " &
-                        typeToString(typ))
     genTypeInfoAux(m, typ, origType, name, info)
   else:
     genTypeInfoAuxBase(m, typ, origType, name, rope("0"), info)
@@ -1249,9 +1240,6 @@ proc genHook(m: BModule; t: PType; info: TLineInfo; op: TTypeAttachedOp): Rope =
 proc genTypeInfoV2(m: BModule, t, origType: PType, name: Rope; info: TLineInfo) =
   var typeName: Rope
   if t.kind == tyObject:
-    if incompleteType(t):
-      localError(m.config, info, "request for RTTI generation for incomplete object: " &
-                 typeToString(t))
     typeName = genTypeInfo2Name(m, t)
   else:
     typeName = rope("NIM_NIL")
