@@ -67,4 +67,5 @@ remove all WTFs from the codebase.
 ** makes pragmas importable
 ** remove term rewriting macros
 ** remove dot operator
-** remove pragma explain
+** explain pragma explain
+** remove special operators `.` `.=` `.()`

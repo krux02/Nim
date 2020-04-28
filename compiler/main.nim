@@ -17,12 +17,12 @@ import
   condsyms, times,
   sem, idents, passes, extccomp,
   cgen, json, nversion,
-  platform, nimconf, passaux, depends, vm, idgen,
+  platform, passaux, depends, vm, idgen,
   modules,
   modulegraphs, tables, rod, lineinfos, pathutils
 
 when not defined(leanCompiler):
-  import jsgen, docgen, docgen2
+  import jsgen, docgen, docgen2, nimconf
 
 proc semanticPasses(g: ModuleGraph) =
   registerPass g, verbosePass

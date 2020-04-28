@@ -73,7 +73,6 @@ proc genVarTuple(p: BProc, n: PNode) =
   for i in 0..<n.len-2:
     let vn = n[i]
     let v = vn.sym
-    if sfCompileTime in v.flags: continue
     var traverseProc: Rope
     if sfGlobal in v.flags:
       assignGlobalVar(p, vn, nil)
@@ -248,7 +247,12 @@ proc potentialValueInit(p: BProc; v: PSym; value: PNode): Rope =
   else:
     result = nil
 
-proc genSingleVar(p: BProc, v: PSym; vn, value: PNode) =
+proc genSingleVar(p: BProc, a: PNode) =
+  let vn = a.sons[0]
+  let v = vn.sym
+  let value = a[2]
+  if sfCompileTime in v.flags:
+    return
   if sfGoto in v.flags:
     # translate 'var state {.goto.} = X' into 'goto LX':
     genGotoVar(p, value)
@@ -318,11 +322,6 @@ proc genSingleVar(p: BProc, v: PSym; vn, value: PNode) =
   if value.kind != nkEmpty and valueAsRope == nil:
     genLineDir(targetProc, vn)
     loadInto(targetProc, vn, value, v.loc)
-
-proc genSingleVar(p: BProc, a: PNode) =
-  let v = a[0].sym
-  if sfCompileTime in v.flags: return
-  genSingleVar(p, v, a[0], a[2])
 
 proc genClosureVar(p: BProc, a: PNode) =
   var immediateAsgn = a[2].kind != nkEmpty

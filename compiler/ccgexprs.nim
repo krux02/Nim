@@ -2532,6 +2532,7 @@ proc expr(p: BProc, n: PNode, d: var TLoc) =
       #if sym.kind == skIterator:
       #  echo renderTree(sym.getBody, {renderIds})
       if sfCompileTime in sym.flags:
+        debug n
         localError(p.config, n.info, "request to generate code for .compileTime proc: " &
            sym.name.s)
       genProc(p.module, sym)
@@ -2552,10 +2553,11 @@ proc expr(p: BProc, n: PNode, d: var TLoc) =
       if {sfGlobal, sfThread} * sym.flags != {}:
         genVarPrototype(p.module, n)
         if sfCompileTime in sym.flags:
-          genSingleVar(p, sym, n, astdef(sym))
+          localError(p.config, n.info, "request to generate code for .compileTime variable: " &
+           sym.name.s)
 
       if sym.loc.r == nil or sym.loc.t == nil:
-        #echo "FAILED FOR PRCO ", p.prc.name.s
+        #echo "FAILED FOR PROC ", p.prc.name.s
         #echo renderTree(p.prc.ast, {renderIds})
         internalError p.config, n.info, "expr: var not init " & sym.name.s & "_" & $sym.id
       if sfThread in sym.flags:

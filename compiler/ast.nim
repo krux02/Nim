@@ -266,7 +266,7 @@ type
     sfShadowed,       # a symbol that was shadowed in some inner scope
     sfThread,         # proc will run as a thread
                       # variable is a thread variable
-    sfCompileTime,    # proc can be evaluated at compile time
+    sfCompileTime,    # proc/var is for compile time usage exclusively
     sfConstructor,    # proc is a C++ constructor
     sfDispatcher,     # copied method symbol is the dispatcher
                       # deprecated and unused, except for the con

@@ -1291,6 +1291,9 @@ proc genSym(p: PProc, n: PNode, r: var TCompRes) =
   var s = n.sym
   case s.kind
   of skVar, skLet, skParam, skTemp, skResult, skForVar:
+    if sfCompileTime in s.flags:
+      localError(p.config, n.info, "request to generate code for .compileTime proc: " &
+          s.name.s)
     if s.loc.r == nil:
       internalError(p.config, n.info, "symbol has no generated name: " & s.name.s)
     if sfCompileTime in s.flags:
