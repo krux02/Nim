@@ -829,17 +829,17 @@ proc semStaticExpr(c: PContext, n: PNode): PNode =
   else:
     result = fixupTypeAfterEval(c, result, a)
 
-proc semOverloadedCallAnalyseEffects(c: PContext, n: PNode, nOrig: PNode,
+proc semOverloadedCallAnalyseEffects(c: PContext, n: PNode,
                                      flags: TExprFlags): PNode =
   if flags*{efInTypeof, efWantIterator} != {}:
     # consider: 'for x in pReturningArray()' --> we don't want the restriction
     # to 'skIterator' anymore; skIterator is preferred in sigmatch already
     # for typeof support.
     # for ``type(countup(1,3))``, see ``tests/ttoseq``.
-    result = semOverloadedCall(c, n, nOrig,
+    result = semOverloadedCall(c, n,
       {skProc, skFunc, skMethod, skConverter, skMacro, skTemplate, skIterator}, flags)
   else:
-    result = semOverloadedCall(c, n, nOrig,
+    result = semOverloadedCall(c, n,
       {skProc, skFunc, skMethod, skConverter, skMacro, skTemplate}, flags)
 
   if result != nil:
@@ -858,16 +858,16 @@ proc semOverloadedCallAnalyseEffects(c: PContext, n: PNode, nOrig: PNode,
 
 proc semObjConstr(c: PContext, n: PNode, flags: TExprFlags): PNode
 
-proc resolveIndirectCall(c: PContext; n, nOrig: PNode;
+proc resolveIndirectCall(c: PContext; n: PNode;
                          t: PType): TCandidate =
   initCandidate(c, result, t)
-  matches(c, n, nOrig, result)
+  matches(c, n, result)
   if result.state != csMatch:
     # try to deref the first argument:
     if implicitDeref in c.features and canDeref(n):
       n[1] = n[1].tryDeref
       initCandidate(c, result, t)
-      matches(c, n, nOrig, result)
+      matches(c, n, result)
 
 proc bracketedMacro(n: PNode): PSym =
   if n.len >= 1 and n[0].kind == nkSym:
@@ -879,11 +879,11 @@ proc setGenericParams(c: PContext, n: PNode) =
   for i in 1..<n.len:
     n[i].typ = semTypeNode(c, n[i], nil)
 
-proc afterCallActions(c: PContext; n, orig: PNode, flags: TExprFlags): PNode =
+proc afterCallActions(c: PContext; n: PNode, flags: TExprFlags): PNode =
   result = n
   let callee = result[0].sym
   case callee.kind
-  of skMacro: result = semMacroExpr(c, result, orig, callee, flags)
+  of skMacro: result = semMacroExpr(c, result, callee, flags)
   of skTemplate: result = semTemplateExpr(c, result, callee, flags)
   else:
     semFinishOperands(c, result)
@@ -927,14 +927,13 @@ proc semIndirectOp(c: PContext, n: PNode, flags: TExprFlags): PNode =
         setGenericParams(c, n[0])
         return semDirectOp(c, n, flags)
 
-  let nOrig: PNode = if callsiteAccess in c.config.features: n.copyTree else: nil
   semOpAux(c, n)
   var t: PType = nil
   if n[0].typ != nil:
     t = skipTypes(n[0].typ, abstractInst+{tyOwned}-{tyTypeDesc, tyDistinct})
   if t != nil and t.kind == tyProc:
     # This is a proc variable, apply normal overload resolution
-    let m = resolveIndirectCall(c, n, nOrig, t)
+    let m = resolveIndirectCall(c, n, t)
     if m.state != csMatch:
       if c.config.m.errorOutputs == {}:
         # speed up error generation:
@@ -971,27 +970,24 @@ proc semIndirectOp(c: PContext, n: PNode, flags: TExprFlags): PNode =
       # XXX: hmm, what kind of symbols will end up here?
       # do we really need to try the overload resolution?
       n[0] = prc
-      if nOrig != nil: nOrig[0] = prc
       n.flags.incl nfExprCall
-      result = semOverloadedCallAnalyseEffects(c, n, nOrig, flags)
+      result = semOverloadedCallAnalyseEffects(c, n, flags)
       if result == nil: return errorNode(c, n)
     elif result.kind notin nkCallKinds:
       # the semExpr() in overloadedCallOpr can even break this condition!
       # See bug #904 of how to trigger it:
       return result
-  #result = afterCallActions(c, result, nOrig, flags)
   if result[0].kind == nkSym:
-    result = afterCallActions(c, result, nOrig, flags)
+    result = afterCallActions(c, result, flags)
   else:
     fixAbstractType(c, result)
     analyseIfAddressTakenInCall(c, result)
 
 proc semDirectOp(c: PContext, n: PNode, flags: TExprFlags): PNode =
   # this seems to be a hotspot in the compiler!
-  let nOrig: PNode = if callsiteAccess in c.config.features: n.copyTree else: nil
   #semLazyOpAux(c, n)
-  result = semOverloadedCallAnalyseEffects(c, n, nOrig, flags)
-  if result != nil: result = afterCallActions(c, result, nOrig, flags)
+  result = semOverloadedCallAnalyseEffects(c, n, flags)
+  if result != nil: result = afterCallActions(c, result, flags)
   else: result = errorNode(c, n)
 
 proc buildEchoStmt(c: PContext, n: PNode): PNode =
@@ -1170,7 +1166,7 @@ proc semSym(c: PContext, n: PNode, sym: PSym, flags: TExprFlags): PNode =
       onUse(n.info, s)
       result = symChoice(c, n, s, scClosed)
     else:
-      result = semMacroExpr(c, n, n, s, flags)
+      result = semMacroExpr(c, n, s, flags)
   of skTemplate:
     if efNoEvaluateGeneric in flags and s.ast[genericParamsPos].len > 0 or
        (n.kind notin nkCallKinds and s.requiredParams > 0) or
@@ -1537,7 +1533,7 @@ proc semSubscript(c: PContext, n: PNode, flags: TExprFlags): PNode =
           # macro or template call with generic arguments here.
           n.transitionSonsKind(nkCall)
           case s.kind
-          of skMacro: result = semMacroExpr(c, n, n, s, flags)
+          of skMacro: result = semMacroExpr(c, n, s, flags)
           of skTemplate: result = semTemplateExpr(c, n, s, flags)
           else: discard
       of skType:
@@ -1551,7 +1547,7 @@ proc semArrayAccess(c: PContext, n: PNode, flags: TExprFlags): PNode =
     # overloaded [] operator:
     result = semExpr(c, buildOverloadedSubscripts(n, getIdent(c.cache, "[]")))
 
-proc propertyWriteAccess(c: PContext, n, nOrig, a: PNode): PNode =
+proc propertyWriteAccess(c: PContext, n, a: PNode): PNode =
   var id = considerQuotedIdent(c, a[1], a)
   var setterId = newIdentNode(getIdent(c.cache, id.s & '='), n.info)
   # a[0] is already checked for semantics, that does ``builtinFieldAccess``
@@ -1559,13 +1555,10 @@ proc propertyWriteAccess(c: PContext, n, nOrig, a: PNode): PNode =
   # nodes?
   result = newNode(nkCall, n.info, sons = @[setterId, a[0], semExprWithType(c, n[1])])
   result.flags.incl nfDotSetter
-  var orig: PNode =
-    if nOrig != nil:  newNode(nkCall, n.info, sons = @[setterId, nOrig[0][0], nOrig[1]])
-    else:             nil
-  result = semOverloadedCallAnalyseEffects(c, result, orig, {})
+  result = semOverloadedCallAnalyseEffects(c, result, {})
 
   if result != nil:
-    result = afterCallActions(c, result, nOrig, {})
+    result = afterCallActions(c, result, {})
     #fixAbstractType(c, result)
     #analyseIfAddressTakenInCall(c, result)
 
@@ -1667,11 +1660,9 @@ proc semAsgn(c: PContext, n: PNode; mode=asgnNormal): PNode =
   of nkDotExpr:
     # r.f = x
     # --> `f=` (r, x)
-    let nOrig: PNode = if callsiteAccess in c.config.features: n.copyTree else: nil
-
     a = builtinFieldAccess(c, a, {efLValue})
     if a == nil:
-      a = propertyWriteAccess(c, n, nOrig, n[0])
+      a = propertyWriteAccess(c, n, n[0])
       if a != nil: return a
       # we try without the '='; proc that return 'var' or macros are still
       # possible:
@@ -2244,9 +2235,8 @@ proc semMagic(c: PContext, n: PNode, s: PSym, flags: TExprFlags): PNode =
   of mPlugin:
     markUsed(c, n.info, s)
     # semDirectOp with conditional 'afterCallActions':
-    let nOrig: PNode = if callsiteAccess in c.config.features: n.copyTree else: nil
     #semLazyOpAux(c, n)
-    result = semOverloadedCallAnalyseEffects(c, n, nOrig, flags)
+    result = semOverloadedCallAnalyseEffects(c, n, flags)
     if result == nil:
       result = errorNode(c, n)
     else:

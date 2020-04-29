@@ -56,7 +56,7 @@ proc initCandidateSymbols(c: PContext, headSymbol: PNode,
     best.state = csNoMatch
 
 proc pickBestCandidate(c: PContext, headSymbol: PNode,
-                       n, orig: PNode,
+                       n: PNode,
                        initialBinding: PNode,
                        filter: TSymKinds,
                        best, alt: var TCandidate,
@@ -92,7 +92,7 @@ proc pickBestCandidate(c: PContext, headSymbol: PNode,
     determineType(c, sym)
     initCandidate(c, z, sym, initialBinding, scope, diagnosticsFlag)
     if c.currentScope.symbols.counter == counterInitial or syms.len != 0:
-      matches(c, n, orig, z)
+      matches(c, n, z)
       if z.state == csMatch:
         #if sym.name.s == "==" and (n.info ?? "temp3"):
         #  echo typeToString(sym.typ)
@@ -335,7 +335,7 @@ proc getMsgDiagnostic(c: PContext, flags: TExprFlags, n, f: PNode): string =
     if result.len == 0: result = errUndeclaredRoutine % ident
     else: result = errBadRoutine % [ident, result]
 
-proc resolveOverloads(c: PContext, n, orig: PNode,
+proc resolveOverloads(c: PContext, n: PNode,
                       filter: TSymKinds, flags: TExprFlags,
                       errors: var CandidateErrors,
                       errorsEnabled: bool): TCandidate =
@@ -351,7 +351,7 @@ proc resolveOverloads(c: PContext, n, orig: PNode,
     initialBinding = nil
 
   template pickBest(headSymbol) =
-    pickBestCandidate(c, headSymbol, n, orig, initialBinding,
+    pickBestCandidate(c, headSymbol, n, initialBinding,
                       filter, result, alt, errors, efExplain in flags,
                       errorsEnabled)
   pickBest(f)
@@ -364,13 +364,11 @@ proc resolveOverloads(c: PContext, n, orig: PNode,
       var hiddenArg = newSymNode(c.p.selfSym)
       hiddenArg.typ = nil
       n.sons.insert(hiddenArg, 1)
-      if orig != nil: orig.sons.insert(hiddenArg, 1)
 
       pickBest(f)
 
       if result.state != csMatch:
         n.sons.delete(1)
-        if orig != nil: orig.sons.delete(1)
         excl n.flags, nfExprCall
       else: return
 
@@ -380,12 +378,9 @@ proc resolveOverloads(c: PContext, n, orig: PNode,
       # leave the op head symbol empty,
       # we are going to try multiple variants
       n.sons[0..1] = [nil, n[1], f]
-      if orig != nil: orig.sons[0..1] = [nil, orig[1], f]
-
       template tryOp(x) =
         let op = newIdentNode(getIdent(c.cache, x), n.info)
         n[0] = op
-        if orig != nil: orig[0] = op
         pickBest(op)
 
       if nfExplicitCall in n.flags:
@@ -399,7 +394,6 @@ proc resolveOverloads(c: PContext, n, orig: PNode,
       let calleeName = newIdentNode(getIdent(c.cache, f.ident.s[0..^2]), n.info)
       let callOp = newIdentNode(getIdent(c.cache, ".="), n.info)
       n.sons[0..1] = [callOp, n[1], calleeName]
-      if orig != nil: orig.sons[0..1] = [callOp, orig[1], calleeName]
       pickBest(callOp)
 
     if overloadsState == csEmpty and result.state == csEmpty:
@@ -455,7 +449,7 @@ proc instGenericConvertersSons*(c: PContext, n: PNode, x: TCandidate) =
 
 proc indexTypesMatch(c: PContext, f, a: PType, arg: PNode): PNode =
   var m = newCandidate(c, f)
-  result = paramTypesMatch(m, f, a, arg, nil)
+  result = paramTypesMatch(m, f, a, arg)
   if m.genericConverter and result != nil:
     instGenericConvertersArg(c, result, m)
 
@@ -463,7 +457,7 @@ proc inferWithMetatype(c: PContext, formal: PType,
                        arg: PNode, coerceDistincts = false): PNode =
   var m = newCandidate(c, formal)
   m.coerceDistincts = coerceDistincts
-  result = paramTypesMatch(m, formal, arg.typ, arg, nil)
+  result = paramTypesMatch(m, formal, arg.typ, arg)
   if m.genericConverter and result != nil:
     instGenericConvertersArg(c, result, m)
   if result != nil:
@@ -548,10 +542,10 @@ proc tryDeref(n: PNode): PNode =
   result.typ = n.typ.skipTypes(abstractInst)[0]
   result.add n
 
-proc semOverloadedCall(c: PContext, n, nOrig: PNode,
+proc semOverloadedCall(c: PContext, n: PNode,
                        filter: TSymKinds, flags: TExprFlags): PNode =
   var errors: CandidateErrors = @[] # if efExplain in flags: @[] else: nil
-  var r = resolveOverloads(c, n, nOrig, filter, flags, errors, efExplain in flags)
+  var r = resolveOverloads(c, n, filter, flags, errors, efExplain in flags)
   if r.state == csMatch:
     # this may be triggered, when the explain pragma is used
     if errors.len > 0:
@@ -569,7 +563,7 @@ proc semOverloadedCall(c: PContext, n, nOrig: PNode,
     # into sigmatch with hidden conversion produced there
     #
     n[1] = n[1].tryDeref
-    var r = resolveOverloads(c, n, nOrig, filter, flags, errors, efExplain in flags)
+    var r = resolveOverloads(c, n, filter, flags, errors, efExplain in flags)
     if r.state == csMatch: result = semResolvedCall(c, r, n, flags)
     else:
       # get rid of the deref again for a better error message:
@@ -578,14 +572,14 @@ proc semOverloadedCall(c: PContext, n, nOrig: PNode,
       if efExplain notin flags:
         # repeat the overload resolution,
         # this time enabling all the diagnostic output (this should fail again)
-        discard semOverloadedCall(c, n, nOrig, filter, flags + {efExplain})
+        discard semOverloadedCall(c, n, filter, flags + {efExplain})
       elif efNoUndeclared notin flags:
         notFoundError(c, n, errors)
   else:
     if efExplain notin flags:
       # repeat the overload resolution,
       # this time enabling all the diagnostic output (this should fail again)
-      discard semOverloadedCall(c, n, nOrig, filter, flags + {efExplain})
+      discard semOverloadedCall(c, n, filter, flags + {efExplain})
     elif efNoUndeclared notin flags:
       notFoundError(c, n, errors)
 
@@ -679,7 +673,7 @@ proc searchForBorrowProc(c: PContext, startScope: PScope, fn: PSym): PSym =
       x = t.baseOfDistinct
     call.add(newNodeIT(nkEmpty, fn.info, x))
   if hasDistinct:
-    var resolved = semOverloadedCall(c, call, call, {fn.kind}, {})
+    var resolved = semOverloadedCall(c, call, {fn.kind}, {})
     if resolved != nil:
       result = resolved[0].sym
       if not compareTypes(result.typ[0], fn.typ[0], dcEqIgnoreDistinct):

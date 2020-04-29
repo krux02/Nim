@@ -1,6 +1,5 @@
 discard """
   output: "Hello Alice, 64 | Hello Bob, 10$"
-cmd: "nim c --experimental:callsiteAccess $file"
 """
 
 import macros, parseutils, strutils
@@ -19,6 +18,7 @@ template processInterpolations(e) =
 
 macro formatStyleInterpolation(e: untyped): untyped =
   let e = callsite()
+  echo e.treeRepr
   var
     formatString = ""
     arrayNode = newNimNode(nnkBracket)

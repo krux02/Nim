@@ -1,5 +1,4 @@
 discard """
-cmd: "nim c --experimental:callsiteAccess $file"
 output: '''
 Got: 'nnkCall' hi
 {a}

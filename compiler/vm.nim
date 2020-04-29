@@ -1736,12 +1736,7 @@ proc rawExecute(c: PCtx, start: int, tos: PStackFrame): TFullReg =
       c.errorFlag.setLen 0
     of opcCallSite:
       ensureKind(rkNode)
-      if callsiteAccess in c.config.features:
-        if c.callsite != nil: regs[ra].node = c.callsite
-        else: stackTrace(c, tos, pc, errFieldXNotFound & "callsite")
-      else:
-        stackTrace(c, tos, pc, "Access to callsite requires compilation flag `--experimental:callsiteAccess`.")
-
+      regs[ra].node = c.callsite
     of opcNGetLineInfo:
       decodeBImm(rkNode)
       let n = regs[rb].node
@@ -2211,7 +2206,7 @@ proc errorNode(owner: PSym, n: PNode): PNode =
   result.typ.flags.incl tfCheckedForDestructor
 
 proc evalMacroCall*(module: PSym; g: ModuleGraph;
-                    n, nOrig: PNode, sym: PSym): PNode =
+                    n: PNode, sym: PSym): PNode =
   if g.config.errorCounter > 0: return errorNode(module, n)
 
   # XXX globalError() is ugly here, but I don't know a better solution for now
@@ -2230,7 +2225,7 @@ proc evalMacroCall*(module: PSym; g: ModuleGraph;
   let oldMode = c.mode
   c.mode = emStaticStmt
   c.comesFromHeuristic.line = 0'u16
-  c.callsite = nOrig
+  c.callsite = n
   let start = genProc(c, sym)
 
   var tos = PStackFrame(prc: sym, comesFrom: 0, next: nil)

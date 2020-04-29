@@ -54,8 +54,8 @@ remove all WTFs from the codebase.
 ** fix literals of type ~int~
 ** Tutorial, Nim for C++ Developers: class type member -> template with typedesc argument
 ** full c lib wrapper
-** remove all traces on ~nOrig~
-** wtf is up with ~cast[type(foo.bar)](expr)~? Why does it still work even after ~`type`~ is removed from ~system.nim~
+** DONE remove all traces on ~nOrig~
+** wtf is up with ~cast[type(foo.bar)](expr)~? Why does it still work even after ~type~ is removed from ~system.nim~
   semTypeNode returns only a PType, it should return a PNode.
 ** require argument types for macros and templates
 ** remove MyType.field access
@@ -68,4 +68,6 @@ remove all WTFs from the codebase.
 ** remove term rewriting macros
 ** remove dot operator
 ** explain pragma explain
-** remove special operators `.` `.=` `.()`
+** remove special operators ~.~ ~.=~ ~.()~
+** make sure, ~typed~ doesn't mean ~void~ in macro/templates anymore.
+** testament run test/does/not/exist is a warning not an error

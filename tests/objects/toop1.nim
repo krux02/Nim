@@ -1,6 +1,5 @@
 discard """
 output: "34[]o 5"
-cmd: "nim c --experimental:callsiteAccess $file"
 """
 # Test the stuff in the tutorial
 import macros
@@ -36,24 +35,23 @@ proc init(my: var TRectangle) =
   my.draw = cast[proc (my: var TFigure) {.nimcall.}](drawRectangle)
 
 macro `!` (n: varargs[untyped]): typed =
-  let n = callsite()
-  result = newNimNode(nnkCall, n)
-  var dot = newNimNode(nnkDotExpr, n)
-  dot.add(n[1])    # obj
-  if n[2].kind == nnkCall:
+  result = newNimNode(nnkCall, callsite())
+  var dot = newNimNode(nnkDotExpr, callsite())
+  dot.add(n[0])    # obj
+  if n[1].kind == nnkCall:
     # transforms ``obj!method(arg1, arg2, ...)`` to
     # ``(obj.method)(obj, arg1, arg2, ...)``
-    dot.add(n[2][0]) # method
+    dot.add(n[1][0]) # method
     result.add(dot)
-    result.add(n[1]) # obj
-    for i in 1..n[2].len-1:
-      result.add(n[2][i])
+    result.add(n[0]) # obj
+    for i in 1..n[1].len-1:
+      result.add(n[1][i])
   else:
     # transforms ``obj!method`` to
     # ``(obj.method)(obj)``
-    dot.add(n[2]) # method
+    dot.add(n[1]) # method
     result.add(dot)
-    result.add(n[1]) # obj
+    result.add(n[0]) # obj
 
 type
   TSocket* = object of RootObj

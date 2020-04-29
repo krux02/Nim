@@ -31,7 +31,7 @@ This changelog contains all changes that are specific to the krux-nim branch
   `nnkTupleConstr` node. Will affect macros expecting tuples to be of
   kind `nnkPar`.
 - Custom pragma values have now an API for use in macros.
-- callsite has been disabled by default
+- macros.callsite() works again by default and returns a typechecked ast now.
 
 ## Compiler changes
 

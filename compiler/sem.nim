@@ -249,7 +249,7 @@ proc semDirectOp(c: PContext, n: PNode, flags: TExprFlags): PNode
 proc semWhen(c: PContext, n: PNode, semCheck: bool = true): PNode
 proc semTemplateExpr(c: PContext, n: PNode, s: PSym,
                      flags: TExprFlags = {}): PNode
-proc semMacroExpr(c: PContext, n, nOrig: PNode, sym: PSym,
+proc semMacroExpr(c: PContext, n: PNode, sym: PSym,
                   flags: TExprFlags = {}): PNode
 
 proc symFromType(c: PContext; t: PType, info: TLineInfo): PSym =
@@ -450,7 +450,7 @@ const
   errMissingGenericParamsForTemplate = "'$1' has unspecified generic parameters"
   errFloatToString = "cannot convert '$1' to '$2'"
 
-proc semMacroExpr(c: PContext, n, nOrig: PNode, sym: PSym,
+proc semMacroExpr(c: PContext, n: PNode, sym: PSym,
                   flags: TExprFlags = {}): PNode =
   pushInfoContext(c.config, n.info, sym.detailedInfo)
 
@@ -468,7 +468,7 @@ proc semMacroExpr(c: PContext, n, nOrig: PNode, sym: PSym,
 
   #if c.evalContext == nil:
   #  c.evalContext = c.createEvalContext(emStatic)
-  result = evalMacroCall(c.module, c.graph, n, nOrig, sym)
+  result = evalMacroCall(c.module, c.graph, n, sym)
   if efNoSemCheck notin flags:
     result = semAfterMacroCall(c, n, result, sym, flags)
   if c.config.macrosToExpand.hasKey(sym.name.s):

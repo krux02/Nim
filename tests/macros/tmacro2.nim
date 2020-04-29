@@ -1,6 +1,5 @@
 discard """
 output: "ta-da Your value sir: 'HE!!!!o Wor!!d'"
-cmd: "nim c --experimental:callsiteAccess $file"
 """
 
 import macros, strutils

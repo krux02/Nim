@@ -2532,7 +2532,6 @@ proc expr(p: BProc, n: PNode, d: var TLoc) =
       #if sym.kind == skIterator:
       #  echo renderTree(sym.getBody, {renderIds})
       if sfCompileTime in sym.flags:
-        debug n
         localError(p.config, n.info, "request to generate code for .compileTime proc: " &
            sym.name.s)
       genProc(p.module, sym)
