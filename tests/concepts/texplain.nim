@@ -13,12 +13,12 @@ proc e(o: ExplainedConcept): int
   required type for o: ExplainedConcept
   but expression '10' is of type: int literal(10)
 texplain.nim(124, 6) ExplainedConcept: undeclared field: 'foo'
-texplain.nim(124, 6) ExplainedConcept: undeclared field: '.'
-texplain.nim(124, 6) ExplainedConcept: expression '.' cannot be called
+texplain.nim(124, 6) ExplainedConcept: undeclared field: 'foo'
+texplain.nim(124, 6) ExplainedConcept: expression 'foo' cannot be called
 texplain.nim(124, 5) ExplainedConcept: concept predicate failed
 texplain.nim(125, 6) ExplainedConcept: undeclared field: 'bar'
-texplain.nim(125, 6) ExplainedConcept: undeclared field: '.'
-texplain.nim(125, 6) ExplainedConcept: expression '.' cannot be called
+texplain.nim(125, 6) ExplainedConcept: undeclared field: 'bar'
+texplain.nim(125, 6) ExplainedConcept: expression 'bar' cannot be called
 texplain.nim(124, 5) ExplainedConcept: concept predicate failed
 
 texplain.nim(164, 10) Hint: Non-matching candidates for e(10)
@@ -27,12 +27,12 @@ proc e(o: ExplainedConcept): int
   required type for o: ExplainedConcept
   but expression '10' is of type: int literal(10)
 texplain.nim(124, 6) ExplainedConcept: undeclared field: 'foo'
-texplain.nim(124, 6) ExplainedConcept: undeclared field: '.'
-texplain.nim(124, 6) ExplainedConcept: expression '.' cannot be called
+texplain.nim(124, 6) ExplainedConcept: undeclared field: 'foo'
+texplain.nim(124, 6) ExplainedConcept: expression 'foo' cannot be called
 texplain.nim(124, 5) ExplainedConcept: concept predicate failed
 texplain.nim(125, 6) ExplainedConcept: undeclared field: 'bar'
-texplain.nim(125, 6) ExplainedConcept: undeclared field: '.'
-texplain.nim(125, 6) ExplainedConcept: expression '.' cannot be called
+texplain.nim(125, 6) ExplainedConcept: undeclared field: 'bar'
+texplain.nim(125, 6) ExplainedConcept: expression 'bar' cannot be called
 texplain.nim(124, 5) ExplainedConcept: concept predicate failed
 
 texplain.nim(168, 20) Error: type mismatch: got <NonMatchingType>
@@ -84,12 +84,12 @@ proc f(o: NestedConcept)
   required type for o: NestedConcept
   but expression 'y' is of type: MatchingType
 texplain.nim(128, 6) RegularConcept: undeclared field: 'foo'
-texplain.nim(128, 6) RegularConcept: undeclared field: '.'
-texplain.nim(128, 6) RegularConcept: expression '.' cannot be called
+texplain.nim(128, 6) RegularConcept: undeclared field: 'foo'
+texplain.nim(128, 6) RegularConcept: expression 'foo' cannot be called
 texplain.nim(128, 5) RegularConcept: concept predicate failed
 texplain.nim(129, 6) RegularConcept: undeclared field: 'bar'
-texplain.nim(129, 6) RegularConcept: undeclared field: '.'
-texplain.nim(129, 6) RegularConcept: expression '.' cannot be called
+texplain.nim(129, 6) RegularConcept: undeclared field: 'bar'
+texplain.nim(129, 6) RegularConcept: expression 'bar' cannot be called
 texplain.nim(128, 5) RegularConcept: concept predicate failed
 texplain.nim(132, 5) NestedConcept: concept predicate failed
 
