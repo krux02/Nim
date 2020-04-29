@@ -133,7 +133,6 @@ type
 
   Feature* = enum  ## experimental features; DO NOT RENAME THESE!
     implicitDeref,
-    dotOperators,
     callOperator,
     parallel,
     destructor,
@@ -323,7 +322,7 @@ template depConfigFields*(fn) {.dirty.} =
   fn(globalOptions)
   fn(selectedGC)
 
-const oldExperimentalFeatures* = {implicitDeref, dotOperators, callOperator, parallel}
+const oldExperimentalFeatures* = {implicitDeref, callOperator, parallel}
 
 const
   ChecksOptions* = {optObjCheck, optFieldCheck, optRangeCheck, optNilCheck,

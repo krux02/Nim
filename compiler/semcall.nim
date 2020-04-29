@@ -372,30 +372,6 @@ proc resolveOverloads(c: PContext, n: PNode,
         excl n.flags, nfExprCall
       else: return
 
-    if nfDotField in n.flags:
-      internalAssert c.config, f.kind == nkIdent and n.len >= 2
-
-      # leave the op head symbol empty,
-      # we are going to try multiple variants
-      n.sons[0..1] = [nil, n[1], f]
-      template tryOp(x) =
-        let op = newIdentNode(getIdent(c.cache, x), n.info)
-        n[0] = op
-        pickBest(op)
-
-      if nfExplicitCall in n.flags:
-        tryOp ".()"
-
-      if result.state in {csEmpty, csNoMatch}:
-        tryOp "."
-
-    elif nfDotSetter in n.flags and f.kind == nkIdent and n.len == 3:
-      # we need to strip away the trailing '=' here:
-      let calleeName = newIdentNode(getIdent(c.cache, f.ident.s[0..^2]), n.info)
-      let callOp = newIdentNode(getIdent(c.cache, ".="), n.info)
-      n.sons[0..1] = [callOp, n[1], calleeName]
-      pickBest(callOp)
-
     if overloadsState == csEmpty and result.state == csEmpty:
       if efNoUndeclared notin flags: # for tests/pragmas/tcustom_pragma.nim
         localError(c.config, n.info, getMsgDiagnostic(c, flags, n, f))
