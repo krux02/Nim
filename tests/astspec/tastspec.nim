@@ -284,7 +284,6 @@ static:
   scope:
     # The addr operator exists only on a typed ast.
     macro testAddrOperator(ast: untyped): untyped =
-      echo ast.treeRepr
       ast.matchAst(err):
       of nnkAddr(ident"x"):
         echo "old nim"
@@ -345,6 +344,7 @@ static:
       (a: 1, b: 2, c: 3)
       (1,)
       (a: 1)
+      ()
 
     for it in ast:
       echo it.lispRepr
@@ -361,6 +361,30 @@ static:
         echo "one tuple ok"
       of nnkTupleConstr(nnkExprColonExpr(ident"a", nnkIntLit(intVal = 1))):
         echo "named one tuple ok"
+      of nnkTupleConstr():
+        echo "empty tuple ok"
+
+    let ast2 = myQuote:
+      var
+        tmp1: ()
+        tmp2: (float) # not a tuple type
+        tmp3: (string,)
+        tmp4: (int, float, string)
+        tmp5: (int, float, string,)
+
+    for it in ast2:
+      it[1].matchAst:
+      of nnkTupleConstr():
+        echo "empty tuple in type ok"
+      of nnkPar(ident"float"):
+        echo "parens in type ok"
+      of nnkTupleConstr(ident"string"):
+        echo "one tuple in type ok"
+      of nnkTupleConstr(ident"int", ident"float", ident"string"):
+        echo "tuple in type ok"
+      of nnkTupleConstr(ident"int", ident"float", ident"string"):
+        echo "tuple with comma in type ok"
+
 
   ## Curly braces
 
@@ -964,7 +988,7 @@ static:
     let ast = astX.peelOff({nnkStmtList, nnkTypeSection})
 
     ast.matchAst(err):  # this is a sub ast for this a findAst or something like that is useful
-    of nnkTypeDef(_, nnkGenericParams( nnkIdentDefs( ident"T", nnkCall( ident"[]", ident"static", _ ), _ )), _):
+    of nnkTypeDef(_, nnkGenericParams( nnkIdentDefs( ident"T", nnkBracketExpr(ident"static", _ ), _ )), _):
       echo "ok"
     else:
       echo "foobar"

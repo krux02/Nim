@@ -4,7 +4,6 @@ reports. Deprecated features won't stay for long. The goal is to
 remove all WTFs from the codebase.
 
 * TODO
-** inject base type fields into node (make iterating fields easier).
 ** DONE use nnkTupleConstr consistently (replace nnkPar where necessary)
 ** raise error on union at compile time
 ** add entry to tutorial about init pattern (inheritable types should provide init and newMyType)
@@ -70,3 +69,6 @@ remove all WTFs from the codebase.
 ** DONE remove special operators ~.~ ~.=~ ~.()~
 ** DONE make sure, ~typed~ doesn't mean ~void~ in macro/templates anymore.
 ** testament run test/does/not/exist is a warning not an error
+** make ~not~ a normal identifier (not an operator)
+** inject base type fields into node (make iterating fields easier).
+** reintroduce ~abort~

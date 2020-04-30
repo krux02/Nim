@@ -428,6 +428,10 @@ proc exprColonEqExprListAux(p: var TParser, endTok: TTokType, result: PNode) =
       result.transitionSonsKind(nkTupleConstr)
     getTok(p)
     skipComment(p, a)
+  # () produces an empty tuple expression
+  if result.len == 0 and result.kind == nkPar:
+    result.transitionSonsKind(nkTupleConstr)
+
   optPar(p)
   eat(p, endTok)
 
@@ -603,6 +607,9 @@ proc parsePar(p: var TParser): PNode =
           if p.tok.tokType != tkComma: break
           getTok(p)
           skipComment(p, a)
+  # () produces an empty tuple expression
+  if result.len == 0 and result.kind == nkPar:
+    result.transitionSonsKind(nkTupleConstr)
   optPar(p)
   eat(p, tkParRi)
 
