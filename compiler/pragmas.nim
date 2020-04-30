@@ -330,7 +330,7 @@ proc processDynLib(c: PContext, n: PNode, sym: PSym) =
       sym.typ.callConv = ccCDecl
 
 proc processNote(c: PContext, n: PNode) =
-  template handleNote(toStrArray, msgMin, notes) =
+  template handleNote(toStrArray, msgMin, notes: untyped) =
     let x = findStr(toStrArray, n[0][1].ident.s)
     if x >= 0:
       nk = TNoteKind(x + ord(msgMin))

@@ -60,7 +60,7 @@ proc isArrayConstr(n: PNode): bool {.inline.} =
   result = n.kind == nkBracket and
     n.typ.skipTypes(abstractInst).kind == tyArray
 
-template semIdeForTemplateOrGenericCheck(conf, n, requiresCheck) =
+template semIdeForTemplateOrGenericCheck(conf, n, requiresCheck: untyped) =
   # we check quickly if the node is where the cursor is
   when defined(nimsuggest):
     if n.info.fileIndex == conf.m.trackPos.fileIndex and n.info.line == conf.m.trackPos.line:

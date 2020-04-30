@@ -563,7 +563,7 @@ proc internalError*(conf: ConfigRef; errMsg: string) =
   writeContext(conf, unknownLineInfo)
   rawMessage(conf, errInternal, errMsg)
 
-template assertNotNil*(conf: ConfigRef; e): untyped =
+template assertNotNil*(conf: ConfigRef; e: untyped): untyped =
   if e == nil: internalError(conf, $instantiationInfo())
   e
 

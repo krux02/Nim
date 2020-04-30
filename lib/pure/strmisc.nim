@@ -32,7 +32,7 @@ proc expandTabs*(s: string, tabSize: int = 8): string {.noSideEffect,
   result = newStringOfCap(s.len + s.len shr 2)
   var pos = 0
 
-  template addSpaces(n) =
+  template addSpaces(n: untyped) =
     for j in 0 ..< n:
       result.add(' ')
       pos += 1

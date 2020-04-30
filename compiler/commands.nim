@@ -12,7 +12,7 @@
 
 # We do this here before the 'import' statement so 'defined' does not get
 # confused with 'TGCMode.gcGenerational' etc.
-template bootSwitch(name, expr, userString) =
+template bootSwitch(name, expr, userString: untyped) =
   # Helper to build boot constants, for debugging you can 'echo' the else part.
   const name = if expr: " " & userString else: ""
 

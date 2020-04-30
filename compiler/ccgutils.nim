@@ -67,7 +67,7 @@ proc mangle*(name: string): string =
     result.add("X" & name[0])
     start = 1
   var requiresUnderscore = false
-  template special(x) =
+  template special(x: untyped) =
     result.add x
     requiresUnderscore = true
   for i in start..<name.len:

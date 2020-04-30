@@ -202,7 +202,7 @@ proc possibleAliases(w: var W; result: var seq[ptr TSym]) =
   # by a smarter data-structure but we wait until profiling shows us it's
   # expensive. Usually 'w.assignments' is small enough.
   var alreadySeen = initIntSet()
-  template addNoDup(x) =
+  template addNoDup(x: untyped) =
     if not alreadySeen.containsOrIncl(x.id): result.add x
   for x in result: alreadySeen.incl x.id
 

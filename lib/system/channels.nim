@@ -340,7 +340,7 @@ proc rawRecv(q: PRawChannel, data: pointer, typ: PNimType) =
     copyMem(data, addr(q.data[q.rd * typ.size]), typ.size)
   q.rd = (q.rd + 1) and q.mask
 
-template lockChannel(q, action): untyped =
+template lockChannel(q, action: untyped): untyped =
   acquireSys(q.lock)
   action
   releaseSys(q.lock)

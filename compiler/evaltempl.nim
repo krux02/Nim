@@ -27,7 +27,7 @@ proc copyNode(ctx: TemplCtx, a, b: PNode): PNode =
   if ctx.instLines: result.info = b.info
 
 proc evalTemplateAux(templ, actual: PNode, c: var TemplCtx, result: PNode) =
-  template handleParam(param) =
+  template handleParam(param: untyped) =
     let x = param
     if x.kind == nkArgList:
       for y in items(x): result.add(y)

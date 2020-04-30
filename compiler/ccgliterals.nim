@@ -15,7 +15,7 @@
 ## The price is that seqs and strings are not purely a library
 ## implementation.
 
-template detectVersion(field, corename) =
+template detectVersion(field, corename: untyped) =
   if m.g.field == 0:
     let core = getCompilerProc(m.g.graph, corename)
     if core == nil or core.kind != skConst:

@@ -220,8 +220,8 @@ proc stableName(c: DrnimContext; n: PNode; version: VersionScope;
                 isOld = false): string =
   stableName(result, c, n, version, isOld)
 
-template allScopes(c): untyped = VersionScope(c.varVersions.len)
-template currentScope(c): untyped = VersionScope(c.varVersions.len)
+template allScopes(c: untyped): untyped = VersionScope(c.varVersions.len)
+template currentScope(c: untyped): untyped = VersionScope(c.varVersions.len)
 
 proc notImplemented(msg: string) {.noinline.} =
   when defined(debug):
@@ -252,7 +252,7 @@ proc typeToZ3(c: DrCon; t: PType): Z3_sort =
   else:
     notImplemented(typeToString(t))
 
-template binary(op, a, b): untyped =
+template binary(op, a, b: untyped): untyped =
   var arr = [a, b]
   op(ctx, cuint(2), addr(arr[0]))
 
@@ -270,7 +270,7 @@ proc nodeToDomain(c: var DrCon; n, q: PNode; opAnd: PSym): PNode =
   else:
     notImplemented($n)
 
-template quantorToZ3(fn) {.dirty.} =
+template quantorToZ3(fn: untyped) {.dirty.} =
   template ctx: untyped = c.up.z3
 
   var bound = newSeq[Z3_app](n.len-2)
@@ -307,7 +307,7 @@ proc paramName(c: DrnimContext; n: PNode): string =
 
 proc nodeToZ3(c: var DrCon; n: PNode; scope: VersionScope; vars: var seq[PNode]): Z3_ast =
   template ctx: untyped = c.up.z3
-  template rec(n): untyped = nodeToZ3(c, n, scope, vars)
+  template rec(n: untyped): untyped = nodeToZ3(c, n, scope, vars)
   case n.kind
   of nkSym:
     let key = if c.canonParameterNames: paramName(c.up, n) else: stableName(c.up, n, scope)

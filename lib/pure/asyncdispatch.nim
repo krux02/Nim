@@ -723,7 +723,7 @@ when defined(windows) or defined(nimdoc):
     let dwLocalAddressLength = DWORD(sizeof(Sockaddr_in6) + 16)
     let dwRemoteAddressLength = DWORD(sizeof(Sockaddr_in6) + 16)
 
-    template failAccept(errcode) =
+    template failAccept(errcode: untyped) =
       if flags.isDisconnectionError(errcode):
         var newAcceptFut = acceptAddr(socket, flags)
         newAcceptFut.callback =
@@ -931,7 +931,7 @@ when defined(windows) or defined(nimdoc):
     registerWaitableEvent(fd, cb, FD_WRITE or FD_CONNECT or FD_CLOSE)
 
   template registerWaitableHandle(p, hEvent, flags, pcd, timeout,
-                                  handleCallback) =
+                                  handleCallback: untyped) =
     let handleFD = AsyncFD(hEvent)
     pcd.ioPort = p.ioPort
     pcd.handleFd = handleFD
@@ -1579,7 +1579,7 @@ proc poll*(timeout = 500) =
   ## `epoll`:idx: or `kqueue`:idx: primitive only once.
   discard runOnce(timeout)
 
-template createAsyncNativeSocketImpl(domain, sockType, protocol) =
+template createAsyncNativeSocketImpl(domain, sockType, protocol: untyped) =
   let handle = createNativeSocket(domain, sockType, protocol)
   if handle == osInvalidSocket:
     return osInvalidSocket.AsyncFD
@@ -1612,7 +1612,7 @@ when defined(windows) or defined(nimdoc):
   proc bindToDomain(handle: SocketHandle, domain: Domain) =
     # Extracted into a separate proc, because connect() on Windows requires
     # the socket to be initially bound.
-    template doBind(saddr) =
+    template doBind(saddr: untyped) =
       if bindAddr(handle, cast[ptr SockAddr](addr(saddr)),
                   sizeof(saddr).SockLen) < 0'i32:
         raiseOSError(osLastError())

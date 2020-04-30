@@ -611,7 +611,7 @@ proc procTypeRel(c: var TCandidate, f, a: PType): TTypeRelation =
     result = isEqual      # start with maximum; also correct for no
                           # params at all
 
-    template checkParam(f, a) =
+    template checkParam(f, a: untyped) =
       result = minRel(result, procParamTypeRel(c, f, a))
       if result == isNone: return
 
@@ -708,7 +708,7 @@ proc matchUserTypeClass*(m: var TCandidate; ff, a: PType): PType =
 
       if alreadyBound != nil: typ = alreadyBound
 
-      template paramSym(kind): untyped =
+      template paramSym(kind: untyped): untyped =
         newSym(kind, typeParamName, typeClass.sym, typeClass.sym.info, {})
 
       block addTypeParam:
@@ -951,7 +951,7 @@ proc isCovariantPtr(c: var TCandidate, f, a: PType): bool =
 when false:
   proc maxNumericType(prev, candidate: PType): PType =
     let c = candidate.skipTypes({tyRange})
-    template greater(s) =
+    template greater(s: untyped) =
       if c.kind in s: result = c
     case prev.kind
     of tyInt: greater({tyInt64})
@@ -968,7 +968,7 @@ when false:
     of tyFloat64: greater({tyFloat128})
     else: discard
 
-template skipOwned(a) =
+template skipOwned(a: untyped) =
   if a.kind == tyOwned: a = a.skipTypes({tyOwned, tyGenericInst})
 
 proc typeRel(c: var TCandidate, f, aOrig: PType,
@@ -1062,7 +1062,7 @@ proc typeRel(c: var TCandidate, f, aOrig: PType,
   if a.isResolvedUserTypeClass:
     return typeRel(c, f, a.lastSon)
 
-  template bindingRet(res) =
+  template bindingRet(res: untyped) =
     if doBind:
       let bound = aOrig.skipTypes({tyRange}).skipIntLit
       put(c, f, bound)
@@ -2294,7 +2294,7 @@ proc incrIndexType(t: PType) =
   assert t.kind == tyArray
   inc t[0].n[1].intVal
 
-template isVarargsUntyped(x): untyped =
+template isVarargsUntyped(x: untyped): untyped =
   x.kind == tyVarargs and x[0].kind == tyUntyped
 
 proc matchesAux(c: PContext, n: PNode,
@@ -2661,11 +2661,11 @@ tests:
     setup:
       var c = newCandidate(nil, nil)
 
-    template yes(x, y) =
+    template yes(x, y: untyped) =
       test astToStr(x) & " is " & astToStr(y):
         check typeRel(c, y, x) == isGeneric
 
-    template no(x, y) =
+    template no(x, y: untyped) =
       test astToStr(x) & " is not " & astToStr(y):
         check typeRel(c, y, x) == isNone
 

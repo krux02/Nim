@@ -240,7 +240,7 @@ block tbugs:
 
 
 # bug #11131
-macro toRendererBug(n): untyped =
+macro toRendererBug(n: untyped): untyped =
   result = newLit repr(n)
 
 echo toRendererBug(0o377'i8)

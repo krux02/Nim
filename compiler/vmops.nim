@@ -20,68 +20,68 @@ from times import cpuTime
 
 from hashes import hash
 
-template mathop(op) {.dirty.} =
+template mathop(op: untyped) {.dirty.} =
   registerCallback(c, "stdlib.math." & astToStr(op), `op Wrapper`)
 
-template osop(op) {.dirty.} =
+template osop(op: untyped) {.dirty.} =
   registerCallback(c, "stdlib.os." & astToStr(op), `op Wrapper`)
 
-template timesop(op) {.dirty.} =
+template timesop(op: untyped) {.dirty.} =
   registerCallback(c, "stdlib.times." & astToStr(op), `op Wrapper`)
 
-template systemop(op) {.dirty.} =
+template systemop(op: untyped) {.dirty.} =
   registerCallback(c, "stdlib.system." & astToStr(op), `op Wrapper`)
 
-template ioop(op) {.dirty.} =
+template ioop(op: untyped) {.dirty.} =
   registerCallback(c, "stdlib.io." & astToStr(op), `op Wrapper`)
 
-template macrosop(op) {.dirty.} =
+template macrosop(op: untyped) {.dirty.} =
   registerCallback(c, "stdlib.macros." & astToStr(op), `op Wrapper`)
 
-template md5op(op) {.dirty.} =
+template md5op(op: untyped) {.dirty.} =
   registerCallback(c, "stdlib.md5." & astToStr(op), `op Wrapper`)
 
-template wrap1f_math(op) {.dirty.} =
+template wrap1f_math(op: untyped) {.dirty.} =
   proc `op Wrapper`(a: VmArgs) {.nimcall.} =
     setResult(a, op(getFloat(a, 0)))
   mathop op
 
-template wrap2f_math(op) {.dirty.} =
+template wrap2f_math(op: untyped) {.dirty.} =
   proc `op Wrapper`(a: VmArgs) {.nimcall.} =
     setResult(a, op(getFloat(a, 0), getFloat(a, 1)))
   mathop op
 
-template wrap0(op, modop) {.dirty.} =
+template wrap0(op, modop: untyped) {.dirty.} =
   proc `op Wrapper`(a: VmArgs) {.nimcall.} =
     setResult(a, op())
   modop op
 
-template wrap1s(op, modop) {.dirty.} =
+template wrap1s(op, modop: untyped) {.dirty.} =
   proc `op Wrapper`(a: VmArgs) {.nimcall.} =
     setResult(a, op(getString(a, 0)))
   modop op
 
-template wrap2s(op, modop) {.dirty.} =
+template wrap2s(op, modop: untyped) {.dirty.} =
   proc `op Wrapper`(a: VmArgs) {.nimcall.} =
     setResult(a, op(getString(a, 0), getString(a, 1)))
   modop op
 
-template wrap2si(op, modop) {.dirty.} =
+template wrap2si(op, modop: untyped) {.dirty.} =
   proc `op Wrapper`(a: VmArgs) {.nimcall.} =
     setResult(a, op(getString(a, 0), getInt(a, 1)))
   modop op
 
-template wrap1svoid(op, modop) {.dirty.} =
+template wrap1svoid(op, modop: untyped) {.dirty.} =
   proc `op Wrapper`(a: VmArgs) {.nimcall.} =
     op(getString(a, 0))
   modop op
 
-template wrap2svoid(op, modop) {.dirty.} =
+template wrap2svoid(op, modop: untyped) {.dirty.} =
   proc `op Wrapper`(a: VmArgs) {.nimcall.} =
     op(getString(a, 0), getString(a, 1))
   modop op
 
-template wrapDangerous(op, modop) {.dirty.} =
+template wrapDangerous(op, modop: untyped) {.dirty.} =
   proc `op Wrapper`(a: VmArgs) {.nimcall.} =
     if defined(nimsuggest) or c.config.cmd == cmdCheck:
       discard

@@ -74,7 +74,7 @@ when defined(nimTypeNames):
 
     outOfMemHook = oomhandler
 
-template decTypeSize(cell, t) =
+template decTypeSize(cell, t: untyped) =
   when defined(nimTypeNames):
     if t.kind in {tyString, tySequence}:
       let cap = cast[PGenericSeq](cellToUsr(cell)).space
@@ -88,7 +88,7 @@ template decTypeSize(cell, t) =
       atomicDec t.sizes, t.base.size+sizeof(Cell)
     atomicDec t.instances
 
-template incTypeSize(typ, size) =
+template incTypeSize(typ, size: untyped) =
   when defined(nimTypeNames):
     atomicInc typ.instances
     atomicInc typ.sizes, size+sizeof(Cell)
@@ -429,7 +429,7 @@ proc deallocHeap*(runFinalizers = true; allowGcAfterwards = true) =
   ## is true. If ``allowGcAfterwards`` is true, a minimal amount of allocation
   ## happens to ensure the GC can continue to work after the call
   ## to ``deallocHeap``.
-  template deallocCell(x) =
+  template deallocCell(x: untyped) =
     if isCell(x):
       # cast to PCell is correct here:
       prepareDealloc(cast[PCell](x))

@@ -8,7 +8,7 @@ proc sortedPairs[T](t: T): auto = toSeq(t.pairs).sorted
 template sortedItems(t: untyped): untyped = sorted(toSeq(t))
 
 block: # we use HashSet as groundtruth, it's well tested elsewhere
-  template testDel(t, t0) =
+  template testDel(t, t0: untyped) =
 
     template checkEquals() =
       doAssert t.len == t0.len
@@ -19,11 +19,11 @@ block: # we use HashSet as groundtruth, it's well tested elsewhere
 
       doAssert sortedItems(t) == sortedItems(t0)
 
-    template incl2(i) =
+    template incl2(i: untyped) =
       t.incl i
       t0.incl i
 
-    template excl2(i) =
+    template excl2(i: untyped) =
       t.excl i
       t0.excl i
 

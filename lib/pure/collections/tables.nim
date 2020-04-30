@@ -245,8 +245,8 @@ const
 
 # Do NOT move these to tableimpl.nim, because sharedtables uses that
 # file and has its own implementation.
-template maxHash(t): untyped = high(t.data)
-template dataLen(t): untyped = len(t.data)
+template maxHash(t: untyped): untyped = high(t.data)
+template dataLen(t: untyped): untyped = len(t.data)
 
 template checkIfInitialized() =
   if t.dataLen == 0:
@@ -254,7 +254,7 @@ template checkIfInitialized() =
 
 include tableimpl
 
-template get(t, key): untyped =
+template get(t, key: untyped): untyped =
   ## retrieves the value at ``t[key]``. The value can be modified.
   ## If ``key`` is not in ``t``, the ``KeyError`` exception is raised.
   mixin rawGet

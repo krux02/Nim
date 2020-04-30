@@ -644,7 +644,7 @@ doAssert offsetof(MyCaseObject, val3) == 16
 doAssert offsetof(MyCaseObject, val4) == 12
 doAssert offsetof(MyCaseObject, val5) == 16
 
-template reject(e) =
+template reject(e: untyped) =
   static: assert(not compiles(e))
 
 reject:

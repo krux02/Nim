@@ -130,7 +130,7 @@ template move(a, b: untyped) {.dirty.} = system.shallowCopy(a, b)
 
 proc derefPtrToReg(address: BiggestInt, typ: PType, r: var TFullReg, isAssign: bool): bool =
   # nim bug: `isAssign: static bool` doesn't work, giving odd compiler error
-  template fun(field, T, rkind) =
+  template fun(field, T, rkind: untyped) =
     if isAssign:
       cast[ptr T](address)[] = T(r.field)
     else:
@@ -178,10 +178,10 @@ proc createStrKeepNode(x: var TFullReg; keepNode=true) =
 
 include vmhooks
 
-template createStr(x) =
+template createStr(x: untyped) =
   x.node = newNode(nkStrLit)
 
-template createSet(x) =
+template createSet(x: untyped) =
   x.node = newNode(nkCurly)
 
 proc moveConst(x: var TFullReg, y: TFullReg) =
@@ -542,7 +542,7 @@ proc rawExecute(c: PCtx, start: int, tos: PStackFrame): TFullReg =
     let ra = instr.regA
 
     when traceCode:
-      template regDescr(name, r): string =
+      template regDescr(name, r: untyped): string =
         let kind = if r < regs.len: $regs[r].kind else: ""
         let ret = name & ": " & $r & " " & $kind
         alignLeft(ret, 15)
@@ -978,7 +978,7 @@ proc rawExecute(c: PCtx, start: int, tos: PStackFrame): TFullReg =
     of opcEqRef:
       var ret = false
       decodeBC(rkInt)
-      template getTyp(n): untyped =
+      template getTyp(n: untyped): untyped =
         n.typ.skipTypes(abstractInst)
       proc ptrEquality(n1: ptr PNode, n2: PNode): bool =
         ## true if n2.intVal represents a ptr equal to n1

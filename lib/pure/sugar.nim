@@ -234,19 +234,19 @@ proc transLastStmt(n, res, bracketExpr: NimNode): (NimNode, NimNode, NimNode) {.
     if bracketExpr.len == 1:
       bracketExpr.add([newCall(bindSym"typeof", newEmptyNode()), newCall(
           bindSym"typeof", newEmptyNode())])
-    template adder(res, k, v) = res[k] = v
+    template adder(res, k, v: untyped) = res[k] = v
     result[0] = getAst(adder(res, n[0][0], n[0][1]))
   of nnkCurly:
     result[2] = n[0]
     if bracketExpr.len == 1:
       bracketExpr.add(newCall(bindSym"typeof", newEmptyNode()))
-    template adder(res, v) = res.incl(v)
+    template adder(res, v: untyped) = res.incl(v)
     result[0] = getAst(adder(res, n[0]))
   else:
     result[2] = n
     if bracketExpr.len == 1:
       bracketExpr.add(newCall(bindSym"typeof", newEmptyNode()))
-    template adder(res, v) = res.add(v)
+    template adder(res, v: untyped) = res.add(v)
     result[0] = getAst(adder(res, n))
 
 macro collect*(init, body: untyped): untyped {.since: (1, 1).} =

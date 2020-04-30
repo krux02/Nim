@@ -55,7 +55,7 @@ else:
     WideCString* = ref UncheckedArray[Utf16Char]
     WideCStringObj* = WideCString
 
-  template createWide(a; L) =
+  template createWide(a, L: untyped) =
     unsafeNew(a, L * 4 + 2)
 
 proc ord(arg: Utf16Char): int = int(cast[uint16](arg))

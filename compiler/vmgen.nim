@@ -1468,7 +1468,7 @@ proc checkCanEval(c: PCtx; n: PNode) =
                   skIterator} and sfForward in s.flags:
     cannotEval(c, n)
 
-template needsAdditionalCopy(n): untyped =
+template needsAdditionalCopy(n: untyped): untyped =
   not c.isTemp(dest) and not fitsRegister(n.typ)
 
 proc genAdditionalCopy(c: PCtx; n: PNode; opc: TOpcode;

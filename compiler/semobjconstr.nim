@@ -205,7 +205,7 @@ proc semConstructFields(c: PContext, recNode: PNode,
           [fields, discriminator.sym.name.s])
         mergeInitStatus(result, initNone)
 
-      template wrongBranchError(i) =
+      template wrongBranchError(i: untyped) =
         let fields = fieldsPresentInBranch(i)
         localError(c.config, constrCtx.initExpr.info,
           "a case selecting discriminator '$1' with value '$2' " &
@@ -213,7 +213,7 @@ proc semConstructFields(c: PContext, recNode: PNode,
           "are in conflict with this value.",
           [discriminator.sym.name.s, discriminatorVal.renderTree, fields])
 
-      template valuesInConflictError(valsDiff) =
+      template valuesInConflictError(valsDiff: untyped) =
         localError(c.config, discriminatorVal.info, ("possible values " &
           "$2 are in conflict with discriminator values for " &
           "selected object branch $1.") % [$selectedBranch,

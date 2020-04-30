@@ -846,7 +846,7 @@ proc allPathsAsgnResult(n: PNode): InitResultEnum =
   # except:
   #   echo "a was not written to"
   #
-  template allPathsInBranch(it) =
+  template allPathsInBranch(it: untyped) =
     let a = allPathsAsgnResult(it)
     case a
     of InitRequired: return InitRequired

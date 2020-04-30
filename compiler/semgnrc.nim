@@ -50,14 +50,14 @@ proc semGenericStmtScope(c: PContext, n: PNode,
   result = semGenericStmt(c, n, flags, ctx)
   closeScope(c)
 
-template macroToExpand(s): untyped =
+template macroToExpand(s: untyped): untyped =
   s.kind in {skMacro, skTemplate} and (s.typ.len == 1 or sfAllUntyped in s.flags)
 
-template macroToExpandSym(s): untyped =
+template macroToExpandSym(s: untyped): untyped =
   sfCustomPragma notin s.flags and s.kind in {skMacro, skTemplate} and
     (s.typ.len == 1) and not fromDotExpr
 
-template isMixedIn(sym): bool =
+template isMixedIn(sym: untyped): bool =
   let s = sym
   s.name.id in ctx.toMixin or (withinConcept in flags and
                                s.magic == mNone and

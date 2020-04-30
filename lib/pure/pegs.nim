@@ -539,10 +539,10 @@ proc bounds*(c: Captures,
 when not useUnicode:
   type
     Rune = char
-  template fastRuneAt(s, i, ch) =
+  template fastRuneAt(s, i, ch: untyped) =
     ch = s[i]
     inc(i)
-  template runeLenAt(s, i): untyped = 1
+  template runeLenAt(s, i: untyped): untyped = 1
 
   proc isAlpha(a: char): bool {.inline.} = return a in {'a'..'z', 'A'..'Z'}
   proc isUpper(a: char): bool {.inline.} = return a in {'A'..'Z'}
@@ -858,9 +858,9 @@ proc rawMatch*(s: string, p: Peg, start: int, c: var Captures): int
   ## Returns -1 if it does not match, else the length of the match
 
   # Set the handler generators to produce do-nothing handlers.
-  template enter(pk, s, p, start) =
+  template enter(pk, s, p, start: untyped) =
     discard
-  template leave(pk, s, p, start, length) =
+  template leave(pk, s, p, start, length: untyped) =
     discard
   matchOrParse(matchIt)
   result = matchIt(s, p, start, c)
@@ -891,18 +891,18 @@ macro mkHandlerTplts(handlers: untyped): untyped =
   #           <handler code block>
   #   ...
   proc mkEnter(hdName, body: NimNode): NimNode =
-    template helper(hdName, body) {.dirty.} =
-      template hdName(s, p, start) =
+    template helper(hdName, body: untyped) {.dirty.} =
+      template hdName(s, p, start: untyped) =
         let s {.inject.} = s
         let p {.inject.} = p
         let start {.inject.} = start
         body
     result = getAst(helper(hdName, body))
 
-  template mkLeave(hdPostf, body) {.dirty.} =
+  template mkLeave(hdPostf, body: untyped) {.dirty.} =
     # this has to be dirty to be able to capture *result* as *length* in
     # *leaveXX* calls.
-    template `leave hdPostf`(s, p, start, length) =
+    template `leave hdPostf`(s, p, start, length: untyped) =
       body
 
   result = newStmtList()
@@ -1020,7 +1020,7 @@ template eventParser*(pegAst, handlers: untyped): (proc(s: string): int) =
       # start of the code for a grammar element of kind *pegKind*.
       # Expands to a call to the handler template if one was generated
       # by *mkHandlerTplts*.
-      template mkDoEnter(hdPostf, s, pegNode, start) =
+      template mkDoEnter(hdPostf, s, pegNode, start: untyped) =
         when declared(`enter hdPostf`):
           `enter hdPostf`(s, pegNode, start):
         else:
@@ -1031,7 +1031,7 @@ template eventParser*(pegAst, handlers: untyped): (proc(s: string): int) =
     macro leave(pegKind, s, pegNode, start, length: untyped): untyped =
       # Like *enter*, but called at the end of the matcher code for
       # a grammar element of kind *pegKind*.
-      template mkDoLeave(hdPostf, s, pegNode, start, length) =
+      template mkDoLeave(hdPostf, s, pegNode, start, length: untyped) =
         when declared(`leave hdPostf`):
           `leave hdPostf`(s, pegNode, start, length):
         else:
@@ -1050,7 +1050,7 @@ template eventParser*(pegAst, handlers: untyped): (proc(s: string): int) =
     rawParse(s, pegAst, 0, cs)
   parser
 
-template fillMatches(s, caps, c) =
+template fillMatches(s, caps, c: untyped) =
   for k in 0..c.ml-1:
     let startIdx = c.matches[k][0]
     let endIdx = c.matches[k][1]

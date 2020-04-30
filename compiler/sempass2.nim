@@ -438,7 +438,7 @@ proc trackPragmaStmt(tracked: PEffects, n: PNode) =
       # list the computed effects up to here:
       listEffects(tracked)
 
-template notGcSafe(t): untyped = {tfGcSafe, tfNoSideEffect} * t.flags == {}
+template notGcSafe(t: untyped): untyped = {tfGcSafe, tfNoSideEffect} * t.flags == {}
 
 proc importedFromC(n: PNode): bool =
   # when imported from C, we assume GC-safety.

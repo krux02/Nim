@@ -33,7 +33,7 @@ proc countDefinedSymbols*(symbols: StringTableRef): int =
 
 proc initDefines*(symbols: StringTableRef) =
   # for bootstrapping purposes and old code:
-  template defineSymbol(s) = symbols.defineSymbol(s)
+  template defineSymbol(s: untyped) = symbols.defineSymbol(s)
   defineSymbol("nimhygiene")
   defineSymbol("niminheritable")
   defineSymbol("nimmixin")

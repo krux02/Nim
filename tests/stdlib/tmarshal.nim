@@ -9,7 +9,7 @@ omega 200
 
 import marshal
 
-template testit(x) = discard $$to[typeof(x)]($$x)
+template testit(x: untyped) = discard $$to[typeof(x)]($$x)
 
 var x: array[0..4, array[0..4, string]] = [
   ["test", "1", "2", "3", "4"], ["test", "1", "2", "3", "4"],

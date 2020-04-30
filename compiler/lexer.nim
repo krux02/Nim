@@ -157,7 +157,7 @@ proc getLineInfo*(L: TLexer, tok: TToken): TLineInfo {.inline.} =
 proc isKeyword*(kind: TTokType): bool =
   result = (kind >= tokKeywordLow) and (kind <= tokKeywordHigh)
 
-template ones(n): untyped = ((1 shl n)-1) # for utf-8 conversion
+template ones(n: untyped): untyped = ((1 shl n)-1) # for utf-8 conversion
 
 proc isNimIdentifier*(s: string): bool =
   let sLen = s.len
@@ -260,13 +260,13 @@ proc lexMessagePos(L: var TLexer, msg: TMsgKind, pos: int, arg = "") =
 proc matchTwoChars(L: TLexer, first: char, second: set[char]): bool =
   result = (L.buf[L.bufpos] == first) and (L.buf[L.bufpos + 1] in second)
 
-template tokenBegin(tok, pos) {.dirty.} =
+template tokenBegin(tok, pos: untyped) {.dirty.} =
   when defined(nimsuggest):
     var colA = getColNumber(L, pos)
   when defined(nimpretty):
     tok.offsetA = L.offsetBase + pos
 
-template tokenEnd(tok, pos) {.dirty.} =
+template tokenEnd(tok, pos: untyped) {.dirty.} =
   when defined(nimsuggest):
     let colB = getColNumber(L, pos)+1
     if L.fileIdx == L.config.m.trackPos.fileIndex and L.config.m.trackPos.col in colA..colB and
@@ -277,7 +277,7 @@ template tokenEnd(tok, pos) {.dirty.} =
   when defined(nimpretty):
     tok.offsetB = L.offsetBase + pos
 
-template tokenEndIgnore(tok, pos) =
+template tokenEndIgnore(tok, pos: untyped) =
   when defined(nimsuggest):
     let colB = getColNumber(L, pos)
     if L.fileIdx == L.config.m.trackPos.fileIndex and L.config.m.trackPos.col in colA..colB and
@@ -288,7 +288,7 @@ template tokenEndIgnore(tok, pos) =
   when defined(nimpretty):
     tok.offsetB = L.offsetBase + pos
 
-template tokenEndPrevious(tok, pos) =
+template tokenEndPrevious(tok, pos: untyped) =
   when defined(nimsuggest):
     # when we detect the cursor in whitespace, we attach the track position
     # to the token that came before that, but only if we haven't detected
@@ -942,7 +942,7 @@ proc getOperator(L: var TLexer, tok: var TToken) =
 
 proc getPrecedence*(tok: TToken, strongSpaces: bool): int =
   ## Calculates the precedence of the given token.
-  template considerStrongSpaces(x): untyped =
+  template considerStrongSpaces(x: untyped): untyped =
     x + (if strongSpaces: 100 - tok.strongSpaceA.int*10 else: 0)
 
   case tok.tokType

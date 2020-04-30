@@ -168,7 +168,7 @@ proc test_inproc() =
 
 test_inproc()
 
-template reject(x) =
+template reject(x: untyped) =
   static: assert(not compiles(x))
 
 block test_t4799_7:

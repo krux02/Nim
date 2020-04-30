@@ -752,7 +752,7 @@ reorderings that have been passed to named parameters:
 
   # Evaluation order is 'b' before 'a' due to template
   # expansion's semantics.
-  template swapArgs(a, b): untyped =
+  template swapArgs(a, b: untyped): untyped =
     b + a
 
   doAssert swapArgs(p() + q(), q() - p()) == 6
@@ -5112,7 +5112,7 @@ However, this means that the method call syntax is not available for
     :test: "nim c $1"
     :status: 1
 
-  template tmp(x) =
+  template tmp(x: untyped) =
     type
       T {.gensym.} = int
 

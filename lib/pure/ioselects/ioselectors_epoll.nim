@@ -128,7 +128,7 @@ proc close*(ev: SelectEvent) =
   if res != 0:
     raiseIOSelectorsError(osLastError())
 
-template checkFd(s, f) =
+template checkFd(s, f: untyped) =
   # TODO: I don't see how this can ever happen. You won't be able to create an
   # FD if there is too many. -- DP
   if f >= s.maxFD:

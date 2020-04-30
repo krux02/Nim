@@ -14,7 +14,7 @@ proc newNode*(): Node =
 
 macro build*(body: untyped): untyped =
 
-  template appendElement(tmp, childrenBlock) {.dirty.} =
+  template appendElement(tmp, childrenBlock: untyped) {.dirty.} =
     bind newNode
     let tmp = newNode()
     tmp.children = childrenBlock  # this line seems to be the problem

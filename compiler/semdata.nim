@@ -353,7 +353,7 @@ proc makeOrType*(c: PContext, t1, t2: PType): PType =
   if t1.kind != tyOr and t2.kind != tyOr:
     result.sons = @[t1, t2]
   else:
-    template addOr(t1) =
+    template addOr(t1: untyped) =
       if t1.kind == tyOr:
         for x in t1.sons: result.rawAddSon x
       else:

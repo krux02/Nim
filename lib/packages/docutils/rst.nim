@@ -374,7 +374,7 @@ proc addNodes(n: PRstNode): string =
   addNodesAux(n, result)
 
 proc rstnodeToRefnameAux(n: PRstNode, r: var string, b: var bool) =
-  template special(s) =
+  template special(s: untyped) =
     if b:
       add(r, '-')
       b = false
@@ -796,7 +796,7 @@ proc parseMarkdownLink(p: var RstParser; father: PRstNode): bool =
   var desc, link = ""
   var i = p.idx
 
-  template parse(endToken, dest) =
+  template parse(endToken, dest: untyped) =
     inc i # skip begin token
     while true:
       if p.tok[i].kind in {tkEof, tkIndent}: return false

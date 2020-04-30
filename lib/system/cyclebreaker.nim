@@ -64,7 +64,7 @@ type
   DisposeProc = proc (p: pointer) {.nimcall, benign.}
 
 template color(c): untyped = c.rc and colorMask
-template setColor(c, col) =
+template setColor(c, col: untyped) =
   c.rc = c.rc and not colorMask or col
 
 proc nimIncRefCyclic(p: pointer) {.compilerRtl, inl.} =

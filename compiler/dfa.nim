@@ -390,7 +390,7 @@ proc genBreak(c: var Con; n: PNode) =
   else:
     c.blocks[c.blocks.high].fixups.add lab1
 
-template forkT(n, body) =
+template forkT(n, body: untyped) =
   let oldLen = c.forks.len
   let lab1 = c.forkI(n)
   body

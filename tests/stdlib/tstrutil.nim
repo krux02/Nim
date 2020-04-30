@@ -8,7 +8,7 @@ import
 
 import macros
 
-template rejectParse(e) =
+template rejectParse(e: untyped) =
   try:
     discard e
     raise newException(AssertionError, "This was supposed to fail: $#!" % astToStr(e))

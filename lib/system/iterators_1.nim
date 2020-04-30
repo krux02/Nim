@@ -84,7 +84,7 @@ when defined(nimNewRoof):
         yield res
         inc(res)
 
-  template dotdotImpl(t) {.dirty.} =
+  template dotdotImpl(t: untyped) {.dirty.} =
     iterator `..`*(a, b: t): t {.inline.} =
       ## A type specialized version of ``..`` for convenience so that
       ## mixing integer types works better.
@@ -108,7 +108,7 @@ when defined(nimNewRoof):
       yield i
       inc i
 
-  template dotdotLessImpl(t) {.dirty.} =
+  template dotdotLessImpl(t: untyped) {.dirty.} =
     iterator `..<`*(a, b: t): t {.inline.} =
       ## A type specialized version of ``..<`` for convenience so that
       ## mixing integer types works better.

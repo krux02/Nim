@@ -1054,9 +1054,9 @@ proc checkCovariantParamsUsages(c: PContext; genericType: PType) =
   var body = genericType[^1]
 
   proc traverseSubTypes(c: PContext; t: PType): bool =
-    template error(msg) = localError(c.config, genericType.sym.info, msg)
+    template error(msg: untyped) = localError(c.config, genericType.sym.info, msg)
     result = false
-    template subresult(r) =
+    template subresult(r: untyped) =
       let sub = r
       result = result or sub
 
@@ -1308,7 +1308,7 @@ proc semAllTypeSections(c: PContext; n: PNode): PNode =
   result = newNodeI(nkStmtList, n.info)
   gatherStmts(c, n, result)
 
-  template rec(name) =
+  template rec(name: untyped) =
     for i in 0..<result.len:
       if result[i].kind == nkTypeSection:
         name(c, result[i])
@@ -1317,7 +1317,7 @@ proc semAllTypeSections(c: PContext; n: PNode): PNode =
   rec typeSectionFinalPass
   when false:
     # too beautiful to delete:
-    template rec(name; setbit=false) =
+    template rec(name: untyped; setbit=false) =
       proc `name rec`(c: PContext; n: PNode) {.nimcall.} =
         if n.kind == nkTypeSection:
           when setbit: incl n.flags, nfSem

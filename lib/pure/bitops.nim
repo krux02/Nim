@@ -51,7 +51,7 @@ template toUnsigned(x: int32): uint32 = cast[uint32](x)
 template toUnsigned(x: int64): uint64 = cast[uint64](x)
 template toUnsigned(x: int): uint = cast[uint](x)
 
-template forwardImpl(impl, arg) {.dirty.} =
+template forwardImpl(impl, arg: untyped) {.dirty.} =
   when sizeof(x) <= 4:
     when x is SomeSignedInt:
       impl(cast[uint32](x.int32))

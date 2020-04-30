@@ -14,7 +14,7 @@ import os
 
 const debugLex = false
 
-template debug(enable: bool, text: string): typed =
+template debug(enable: bool, text: string) =
   when enable:
     echo(text)
 
@@ -363,7 +363,7 @@ proc `->`*(rule: Rule, production: Rule) =
   assert(not isnil(production.parser), "Right hand side of -> is nil - has the rule been defined yet?")
   rule.parser = production.parser
 
-template grammar*[K](Kind, Text, Symbol: typedesc; default: K, code: untyped): typed {.hint[XDeclaredButNotUsed]: off.} =
+template grammar*[K](Kind, Text, Symbol: typedesc; default: K, code: untyped) {.hint[XDeclaredButNotUsed]: off.} =
 
     proc newRule(): Rule[Kind, Text] {.inject.} = newRule[Kind, Text](default)
     proc chartest(testfunc: proc(c: Symbol): bool): Rule[Kind, Text] {.inject.} = chartest[Kind, Text, Symbol](testfunc, default)
@@ -395,7 +395,7 @@ template grammar*[K](Kind, Text, Symbol: typedesc; default: K, code: untyped): t
 
     code
 
-template grammar*[K](Kind: typedesc; default: K, code: untyped): typed {.hint[XDeclaredButNotUsed]: off.} =
+template grammar*[K](Kind: typedesc; default: K, code: untyped) {.hint[XDeclaredButNotUsed]: off.} =
   grammar(Kind, string, char, default, code)
 
 block:

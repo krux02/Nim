@@ -210,7 +210,7 @@ proc toLowerAscii*(c: char): char {.noSideEffect, procvar,
   else:
     result = c
 
-template toImpl(call) =
+template toImpl(call: untyped) =
   result = newString(len(s))
   for i in 0..len(s) - 1:
     result[i] = call(s[i])
@@ -377,7 +377,7 @@ template stringHasSep(s: string, index: int, sep: char): bool =
 template stringHasSep(s: string, index: int, sep: string): bool =
   s.substrEq(index, sep)
 
-template splitCommon(s, sep, maxsplit, sepLen) =
+template splitCommon(s, sep, maxsplit, sepLen: untyped) =
   ## Common code for split procs
   var last = 0
   var splits = maxsplit
@@ -392,7 +392,7 @@ template splitCommon(s, sep, maxsplit, sepLen) =
     dec(splits)
     inc(last, sepLen)
 
-template oldSplit(s, seps, maxsplit) =
+template oldSplit(s, seps, maxsplit: untyped) =
   var last = 0
   var splits = maxsplit
   assert(not ('\0' in seps))
@@ -516,7 +516,7 @@ iterator split*(s: string, sep: string, maxsplit: int = -1): string =
   splitCommon(s, sep, maxsplit, sep.len)
 
 
-template rsplitCommon(s, sep, maxsplit, sepLen) =
+template rsplitCommon(s, sep, maxsplit, sepLen: untyped) =
   ## Common code for rsplit functions
   var
     last = s.len - 1

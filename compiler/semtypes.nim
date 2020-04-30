@@ -968,7 +968,7 @@ proc addParamOrResult(c: PContext, param: PSym, kind: TSymKind) =
         param.owner = getCurrOwner(c)
     else: addDecl(c, param)
 
-template shouldHaveMeta(t) =
+template shouldHaveMeta(t: untyped) =
   internalAssert c.config, tfHasMeta in t.flags
   # result.lastSon.flags.incl tfHasMeta
 
@@ -1385,7 +1385,7 @@ proc semGeneric(c: PContext, n: PNode, s: PSym, prev: PType): PType =
   result = newOrPrevType(tyGenericInvocation, prev, c)
   addSonSkipIntLit(result, t)
 
-  template addToResult(typ) =
+  template addToResult(typ: untyped) =
     if typ.isNil:
       internalAssert c.config, false
       rawAddSon(result, typ)

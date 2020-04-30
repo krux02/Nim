@@ -5,7 +5,7 @@ discard """
 
 import macros
 
-template grainBlock(proxyTypeName: untyped, proxyProcs: untyped): typed =
+template grainBlock(proxyTypeName: untyped, proxyProcs: untyped) =
   discard
 
 var
@@ -16,4 +16,3 @@ macro foo(): untyped =
   let x = getAst grainBlock(proxyTypeName, proxyProcs, proxyTypeName)
 
 foo()
-

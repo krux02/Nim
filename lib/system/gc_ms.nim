@@ -21,7 +21,7 @@ const
   rcGrey = 1   # unused
   rcBlack = 2
 
-template mulThreshold(x): untyped = x * 2
+template mulThreshold(x: untyped): untyped = x * 2
 
 when defined(memProfiler):
   proc nimProfile(requestedSize: int)

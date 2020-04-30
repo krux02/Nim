@@ -1621,7 +1621,7 @@ proc transitionToLet*(s: PSym) =
   s.bitsize = obj.bitsize
   s.alignment = obj.alignment
 
-template copyNodeImpl(dst, src, processSonsStmt) =
+template copyNodeImpl(dst, src, processSonsStmt: untyped) =
   if src == nil: return
   dst = newNode(src.kind)
   dst.info = src.info

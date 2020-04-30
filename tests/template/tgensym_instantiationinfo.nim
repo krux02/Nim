@@ -10,10 +10,10 @@ template printError(error: typed) =
   echo "Error at ", instInfo.filename, ':', instInfo.line, ": ", error
 
 # Removing this overload fixes the error
-template someTemplate(someBool: bool, body) =
+template someTemplate(someBool: bool, body: untyped) =
   discard
 
-template someTemplate(body) =
+template someTemplate(body: untyped) =
   body
 
 proc main() =

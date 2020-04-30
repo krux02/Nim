@@ -65,8 +65,8 @@ proc addDecl(cache: IdentCache; n: PNode; declares: var IntSet) =
   else: discard
 
 proc computeDeps(cache: IdentCache; n: PNode, declares, uses: var IntSet; topLevel: bool) =
-  template deps(n) = computeDeps(cache, n, declares, uses, false)
-  template decl(n) =
+  template deps(n: untyped) = computeDeps(cache, n, declares, uses, false)
+  template decl(n: untyped) =
     if topLevel: addDecl(cache, n, declares)
   case n.kind
   of procDefs, nkMacroDef, nkTemplateDef:

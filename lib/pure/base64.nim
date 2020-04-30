@@ -61,7 +61,7 @@
 ## * `md5 module<md5.html>`_ implements the MD5 checksum algorithm
 ## * `sha1 module<sha1.html>`_ implements a sha1 encoder and decoder
 
-template cbBase(a, b): untyped = [
+template cbBase(a, b: untyped): untyped = [
   'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M',
   'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z',
   'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm',

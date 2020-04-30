@@ -640,7 +640,7 @@ Example: Lifting Procs
     :test: "nim c $1"
   import math
 
-  template liftScalarProc(fname) =
+  template liftScalarProc(fname: untyped) =
     ## Lift a proc taking one scalar parameter and returning a
     ## scalar value (eg ``proc sssss[T](x: T): float``),
     ## to provide templated procs that can handle a single

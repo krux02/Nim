@@ -431,7 +431,7 @@ when not defined(useNimRtl):
       elif not running(p): break
     close(p)
 
-template streamAccess(p) =
+template streamAccess(p: untyped) =
   assert poParentStreams notin p.options, "API usage error: stream access not allowed when you use poParentStreams"
 
 when defined(Windows) and not defined(useNimRtl):

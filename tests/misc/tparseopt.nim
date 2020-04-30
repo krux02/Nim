@@ -74,7 +74,7 @@ else:
   import "../.." / compiler/unittest_light
 
   block: # fix #9951
-    template runTest(parseoptCustom) =
+    template runTest(parseoptCustom: untyped) =
       var p = parseoptCustom.initOptParser(@["echo \"quoted\""])
       let expected = when defined(windows):
         """"echo \"quoted\"""""

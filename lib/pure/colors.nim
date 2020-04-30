@@ -33,7 +33,7 @@ template extract(a: Color, r, g, b: untyped) =
 template rawRGB(r, g, b: int): Color =
   Color(r shl 16 or g shl 8 or b)
 
-template colorOp(op): Color =
+template colorOp(op: untyped): Color =
   extract(a, ar, ag, ab)
   extract(b, br, bg, bb)
   rawRGB(op(ar, br), op(ag, bg), op(ab, bb))

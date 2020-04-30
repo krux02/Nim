@@ -23,7 +23,7 @@ var
 
 const insertQuery = "INSERT INTO tracking(op, address, size, file, line) values (?, ?, ?, ?, ?)"
 
-template sbind(x: int; value) =
+template sbind(x: int; value: untyped) =
   when value is cstring:
     let ret = insertStmt.bindText(x, value, value.len.int32, SQLITE_TRANSIENT)
     if ret != SQLITE_OK:

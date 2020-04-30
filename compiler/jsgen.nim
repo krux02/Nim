@@ -124,7 +124,7 @@ template line(p: PProc, added: Rope) =
 template lineF(p: PProc, frmt: FormatStr, args: varargs[Rope]) =
   p.body.add(indentLine(p, ropes.`%`(frmt, args)))
 
-template nested(p, body) =
+template nested(p, body: untyped) =
   inc p.extraIndent
   body
   dec p.extraIndent

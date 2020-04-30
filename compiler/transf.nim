@@ -1103,7 +1103,7 @@ proc liftDeferAux(n: PNode) =
   for i in 0..n.safeLen-1:
     liftDeferAux(n[i])
 
-template liftDefer(c, root) =
+template liftDefer(c, root: untyped) =
   if c.deferDetected:
     liftDeferAux(root)
 

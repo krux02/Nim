@@ -23,8 +23,8 @@ template sortedItems(t: untyped): untyped = sorted(toSeq(t))
 import tables # refs issue #13504
 
 block: # we use Table as groundtruth, it's well tested elsewhere
-  template testDel(t, t0) =
-    template put2(i) =
+  template testDel(t, t0: untyped) =
+    template put2(i: untyped) =
       t[i] = i
       t0[i] = i
 

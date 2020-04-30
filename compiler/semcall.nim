@@ -350,7 +350,7 @@ proc resolveOverloads(c: PContext, n: PNode,
   else:
     initialBinding = nil
 
-  template pickBest(headSymbol) =
+  template pickBest(headSymbol: untyped) =
     pickBestCandidate(c, headSymbol, n, initialBinding,
                       filter, result, alt, errors, efExplain in flags,
                       errorsEnabled)

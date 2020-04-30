@@ -12,7 +12,7 @@
 
 include osalloc
 
-template track(op, address, size) =
+template track(op, address, size: untyped) =
   when defined(memTracker):
     memTrackerOp(op, address, size)
 
@@ -194,7 +194,7 @@ proc findSuitableBlock(a: MemRegion; fl, sl: var int): PBigChunk {.inline.} =
       sl = lsbit(a.slBitmap[fl])
       result = mat()
 
-template clearBits(sl, fl) =
+template clearBits(sl, fl: untyped) =
   clearBit(sl, a.slBitmap[fl])
   if a.slBitmap[fl] == 0u32:
     # do not forget to cascade:
@@ -682,8 +682,8 @@ when false:
     c_fprintf(stdout, "%ld\n", size)
     sysAssert(false, "untracked size!")
 else:
-  template trackSize(x) = discard
-  template untrackSize(x) = discard
+  template trackSize(x: untyped) = discard
+  template untrackSize(x: untyped) = discard
 
 when false:
   # not yet used by the GCs

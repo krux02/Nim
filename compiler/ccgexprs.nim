@@ -2402,7 +2402,7 @@ proc genComplexConst(p: BProc, sym: PSym, d: var TLoc) =
   assert((sym.loc.r != nil) and (sym.loc.t != nil))
   putLocIntoDest(p, d, sym.loc)
 
-template genStmtListExprImpl(exprOrStmt) {.dirty.} =
+template genStmtListExprImpl(exprOrStmt: untyped) {.dirty.} =
   #let hasNimFrame = magicsys.getCompilerProc("nimFrame") != nil
   let hasNimFrame = p.prc != nil and
       sfSystemModule notin p.module.module.flags and

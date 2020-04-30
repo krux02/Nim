@@ -11,13 +11,13 @@ compile end'''
 static:
   echo "compile start"
 
-template implementArithOpsOld(T) =
+template implementArithOpsOld(T: untyped) =
   proc echoAdd(a, b: T) =
     echo a + b
   proc echoSub(a, b: T) =
     echo a - b
 
-template implementArithOpsNew(T) =
+template implementArithOpsNew(T: untyped) =
   proc echoAdd(a, b: T) {.used.} =
     echo a + b
   proc echoSub(a, b: T) {.used.} =

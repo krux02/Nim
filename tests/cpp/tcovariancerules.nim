@@ -20,17 +20,17 @@ dog 2
 '''
 """
 
-template accept(x) =
+template accept(x: untyped) =
   static: assert(compiles(x))
 
-template reject(x) =
+template reject(x: untyped) =
   static: assert(not compiles(x))
 
 import macros
 
 macro skipElse(n: untyped): untyped = n[0]
 
-template acceptWithCovariance(x, otherwise): untyped =
+template acceptWithCovariance(x, otherwise: untyped): untyped =
   when nimEnableCovariance:
     x
   else:

@@ -51,7 +51,7 @@ type
 
 const toDebug {.strdefine.} = ""
 
-template dbg(body) =
+template dbg(body: untyped) =
   when toDebug.len > 0:
     if c.owner.name.s == toDebug or toDebug == "always":
       body

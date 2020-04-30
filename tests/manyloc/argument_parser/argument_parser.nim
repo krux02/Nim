@@ -156,7 +156,7 @@ proc `$`*(data: Tparsed_parameter): string {.procvar.} =
   of PK_HELP: result = "help"
 
 
-template new_parsed_parameter*(tkind: Tparam_kind, expr): Tparsed_parameter =
+template new_parsed_parameter*(tkind: Tparam_kind, expr: untyped): Tparsed_parameter =
   ## Handy compile time template to build Tparsed_parameter object variants.
   ##
   ## The problem with object variants is that you first have to initialise them

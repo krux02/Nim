@@ -38,12 +38,12 @@ proc setupVM*(module: PSym; cache: IdentCache; scriptName: string;
   var errorMsg: string
   var vthisDir = scriptName.splitFile.dir
 
-  template cbconf(name, body) {.dirty.} =
+  template cbconf(name, body: untyped) {.dirty.} =
     result.registerCallback "stdlib.system." & astToStr(name),
       proc (a: VmArgs) =
         body
 
-  template cbexc(name, exc, body) {.dirty.} =
+  template cbexc(name, exc, body: untyped) {.dirty.} =
     result.registerCallback "stdlib.system." & astToStr(name),
       proc (a: VmArgs) =
         errorMsg = ""
@@ -52,7 +52,7 @@ proc setupVM*(module: PSym; cache: IdentCache; scriptName: string;
         except exc:
           errorMsg = getCurrentExceptionMsg()
 
-  template cbos(name, body) {.dirty.} =
+  template cbos(name, body: untyped) {.dirty.} =
     cbexc(name, OSError, body)
 
   # Idea: Treat link to file as a file, but ignore link to directory to prevent

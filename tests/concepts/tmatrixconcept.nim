@@ -8,8 +8,8 @@ R=3 C=3 T=int
 
 import typetraits
 
-template ok(x) = assert x
-template no(x) = assert(not x)
+template ok(x: untyped) = assert x
+template no(x: untyped) = assert(not x)
 
 const C = 10
 

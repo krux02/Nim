@@ -28,7 +28,7 @@ proc encodeConfig(g: ModuleGraph): string =
     result.add ' '
     result.add d
 
-  template serialize(field) =
+  template serialize(field: untyped) =
     result.add ' '
     result.add($g.config.field)
 

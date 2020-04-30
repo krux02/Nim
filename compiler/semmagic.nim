@@ -128,7 +128,7 @@ proc evalTypeTrait(c: PContext; traitCall: PNode, operand: PType, context: PSym)
   template operand2: PType =
     traitCall[2].typ.skipTypes({tyTypeDesc})
 
-  template typeWithSonsResult(kind, sons): PNode =
+  template typeWithSonsResult(kind, sons: untyped): PNode =
     newTypeWithSons(context, kind, sons).toNode(traitCall.info)
 
   if operand.kind == tyGenericParam or (traitCall.len > 2 and operand2.kind == tyGenericParam):

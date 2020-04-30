@@ -29,12 +29,12 @@ proc consumeInt(x: int) =
 const activeTests = {1..100}
 
 when true:
-  template test(n, body) =
+  template test(n, body: untyped) =
     when n in activeTests:
       block:
         body
 
-  template reject(x) =
+  template reject(x: untyped) =
     static: assert(not compiles(x))
 
   test 1:

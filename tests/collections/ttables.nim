@@ -155,7 +155,7 @@ block tindexby:
 block tableconstr:
   # Test if the new table constructor syntax works:
 
-  template ignoreExpr(e) =
+  template ignoreExpr(e: untyped) =
     discard
 
   # test first class '..' syntactical citizen:
@@ -398,7 +398,7 @@ block tablesref:
 
 
 block: # https://github.com/nim-lang/Nim/issues/13496
-  template testDel(body) =
+  template testDel(body: untyped) =
     block:
       body
       when t is CountTable|CountTableRef:

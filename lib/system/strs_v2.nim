@@ -23,11 +23,11 @@ type
 
 const nimStrVersion {.core.} = 2
 
-template isLiteral(s): bool = (s.p == nil) or (s.p.cap and strlitFlag) == strlitFlag
+template isLiteral(s: untyped): bool = (s.p == nil) or (s.p.cap and strlitFlag) == strlitFlag
 
-template contentSize(cap): int = cap + 1 + sizeof(NimStrPayloadBase)
+template contentSize(cap: untyped): int = cap + 1 + sizeof(NimStrPayloadBase)
 
-template frees(s) =
+template frees(s: untyped) =
   if not isLiteral(s):
     deallocShared(s.p)
 

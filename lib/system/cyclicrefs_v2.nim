@@ -26,8 +26,8 @@ type
   TraceProc = proc (p, env: pointer) {.nimcall, benign.}
   DisposeProc = proc (p: pointer) {.nimcall, benign.}
 
-template color(c): untyped = c.rc and colorMask
-template setColor(c, col) =
+template color(c: untyped): untyped = c.rc and colorMask
+template setColor(c, col: untyped) =
   when col == colGreen:
     c.rc = c.rc and not colorMask
   else:

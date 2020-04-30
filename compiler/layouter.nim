@@ -329,12 +329,12 @@ const
   oprSet = {tkOpr, tkDiv, tkMod, tkShl, tkShr, tkIn, tkNotin, tkIs,
             tkIsnot, tkNot, tkOf, tkAs, tkDotDot, tkAnd, tkOr, tkXor}
 
-template goodCol(col): bool = col >= em.maxLineLen div 2
+template goodCol(col: untyped): bool = col >= em.maxLineLen div 2
 
-template moreIndent(em): int =
+template moreIndent(em: untyped): int =
   if em.doIndentMore > 0: em.indWidth*2 else: em.indWidth
 
-template rememberSplit(kind) =
+template rememberSplit(kind: untyped) =
   if goodCol(em.col) and not em.inquote:
     let spaces = em.indentLevel+moreIndent(em)
     if spaces < em.col and spaces > 0:
@@ -418,7 +418,7 @@ proc emitComment(em: var Emitter; tok: TToken; dontIndent: bool) =
     emitMultilineComment(em, lit, col, dontIndent)
 
 proc emitTok*(em: var Emitter; L: TLexer; tok: TToken) =
-  template wasExportMarker(em): bool =
+  template wasExportMarker(em: untyped): bool =
     em.kinds.len > 0 and em.kinds[^1] == ltExportMarker
 
   if tok.tokType == tkComment and tok.literal.startsWith("#!nimpretty"):
@@ -533,7 +533,7 @@ proc emitTok*(em: var Emitter; L: TLexer; tok: TToken) =
     else:
       if not em.endsInWhite: wrSpace(em)
       wr(em, tok.ident.s, ltOpr)
-      template isUnary(tok): bool =
+      template isUnary(tok: untyped): bool =
         tok.strongSpaceB == 0 and tok.strongSpaceA > 0
 
       if not isUnary(tok):

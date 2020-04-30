@@ -204,7 +204,7 @@ const
   reraisedFromBegin = -10
   reraisedFromEnd = -100
 
-template reraisedFrom(z): untyped =
+template reraisedFrom(z: untyped): untyped =
   StackTraceEntry(procname: nil, line: z, filename: nil)
 
 proc auxWriteStackTrace(f: PFrame; s: var seq[StackTraceEntry]) =
@@ -373,11 +373,11 @@ proc reportUnhandledErrorAux(e: ref Exception) {.nodestroy.} =
     `=destroy`(buf)
   else:
     # ugly, but avoids heap allocations :-)
-    template xadd(buf, s, slen) =
+    template xadd(buf, s, slen: untyped) =
       if L + slen < high(buf):
         copyMem(addr(buf[L]), cstring(s), slen)
         inc L, slen
-    template add(buf, s) =
+    template add(buf, s: untyped) =
       xadd(buf, s, s.len)
     var buf: array[0..2000, char]
     var L = 0
@@ -617,7 +617,7 @@ when not defined(noSignalHandler) and not defined(useNimRtl):
       when not usesDestructors: GC_enable()
     else:
       var msg: cstring
-      template asgn(y) =
+      template asgn(y: untyped) =
         msg = y
       processSignal(sign, asgn)
       showErrorMessage(msg)

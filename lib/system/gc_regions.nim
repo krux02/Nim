@@ -230,7 +230,7 @@ proc obstackPtr*(r: MemRegion): StackPtr =
   result.remaining = r.remaining
   result.current = r.tail
 
-template computeRemaining(r): untyped =
+template computeRemaining(r: untyped): untyped =
   r.tail.size -% (cast[int](r.bump) -% cast[int](r.tail))
 
 proc setObstackPtr*(r: var MemRegion; sp: StackPtr) =

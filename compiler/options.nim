@@ -299,7 +299,7 @@ type
     cppCustomNamespace*: string
 
 proc setNoteDefaults*(conf: ConfigRef, note: TNoteKind, enabled = true) =
-  template fun(op) =
+  template fun(op: untyped) =
     conf.notes.op note
     conf.mainPackageNotes.op note
     conf.foreignPackageNotes.op note
@@ -316,7 +316,7 @@ proc hasHint*(conf: ConfigRef, note: TNoteKind): bool =
 proc hasWarn*(conf: ConfigRef, note: TNoteKind): bool =
   optWarns in conf.options and note in conf.notes
 
-template depConfigFields*(fn) {.dirty.} =
+template depConfigFields*(fn: untyped) {.dirty.} =
   fn(target)
   fn(options)
   fn(globalOptions)
@@ -696,7 +696,7 @@ when (NimMajor, NimMinor) < (1, 1) or not declared(isRelativeTo):
 
 proc getRelativePathFromConfigPath*(conf: ConfigRef; f: AbsoluteFile): RelativeFile =
   let f = $f
-  template search(paths) =
+  template search(paths: untyped) =
     for it in paths:
       let it = $it
       if f.isRelativeTo(it):

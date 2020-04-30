@@ -23,7 +23,7 @@ proc `&=`(c: var MD5Context, f: BiggestFloat) =
   md5Update(c, cast[cstring](unsafeAddr f), sizeof(f))
 proc `&=`(c: var MD5Context, s: SigHash) =
   md5Update(c, cast[cstring](unsafeAddr s), sizeof(s))
-template lowlevel(v) =
+template lowlevel(v: untyped) =
   md5Update(c, cast[cstring](unsafeAddr(v)), sizeof(v))
 
 
@@ -402,4 +402,3 @@ proc idOrSig*(s: PSym, currentModule: string,
     if counter != 0:
       result.add "_" & rope(counter+1)
     sigCollisions.inc(sig)
-

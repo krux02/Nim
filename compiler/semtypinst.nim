@@ -635,7 +635,7 @@ proc replaceTypeVarsTAux(cl: var TReplTypeVars, t: PType): PType =
         result.size = -1
         result.n = replaceObjBranches(cl, result.n)
 
-template typeBound(c, newty, oldty, field, info) =
+template typeBound(c, newty, oldty, field, info: untyped) =
   let opr = newty.attachedOps[field]
   if opr != nil and sfFromGeneric notin opr.flags:
     # '=' needs to be instantiated for generics when the type is constructed:

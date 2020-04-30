@@ -243,7 +243,7 @@ proc loadConfigs*(cfg: RelativeFile; cache: IdentCache; conf: ConfigRef) =
 
   var configFiles = newSeq[AbsoluteFile]()
 
-  template readConfigFile(path) =
+  template readConfigFile(path: untyped) =
     let configPath = path
     if readConfigFile(configPath, cache, conf):
       configFiles.add(configPath)

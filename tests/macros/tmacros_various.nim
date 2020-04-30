@@ -38,7 +38,7 @@ block tdump:
 
 
 block texprcolonexpr:
-  macro def(x): untyped =
+  macro def(x: untyped): untyped =
     echo treeRepr(x)
 
   def name(a, b:cint) => nil

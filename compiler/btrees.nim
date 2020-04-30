@@ -31,8 +31,8 @@ type
 proc initBTree*[Key, Val](): BTree[Key, Val] =
   BTree[Key, Val](root: Node[Key, Val](entries: 0, isInternal: false))
 
-template less(a, b): bool = cmp(a, b) < 0
-template eq(a, b): bool = cmp(a, b) == 0
+template less(a, b: untyped): bool = cmp(a, b) < 0
+template eq(a, b: untyped): bool = cmp(a, b) == 0
 
 proc getOrDefault*[Key, Val](b: BTree[Key, Val], key: Key): Val =
   var x = b.root

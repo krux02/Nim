@@ -124,7 +124,7 @@ proc checkLocal(c: AnalysisCtx; n: PNode) =
   else:
     for i in 0..<n.safeLen: checkLocal(c, n[i])
 
-template `?`(x): untyped = x.renderTree
+template `?`(x: untyped): untyped = x.renderTree
 
 proc checkLe(c: AnalysisCtx; a, b: PNode) =
   case proveLe(c.guards, a, b)
@@ -263,7 +263,7 @@ proc min(a, b: PNode): PNode =
   elif a.intVal < b.intVal: result = a
   else: result = b
 
-template pushSpawnId(c, body) {.dirty.} =
+template pushSpawnId(c, body: untyped) {.dirty.} =
   inc c.spawns
   let oldSpawnId = c.currentSpawnId
   c.currentSpawnId = c.spawns

@@ -74,7 +74,7 @@ when defined(windows):
     memRead* = MemAccessFlags(PAGE_READONLY)
     memReadWrite* = MemAccessFlags(PAGE_READWRITE)
 
-  template check(expr) =
+  template check(expr: untyped) =
     let r = expr
     if r == cast[type(r)](0):
       raiseOSError(osLastError())
@@ -92,7 +92,7 @@ else:
     memRead* = MemAccessFlags(PROT_READ)
     memReadWrite* = MemAccessFlags(PROT_READ or PROT_WRITE)
 
-  template check(expr) =
+  template check(expr: untyped) =
     if not expr:
       raiseOSError(osLastError())
 
@@ -238,4 +238,3 @@ func commitedLen*[T](s: ReservedMemSeq[T]): int =
 
 func maxLen*[T](s: ReservedMemSeq[T]): int =
   s.mem.maxLen div sizeof(T)
-

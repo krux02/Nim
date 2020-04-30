@@ -350,7 +350,7 @@ block troofregression:
     ## a shortcut for 'a..pred(b)'.
     a ... pred(b)
 
-  template check(a, b) =
+  template check(a, b: untyped) =
     if $a != b:
       echo "Failure ", a, " != ", b
 

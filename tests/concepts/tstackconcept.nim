@@ -12,7 +12,7 @@ IMPLICIT VALUE TYPE NAME INT INT
 
 import typetraits, strutils
 
-template reject(e) =
+template reject(e: untyped) =
   static: assert(not compiles(e))
 
 type

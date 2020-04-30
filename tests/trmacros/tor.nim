@@ -10,7 +10,7 @@ template testOr{ (arithOps{f})(a, b) }(a, b, f: untyped): untyped = f(a mod 10, 
 let xx = 10
 echo 10*xx
 
-template t{x = (~x){y} and (~x){z}}(x, y, z: bool): typed =
+template t{x = (~x){y} and (~x){z}}(x, y, z: bool) =
   x = y
   if x: x = z
 

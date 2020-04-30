@@ -222,7 +222,7 @@ proc genArgNoParam(p: BProc, n: PNode): Rope =
     initLocExprSingleUse(p, n, a)
     result = rdLoc(a)
 
-template genParamLoop(params) {.dirty.} =
+template genParamLoop(params: untyped) {.dirty.} =
   if i < typ.len:
     assert(typ.n[i].kind == nkSym)
     let paramType = typ.n[i]

@@ -91,7 +91,7 @@ const
 const
   vintDelta = 5
 
-template encodeIntImpl(self) =
+template encodeIntImpl(self: untyped) =
   var d: char
   var v = x
   var rem = v mod 190

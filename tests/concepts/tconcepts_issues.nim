@@ -105,7 +105,7 @@ block t976:
   take[int1](i1)
   take[int2](i2)
 
-  template reject(e) =
+  template reject(e: untyped) =
     static: assert(not compiles(e))
 
   reject take[string](i2)

@@ -1976,7 +1976,7 @@ proc semExpandToAst(c: PContext, n: PNode, magicSym: PSym,
 proc processQuotations(c: PContext; n: var PNode, op: string,
                        quotes: var seq[PNode],
                        ids: var seq[PNode]) =
-  template returnQuote(q) =
+  template returnQuote(q: untyped) =
     quotes.add q
     n = newIdentNode(getIdent(c.cache, $quotes.len), n.info)
     ids.add n

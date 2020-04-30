@@ -40,7 +40,7 @@ proc nimModInt64(a, b: int64; res: ptr int64): bool {.nimbaseH.}
 
 # Platform independent versions.
 
-template addImplFallback(name, T, U) {.dirty.} =
+template addImplFallback(name, T, U: untyped) {.dirty.} =
   when not declared(name):
     proc name(a, b: T; res: ptr T): bool {.compilerproc, inline.} =
       let r = cast[T](cast[U](a) + cast[U](b))
@@ -52,7 +52,7 @@ template addImplFallback(name, T, U) {.dirty.} =
 addImplFallback(nimAddInt, int, uint)
 addImplFallback(nimAddInt64, int64, uint64)
 
-template subImplFallback(name, T, U) {.dirty.} =
+template subImplFallback(name, T, U: untyped) {.dirty.} =
   when not declared(name):
     proc name(a, b: T; res: ptr T): bool {.compilerproc, inline.} =
       let r = cast[T](cast[U](a) - cast[U](b))
@@ -64,7 +64,7 @@ template subImplFallback(name, T, U) {.dirty.} =
 subImplFallback(nimSubInt, int, uint)
 subImplFallback(nimSubInt64, int64, uint64)
 
-template mulImplFallback(name, T, U, conv) {.dirty.} =
+template mulImplFallback(name, T, U, conv: untyped) {.dirty.} =
   #
   # This code has been inspired by Python's source code.
   # The native int product x*y is either exactly right or *way* off, being
@@ -111,7 +111,7 @@ mulImplFallback(nimMulInt, int, uint, toFloat)
 mulImplFallback(nimMulInt64, int64, uint64, toBiggestFloat)
 
 
-template divImplFallback(name, T) {.dirty.} =
+template divImplFallback(name, T: untyped) {.dirty.} =
   proc name(a, b: T; res: ptr T): bool {.compilerproc, inline.} =
     # we moved the b == 0 case out into the codegen.
     if a == low(T) and b == T(-1):

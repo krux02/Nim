@@ -4,7 +4,7 @@ errormsg: "type expected, but symbol 'MyType' has no type."
 
 import macros
 
-macro foobar(name) =
+macro foobar(name: untyped) =
   let sym = genSym(nskType, "MyType")
 
   result = quote do:

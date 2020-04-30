@@ -72,3 +72,6 @@ remove all WTFs from the codebase.
 ** make ~not~ a normal identifier (not an operator)
 ** inject base type fields into node (make iterating fields easier).
 ** reintroduce ~abort~
+** enforce () for proc template definitions
+** invert `cmp` and `<` dependency
+** remove immediate templates

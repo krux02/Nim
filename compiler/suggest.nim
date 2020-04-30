@@ -66,7 +66,7 @@ proc extractDocComment(s: PSym): string =
     result = ""
 
 proc cmpSuggestions(a, b: Suggest): int =
-  template cf(field) {.dirty.} =
+  template cf(field: untyped) {.dirty.} =
     result = b.field.int - a.field.int
     if result != 0: return result
 

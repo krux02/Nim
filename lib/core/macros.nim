@@ -1145,7 +1145,7 @@ proc addPragma*(someProc, pragma: NimNode) {.compileTime.} =
     someProc.pragma = pragmaNode
   pragmaNode.add(pragma)
 
-template badNodeKind(n, f) =
+template badNodeKind(n, f: untyped) =
   error("Invalid node kind " & $n.kind & " for macros.`" & $f & "`", n)
 
 proc body*(someProc: NimNode): NimNode {.compileTime.} =

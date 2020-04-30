@@ -1858,12 +1858,12 @@ else:
   template isFile(f: string): bool {.dirty.} =
     fileExists(f)
 
-template defaultWalkFilter(item): bool =
+template defaultWalkFilter(item: untyped): bool =
   ## Walk filter used to return true on both
   ## files and directories
   true
 
-template walkCommon(pattern: string, filter) =
+template walkCommon(pattern: string, filter: untyped) =
   ## Common code for getting the files and directories with the
   ## specified `pattern`
   when defined(windows):
@@ -3029,12 +3029,12 @@ type
     lastWriteTime*: times.Time        ## Time file was last modified/written to.
     creationTime*: times.Time         ## Time file was created. Not supported on all systems!
 
-template rawToFormalFileInfo(rawInfo, path, formalInfo): untyped =
+template rawToFormalFileInfo(rawInfo, path, formalInfo: untyped): untyped =
   ## Transforms the native file info structure into the one nim uses.
   ## 'rawInfo' is either a 'BY_HANDLE_FILE_INFORMATION' structure on Windows,
   ## or a 'Stat' structure on posix
   when defined(Windows):
-    template merge(a, b): untyped = a or (b shl 32)
+    template merge(a, b: untyped): untyped = a or (b shl 32)
     formalInfo.id.device = rawInfo.dwVolumeSerialNumber
     formalInfo.id.file = merge(rawInfo.nFileIndexLow, rawInfo.nFileIndexHigh)
     formalInfo.size = merge(rawInfo.nFileSizeLow, rawInfo.nFileSizeHigh)

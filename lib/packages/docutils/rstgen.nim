@@ -1240,7 +1240,7 @@ proc defaultConfig*(): StringTableRef =
   ## ``rstToHtml`` to generate the bare minimum HTML.
   result = newStringTable(modeStyleInsensitive)
 
-  template setConfigVar(key, val) =
+  template setConfigVar(key, val: untyped) =
     result[key] = val
 
   # If you need to modify these values, it might be worth updating the template

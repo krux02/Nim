@@ -65,24 +65,24 @@ proc objectNode(cache: IdentCache; n: PNode): PNode =
 proc mapTypeToAstX(cache: IdentCache; t: PType; info: TLineInfo;
                    inst=false; allowRecursionX=false): PNode =
   var allowRecursion = allowRecursionX
-  template atomicType(name, m): untyped = atomicTypeX(cache, name, m, t, info)
-  template atomicType(s): untyped = atomicTypeX(s, info)
-  template mapTypeToAst(t,info): untyped = mapTypeToAstX(cache, t, info, inst)
-  template mapTypeToAstR(t,info): untyped = mapTypeToAstX(cache, t, info, inst, true)
-  template mapTypeToAst(t,i,info): untyped =
+  template atomicType(name, m: untyped): untyped = atomicTypeX(cache, name, m, t, info)
+  template atomicType(s: untyped): untyped = atomicTypeX(s, info)
+  template mapTypeToAst(t,info: untyped): untyped = mapTypeToAstX(cache, t, info, inst)
+  template mapTypeToAstR(t,info: untyped): untyped = mapTypeToAstX(cache, t, info, inst, true)
+  template mapTypeToAst(t,i,info: untyped): untyped =
     if i<t.len and t[i]!=nil: mapTypeToAstX(cache, t[i], info, inst)
     else: newNodeI(nkEmpty, info)
-  template mapTypeToBracket(name, m, t, info): untyped =
+  template mapTypeToBracket(name, m, t, info: untyped): untyped =
     mapTypeToBracketX(cache, name, m, t, info, inst)
-  template newNodeX(kind): untyped =
+  template newNodeX(kind: untyped): untyped =
     newNodeIT(kind, if t.n.isNil: info else: t.n.info, t)
-  template newIdentDefs(n,t): untyped =
+  template newIdentDefs(n,t: untyped): untyped =
     var id = newNodeX(nkIdentDefs)
     id.add n  # name
     id.add mapTypeToAst(t, info)  # type
     id.add newNodeI(nkEmpty, info)  # no assigned value
     id
-  template newIdentDefs(s): untyped = newIdentDefs(s, s.typ)
+  template newIdentDefs(s: untyped): untyped = newIdentDefs(s, s.typ)
 
   if inst and not allowRecursion and t.sym != nil:
     # getTypeInst behavior: return symbol

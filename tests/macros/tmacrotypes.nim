@@ -132,7 +132,7 @@ type
   Vec3*[T: VectorElementType] = Vec[3,T]
   Vec2*[T: VectorElementType] = Vec[2,T]
 
-template vecGen(U:untyped,V:typed):typed=
+template vecGen(U:untyped,V:typed) =
   ## ``U`` suffix
   ## ``V`` valType
   ##

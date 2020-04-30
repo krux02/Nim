@@ -817,7 +817,7 @@ template foldl*(sequence, operation: untyped): untyped =
     result = operation
   result
 
-template foldl*(sequence, operation, first): untyped =
+template foldl*(sequence, operation, first: untyped): untyped =
   ## Template to fold a sequence from left to right, returning the accumulation.
   ##
   ## This version of ``foldl`` gets a **starting parameter**. This makes it possible

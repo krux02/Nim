@@ -14,13 +14,13 @@ b is 2 times a
 
 import macros
 
-template ok(x) = assert(x)
-template no(x) = assert(not x)
+template ok(x: untyped) = assert(x)
+template no(x: untyped) = assert(not x)
 
-template accept(x) =
+template accept(x: untyped) =
   static: assert(compiles(x))
 
-template reject(x) =
+template reject(x: untyped) =
   static: assert(not compiles(x))
 
 proc plus(a, b: int): int = a + b

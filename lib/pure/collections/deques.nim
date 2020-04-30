@@ -92,13 +92,13 @@ proc len*[T](deq: Deque[T]): int {.inline.} =
   ## Return the number of elements of `deq`.
   result = deq.count
 
-template emptyCheck(deq) =
+template emptyCheck(deq: untyped) =
   # Bounds check for the regular deque access.
   when compileOption("boundChecks"):
     if unlikely(deq.count < 1):
       raise newException(IndexError, "Empty deque.")
 
-template xBoundsCheck(deq, i) =
+template xBoundsCheck(deq, i: untyped) =
   # Bounds check for the array like accesses.
   when compileOption("boundChecks"): # d:release should disable this.
     if unlikely(i >= deq.count): # x < deq.low is taken care by the Natural parameter

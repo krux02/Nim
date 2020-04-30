@@ -471,7 +471,7 @@ proc pinnedSpawn*(id: ThreadId; call: typed): void {.magic: "Spawn".}
   ## ``call`` has to be proc call ``p(...)`` where ``p`` is gcsafe and has a
   ## return type that is either ``void`` or compatible with ``FlowVar[T]``.
 
-template spawnX*(call): void =
+template spawnX*(call: untyped): void =
   ## Spawns a new task if a CPU core is ready, otherwise executes the
   ## call in the calling thread.
   ##

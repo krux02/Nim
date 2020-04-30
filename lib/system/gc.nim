@@ -140,8 +140,8 @@ proc internRefcount(p: pointer): int {.exportc: "getRefcount".} =
 when BitsPerPage mod (sizeof(int)*8) != 0:
   {.error: "(BitsPerPage mod BitsPerUnit) should be zero!".}
 
-template color(c): untyped = c.refCount and colorMask
-template setColor(c, col) =
+template color(c: untyped): untyped = c.refCount and colorMask
+template setColor(c, col: untyped) =
   when col == rcBlack:
     c.refcount = c.refcount and not colorMask
   else:

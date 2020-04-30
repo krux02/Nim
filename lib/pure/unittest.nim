@@ -431,7 +431,7 @@ proc testEnded(testResult: TestResult) =
   for formatter in formatters:
     formatter.testEnded(testResult)
 
-template suite*(name, body) {.dirty.} =
+template suite*(name, body: untyped) {.dirty.} =
   ## Declare a test suite identified by `name` with optional ``setup``
   ## and/or ``teardown`` section.
   ##
@@ -483,7 +483,7 @@ template suite*(name, body) {.dirty.} =
 
 template exceptionTypeName(e: typed): string = $e.name
 
-template test*(name, body) {.dirty.} =
+template test*(name, body: untyped) {.dirty.} =
   ## Define a single test case identified by `name`.
   ##
   ## .. code-block:: nim
@@ -718,7 +718,7 @@ macro expect*(exceptions: varargs[typed], body: untyped): untyped =
   ##
   ##  expect IOError, OSError, ValueError, AssertionError:
   ##    defectiveRobot()
-  template expectBody(errorTypes, lineInfoLit, body): NimNode {.dirty.} =
+  template expectBody(errorTypes, lineInfoLit, body: untyped): NimNode {.dirty.} =
     try:
       body
       checkpoint(lineInfoLit & ": Expect Failed, no exception was thrown.")

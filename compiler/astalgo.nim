@@ -48,7 +48,7 @@ template debug*(x: PSym|PType|PNode) {.deprecated.} =
   else:
     error()
 
-template debug*(x: auto) {.deprecated.} =
+template debug*(x: untyped) {.deprecated.} =
   echo x
 
 template mdbg*: bool {.deprecated.} =

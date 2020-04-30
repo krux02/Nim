@@ -93,7 +93,7 @@ proc kochExec*(cmd: string) =
 proc kochExecFold*(desc, cmd: string) =
   execFold(desc, kochExe.quoteShell & " " & cmd)
 
-template withDir(dir, body) =
+template withDir(dir, body: untyped) =
   let old = getCurrentDir()
   try:
     setCurrentDir(dir)
@@ -386,7 +386,7 @@ proc winReleaseArch(arch: string) =
   doAssert arch in ["32", "64"]
   let cpu = if arch == "32": "i386" else: "amd64"
 
-  template withMingw(path, body) =
+  template withMingw(path, body: untyped) =
     let prevPath = getEnv("PATH")
     putEnv("PATH", (if path.len > 0: path & PathSep else: "") & prevPath)
     try:
@@ -426,7 +426,7 @@ proc winRelease*() =
 
 # -------------- tests --------------------------------------------------------
 
-template `|`(a, b): string = (if a.len > 0: a else: b)
+template `|`(a, b: untyped): string = (if a.len > 0: a else: b)
 
 proc tests(args: string) =
   nimexec "cc --opt:speed testament/testament"

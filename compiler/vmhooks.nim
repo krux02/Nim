@@ -9,7 +9,7 @@
 
 import pathutils
 
-template setX(k, field) {.dirty.} =
+template setX(k, field: untyped) {.dirty.} =
   a.slots[a.ra].ensureKind(k)
   a.slots[a.ra].field = v
 
@@ -36,7 +36,7 @@ proc setResult*(a: VmArgs; v: seq[string]) =
   for x in v: n.add newStrNode(nkStrLit, x)
   a.slots[a.ra].node = n
 
-template getX(k, field) {.dirty.} =
+template getX(k, field: untyped) {.dirty.} =
   doAssert i < a.rc-1
   doAssert a.slots[i+a.rb+1].kind == k
   result = a.slots[i+a.rb+1].field

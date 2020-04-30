@@ -1232,10 +1232,10 @@ proc add*[T](x: var seq[T], y: openArray[T]) {.noSideEffect.} =
   for i in 0..high(y): x[xl+i] = y[i]
 
 when defined(nimSeqsV2):
-  template movingCopy(a, b) =
+  template movingCopy(a, b: untyped) =
     a = move(b)
 else:
-  template movingCopy(a, b) =
+  template movingCopy(a, b: untyped) =
     shallowCopy(a, b)
 
 proc del*[T](x: var seq[T], i: Natural) {.noSideEffect.} =
@@ -1671,7 +1671,7 @@ proc instantiationInfo*(index = -1, fullPaths = false): tuple[
   ## .. code-block:: nim
   ##   import strutils
   ##
-  ##   template testException(exception, code: untyped): typed =
+  ##   template testException(exception, code: untyped) =
   ##     try:
   ##       let pos = instantiationInfo()
   ##       discard(code)
@@ -2774,13 +2774,13 @@ template currentSourcePath*: string = instantiationInfo(-1, true).filename
   ## * `getCurrentDir proc <os.html#getCurrentDir>`_
 
 when compileOption("rangechecks"):
-  template rangeCheck*(cond) =
+  template rangeCheck*(cond: untyped) =
     ## Helper for performing user-defined range checks.
     ## Such checks will be performed only when the ``rangechecks``
     ## compile-time option is enabled.
     if not cond: sysFatal(RangeError, "range check failed")
 else:
-  template rangeCheck*(cond) = discard
+  template rangeCheck*(cond: untyped) = discard
 
 when not defined(nimhygiene):
   {.pragma: inject.}
@@ -2822,15 +2822,6 @@ macro varargsLen*(x: varargs[untyped]): int {.since: (1, 1).} =
   ## returns number of variadic arguments in `x`
   proc varargsLenImpl(x: NimNode): NimNode {.magic: "LengthOpenArray", noSideEffect.}
   varargsLenImpl(x)
-
-when false:
-  template eval*(blk: typed): typed =
-    ## Executes a block of code at compile time just as if it was a macro.
-    ##
-    ## Optionally, the block can return an AST tree that will replace the
-    ## eval expression.
-    macro payload: typed {.gensym.} = blk
-    payload()
 
 when hasAlloc or defined(nimscript):
   proc insert*(x: var string, item: string, i = 0.Natural) {.noSideEffect.} =

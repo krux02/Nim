@@ -825,7 +825,7 @@ proc patchBody(g: ModuleGraph; c: PContext; n: PNode; info: TLineInfo) =
         n[0] = newSymNode(t.destructor)
   for x in n: patchBody(g, c, x, info)
 
-template inst(field, t) =
+template inst(field, t: untyped) =
   if field.ast != nil and field.ast[genericParamsPos].kind != nkEmpty:
     if t.typeInst != nil:
       var a: TLiftCtx

@@ -10,8 +10,8 @@
 # An ``include`` file for the different hash set implementations.
 
 
-template maxHash(t): untyped = high(t.data)
-template dataLen(t): untyped = len(t.data)
+template maxHash(t: untyped): untyped = high(t.data)
+template dataLen(t: untyped): untyped = len(t.data)
 
 include hashcommon
 
@@ -68,7 +68,7 @@ template containsOrInclImpl() {.dirty.} =
     rawInsert(s, s.data, key, hc, -1 - index)
     inc(s.counter)
 
-template doWhile(a, b) =
+template doWhile(a, b: untyped) =
   while true:
     b
     if not a: break

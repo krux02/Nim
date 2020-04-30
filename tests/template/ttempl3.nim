@@ -31,7 +31,7 @@ echo(ha)
 
 
 # Test identifier generation:
-template prefix(name): untyped = `"hu" name`
+template prefix(name: untyped): untyped = `"hu" name`
 
 var `hu "XYZ"` = "yay"
 

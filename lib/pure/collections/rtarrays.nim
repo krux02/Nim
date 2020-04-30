@@ -22,7 +22,7 @@ type
     spart: seq[T]
     apart: array[ArrayPartSize, T]
 
-template usesSeqPart(x): untyped = x.L > ArrayPartSize
+template usesSeqPart(x: untyped): untyped = x.L > ArrayPartSize
 
 proc initRtArray*[T](len: Natural): RtArray[T] =
   result.L = len
@@ -34,4 +34,3 @@ proc getRawData*[T](x: var RtArray[T]): ptr UncheckedArray[T] =
   else: cast[ptr UncheckedArray[T]](addr(x.apart[0]))
 
 #proc len*[T](x: RtArray[T]): int = x.L
-

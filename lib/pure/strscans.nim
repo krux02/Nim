@@ -309,7 +309,7 @@ proc buildUserCall(x: string; args: varargs[NimNode]): NimNode =
 
 macro scanf*(input: string; pattern: static[string]; results: varargs[typed]): bool =
   ## See top level documentation of this module about how ``scanf`` works.
-  template matchBind(parser) {.dirty.} =
+  template matchBind(parser: untyped) {.dirty.} =
     var resLen = genSym(nskLet, "resLen")
     conds.add newLetStmt(resLen, newCall(bindSym(parser), inp, results[i], idx))
     conds.add resLen.notZero
@@ -477,7 +477,7 @@ macro scanp*(input, idx: typed; pattern: varargs[untyped]): bool =
   ## See top level documentation of this module about how ``scanp`` works.
   type StmtTriple = tuple[init, cond, action: NimNode]
 
-  template interf(x): untyped = bindSym(x, brForceOpen)
+  template interf(x: untyped): untyped = bindSym(x, brForceOpen)
 
   proc toIfChain(n: seq[StmtTriple]; idx, res: NimNode; start: int): NimNode =
     if start >= n.len: return newAssignment(res, newLit true)
@@ -511,7 +511,7 @@ macro scanp*(input, idx: typed; pattern: varargs[untyped]): bool =
         result.add placeholder(n[i], x, j)
 
   proc atm(it, input, idx, attached: NimNode): StmtTriple =
-    template `!!`(x): untyped = attach(x, attached)
+    template `!!`(x: untyped): untyped = attach(x, attached)
     case it.kind
     of nnkIdent:
       var resLen = genSym(nskLet, "resLen")
@@ -520,7 +520,7 @@ macro scanp*(input, idx: typed; pattern: varargs[untyped]): bool =
                 !!newCall(interf"nxt", input, idx, resLen))
     of nnkCallKinds:
       # *{'A'..'Z'} !! s.add(!_)
-      template buildWhile(input, idx, init, cond, action): untyped =
+      template buildWhile(input, idx, init, cond, action: untyped): untyped =
         while hasNxt(input, idx):
           init
           if not cond: break
@@ -573,12 +573,12 @@ macro scanp*(input, idx: typed; pattern: varargs[untyped]): bool =
       elif it.kind == nnkInfix and it[0].eqIdent"^*":
         # a ^* b  is rewritten to:  (a *(b a))?
         #exprList = expr ^+ comma
-        template tmp(a, b): untyped = ?(a, *(b, a))
+        template tmp(a, b: untyped): untyped = ?(a, *(b, a))
         result = atm(getAst(tmp(it[1], it[2])), input, idx, attached)
 
       elif it.kind == nnkInfix and it[0].eqIdent"^+":
         # a ^* b  is rewritten to:  (a +(b a))?
-        template tmp(a, b): untyped = (a, *(b, a))
+        template tmp(a, b: untyped): untyped = (a, *(b, a))
         result = atm(getAst(tmp(it[1], it[2])), input, idx, attached)
       elif it.kind == nnkCommand and it.len == 2 and it[0].eqIdent"pred":
         # enforce that the wrapped call is interpreted as a predicate, not a non-terminal:

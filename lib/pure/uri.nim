@@ -342,7 +342,7 @@ proc combine*(base: Uri, reference: Uri): Uri =
     let qux = combine(parseUri("https://nim-lang.org/foo/bar/"), parseUri("baz"))
     assert qux.path == "/foo/bar/baz"
 
-  template setAuthority(dest, src): untyped =
+  template setAuthority(dest, src: untyped): untyped =
     dest.hostname = src.hostname
     dest.username = src.username
     dest.port = src.port

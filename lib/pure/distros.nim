@@ -140,7 +140,7 @@ const
 # execution for faster platform detections.
 var unameRes, releaseRes, hostnamectlRes: string
 
-template unameRelease(cmd, cache): untyped =
+template unameRelease(cmd, cache: untyped): untyped =
   if cache.len == 0:
     cache = (when defined(nimscript): gorge(cmd) else: execProcess(cmd))
   cache

@@ -1,7 +1,7 @@
 # see `semLowerLetVarCustomPragma` for compiler support that enables these
 # lowerings
 
-template byaddr*(lhs, typ, ex) =
+template byaddr*(lhs, typ, ex: untyped) =
   ## Allows a syntax for lvalue reference, exact analog to
   ## `auto& a = ex;` in C++
   runnableExamples:

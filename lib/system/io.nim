@@ -131,7 +131,7 @@ when defined(androidNDK):
   proc android_log_print(prio: cint, tag: cstring, fmt: cstring): cint
     {.importc: "__android_log_print", header: "<android/log.h>", varargs, discardable.}
 
-template sysFatal(exc, msg) =
+template sysFatal(exc, msg: untyped) =
   raise newException(exc, msg)
 
 proc raiseEIO(msg: string) {.noinline, noreturn.} =

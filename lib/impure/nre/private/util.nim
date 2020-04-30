@@ -4,7 +4,7 @@ import tables
 const Ident = {'a'..'z', 'A'..'Z', '0'..'9', '_', '\128'..'\255'}
 const StartIdent = Ident - {'0'..'9'}
 
-template formatStr*(howExpr, namegetter, idgetter): untyped =
+template formatStr*(howExpr, namegetter, idgetter: untyped): untyped =
   let how = howExpr
   var val = newStringOfCap(how.len)
   var i = 0

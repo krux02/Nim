@@ -64,7 +64,7 @@ block tmatrix:
 
 
 block tnoalias:
-  template optslice{a = b + c}(a: untyped{noalias}, b, c: untyped): typed =
+  template optslice{a = b + c}(a: untyped{noalias}, b, c: untyped) =
     a = b
     inc a, c
   var
@@ -107,4 +107,3 @@ block tstatic_t_bug:
     a += b * scaleval
 
   main()
-

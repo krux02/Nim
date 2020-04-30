@@ -59,7 +59,7 @@ when false:
 
   template nodeFrom(n: PNode): PNode = copyTree(n)
 
-  template record(call) =
+  template record(call: untyped) =
     g.recordStmt(g, c.module, call)
 
   proc recordInc*(c: PCtx; info: TLineInfo; key: string; by: BiggestInt) =

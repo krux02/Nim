@@ -92,7 +92,7 @@ proc simpleExprAux(p: var TParser, limit: int, mode: TPrimaryMode): PNode
 
 # implementation
 
-template prettySection(body) =
+template prettySection(body: untyped) =
   when defined(nimpretty): beginSection(p.em)
   body
   when defined(nimpretty): endSection(p.em)
@@ -154,9 +154,9 @@ template newlineWasSplitting(p: var TParser) =
   when defined(nimpretty):
     layouter.newlineWasSplitting(p.em)
 
-template realInd(p): bool = p.tok.indent > p.currInd
-template sameInd(p): bool = p.tok.indent == p.currInd
-template sameOrNoInd(p): bool = p.tok.indent == p.currInd or p.tok.indent < 0
+template realInd(p: untyped): bool = p.tok.indent > p.currInd
+template sameInd(p: untyped): bool = p.tok.indent == p.currInd
+template sameOrNoInd(p: untyped): bool = p.tok.indent == p.currInd or p.tok.indent < 0
 
 proc validInd(p: var TParser): bool {.inline.} =
   result = p.tok.indent < 0 or p.tok.indent > p.currInd
@@ -972,10 +972,9 @@ proc identWithPragma(p: var TParser): PNode =
 type
   TDeclaredIdentFlag = enum
     withPragma,               # identifier may have pragma
-    withBothOptional          # both ':' and '=' parts are optional
   TDeclaredIdentFlags = set[TDeclaredIdentFlag]
 
-proc parseIdentColonEquals(p: var TParser, flags: TDeclaredIdentFlags): PNode =
+proc parseIdentColonEquals(p: var TParser, withPragma: bool): PNode =
   #| declColonEquals = identWithPragma (comma identWithPragma)* comma?
   #|                   (':' optInd typeDesc)? ('=' optInd expr)?
   #| identColonEquals = IDENT (comma IDENT)* comma?
@@ -986,8 +985,8 @@ proc parseIdentColonEquals(p: var TParser, flags: TDeclaredIdentFlags): PNode =
   while true:
     case p.tok.tokType
     of tkSymbol, tkAccent:
-      if withPragma in flags: a = identWithPragma(p)
-      else: a = parseSymbol(p)
+      if withPragma: a = identWithPragma(p)
+      else:          a = parseSymbol(p)
       if a.kind == nkEmpty: return
     else: break
     result.add(a)
@@ -1000,7 +999,7 @@ proc parseIdentColonEquals(p: var TParser, flags: TDeclaredIdentFlags): PNode =
     result.add(parseTypeDesc(p))
   else:
     result.add(newNodeP(nkEmpty, p))
-    if p.tok.tokType != tkEquals and withBothOptional notin flags:
+    if p.tok.tokType != tkEquals:
       parMessage(p, "':' or '=' expected, but got '$1'", p.tok)
   if p.tok.tokType == tkEquals:
     getTok(p)
@@ -1022,7 +1021,7 @@ proc parseTuple(p: var TParser, indentAllowed = false): PNode =
     optInd(p, result)
     # progress guaranteed
     while p.tok.tokType in {tkSymbol, tkAccent}:
-      var a = parseIdentColonEquals(p, {})
+      var a = parseIdentColonEquals(p, withPragma = false)
       result.add(a)
       if p.tok.tokType notin {tkComma, tkSemiColon}: break
       when defined(nimpretty):
@@ -1040,7 +1039,7 @@ proc parseTuple(p: var TParser, indentAllowed = false): PNode =
         while true:
           case p.tok.tokType
           of tkSymbol, tkAccent:
-            var a = parseIdentColonEquals(p, {})
+            var a = parseIdentColonEquals(p, withPragma = false)
             if p.tok.indent < 0 or p.tok.indent >= p.currInd:
               rawSkipComment(p, a)
             result.add(a)
@@ -1072,7 +1071,7 @@ proc parseParamList(p: var TParser, retColon = true): PNode =
     while true:
       case p.tok.tokType
       of tkSymbol, tkAccent:
-        a = parseIdentColonEquals(p, {withBothOptional, withPragma})
+        a = parseIdentColonEquals(p, withPragma = true)
       of tkParRi:
         break
       of tkVar:
@@ -1208,7 +1207,7 @@ proc parseFor(p: var TParser): PNode =
   colcom(p, result)
   result.add(parseStmt(p))
 
-template nimprettyDontTouch(body) =
+template nimprettyDontTouch(body: untyped) =
   when defined(nimpretty):
     inc p.em.keepIndents
   body
@@ -1969,7 +1968,7 @@ proc parseObjectPart(p: var TParser): PNode =
     of tkCase:
       result = parseObjectCase(p)
     of tkSymbol, tkAccent:
-      result = parseIdentColonEquals(p, {withPragma})
+      result = parseIdentColonEquals(p, withPragma = true)
       if p.tok.indent < 0 or p.tok.indent >= p.currInd:
         rawSkipComment(p, result)
     of tkNil, tkDiscard:
@@ -2127,7 +2126,7 @@ proc parseVariable(p: var TParser): PNode =
     optInd(p, result)
     result.add(parseExpr(p))
   else:
-    result = parseIdentColonEquals(p, {withPragma})
+    result = parseIdentColonEquals(p, withPragma = true)
   result[^1] = postExprBlocks(p, result[^1])
   indAndComment(p, result)
 

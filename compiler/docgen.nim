@@ -103,7 +103,7 @@ proc whichType(d: PDoc; n: PNode): PSym =
 
 proc attachToType(d: PDoc; p: PSym): PSym =
   let params = p.ast[paramsPos]
-  template check(i) =
+  template check(i: untyped) =
     result = whichType(d, params[i])
     if result != nil: return result
 
@@ -927,7 +927,7 @@ proc documentRaises*(cache: IdentCache; n: PNode) =
     if p5 != nil: n[pragmasPos].add p5
 
 proc generateDoc*(d: PDoc, n, orig: PNode, docFlags: DocFlags = kDefault) =
-  template genItemAux(skind) =
+  template genItemAux(skind: untyped) =
     genItem(d, n, n[namePos], skind, docFlags)
   case n.kind
   of nkPragma:

@@ -48,7 +48,7 @@ block fileOperations:
 
   echo "All:"
 
-  template norm(x): untyped =
+  template norm(x: untyped): untyped =
     (when defined(windows): x.replace('\\', '/') else: x)
 
   for path in walkPattern(dname/"*"):
@@ -305,7 +305,7 @@ block ospaths:
       doAssert lastPathPart(r"foo\bar.txt") == "bar.txt"
       doAssert lastPathPart(r"foo\") == "foo"
 
-  template canon(x): untyped = normalizePath(x, '/')
+  template canon(x: untyped): untyped = normalizePath(x, '/')
   doAssert canon"/foo/../bar" == "/bar"
   doAssert canon"foo/../bar" == "bar"
 
@@ -386,7 +386,7 @@ block ospaths:
   # but not `./foo/bar` and `foo/bar`
   doAssert joinPath(".", "/lib") == unixToNativePath"./lib"
   doAssert joinPath(".","abc") == unixToNativePath"./abc"
-  
+
   # cases related to issue #13455
   doAssert joinPath("foo", "", "") == "foo"
   doAssert joinPath("foo", "") == "foo"

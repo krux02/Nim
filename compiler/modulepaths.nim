@@ -46,7 +46,7 @@ when false:
 
 when false:
   proc resolveDollar(project, source, pkg, subdir: string; info: TLineInfo): string =
-    template attempt(a) =
+    template attempt(a: untyped) =
       let x = addFileExt(a, "nim")
       if fileExists(x): return x
 

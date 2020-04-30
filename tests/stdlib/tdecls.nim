@@ -35,7 +35,7 @@ block:
     var b2 {.byaddr.}: int = s[2])
 
 ## We can define custom pragmas in user code
-template byUnsafeAddr(lhs, typ, expr) =
+template byUnsafeAddr(lhs, typ, expr: untyped) =
   when typ is type(nil):
     let tmp = unsafeAddr(expr)
   else:
@@ -50,7 +50,7 @@ block:
 
 block: # nkAccQuoted
   # shows using a keyword, which requires nkAccQuoted
-  template `cast`(lhs, typ, expr) =
+  template `cast`(lhs, typ, expr: untyped) =
     when typ is type(nil):
       let tmp = unsafeAddr(expr)
     else:

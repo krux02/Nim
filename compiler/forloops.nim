@@ -75,7 +75,7 @@ proc extractForLoop*(loop, fullTree: PNode): ForLoop =
   let counter = getCounter(lastStmt)
   if counter.isNil or counter.ast.isNil: return
 
-  template `=~`(a, b): expr = a.kind == nkSym and a.sym == b
+  template `=~`(a, b: untyped): expr = a.kind == nkSym and a.sym == b
 
   if cond[1] =~ counter or cond[2] =~ counter:
     # ok, now check 'counter' is not used *after* the loop

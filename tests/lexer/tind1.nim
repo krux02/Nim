@@ -11,7 +11,7 @@ var x = if 4 != 5:
   else:
     "no"
 
-macro mymacro(n, b): untyped =
+macro mymacro(n, b: untyped): untyped =
   discard
 
 mymacro:

@@ -30,7 +30,7 @@ proc rawInsert[X, A, B](t: var X, data: var KeyValuePairSeq[A, B],
                      key: A, val: B, hc: Hash, h: Hash) =
   rawInsertImpl()
 
-template addImpl(enlarge) {.dirty.} =
+template addImpl(enlarge: untyped) {.dirty.} =
   checkIfInitialized()
   if mustRehash(t): enlarge(t)
   var hc: Hash
@@ -38,7 +38,7 @@ template addImpl(enlarge) {.dirty.} =
   rawInsert(t, t.data, key, val, hc, j)
   inc(t.counter)
 
-template maybeRehashPutImpl(enlarge) {.dirty.} =
+template maybeRehashPutImpl(enlarge: untyped) {.dirty.} =
   checkIfInitialized()
   if mustRehash(t):
     enlarge(t)
@@ -47,14 +47,14 @@ template maybeRehashPutImpl(enlarge) {.dirty.} =
   rawInsert(t, t.data, key, val, hc, index)
   inc(t.counter)
 
-template putImpl(enlarge) {.dirty.} =
+template putImpl(enlarge: untyped) {.dirty.} =
   checkIfInitialized()
   var hc: Hash
   var index = rawGet(t, key, hc)
   if index >= 0: t.data[index].val = val
   else: maybeRehashPutImpl(enlarge)
 
-template mgetOrPutImpl(enlarge) {.dirty.} =
+template mgetOrPutImpl(enlarge: untyped) {.dirty.} =
   checkIfInitialized()
   var hc: Hash
   var index = rawGet(t, key, hc)
@@ -64,7 +64,7 @@ template mgetOrPutImpl(enlarge) {.dirty.} =
   # either way return modifiable val
   result = t.data[index].val
 
-template hasKeyOrPutImpl(enlarge) {.dirty.} =
+template hasKeyOrPutImpl(enlarge: untyped) {.dirty.} =
   checkIfInitialized()
   var hc: Hash
   var index = rawGet(t, key, hc)
@@ -73,7 +73,7 @@ template hasKeyOrPutImpl(enlarge) {.dirty.} =
     maybeRehashPutImpl(enlarge)
   else: result = true
 
-template delImplIdx(t, i) =
+template delImplIdx(t, i: untyped) =
   let msk = maxHash(t)
   if i >= 0:
     dec(t.counter)
@@ -117,7 +117,7 @@ template insertImpl() = # for CountTable
   ctRawInsert(t, t.data, key, val)
   inc(t.counter)
 
-template getOrDefaultImpl(t, key): untyped =
+template getOrDefaultImpl(t, key: untyped): untyped =
   mixin rawGet
   var hc: Hash
   var index = rawGet(t, key, hc)

@@ -27,14 +27,14 @@ type
     counter, dataLen: int
     lock: Lock
 
-template maxHash(t): untyped = t.dataLen-1
+template maxHash(t: untyped): untyped = t.dataLen-1
 
 template checkIfInitialized() =
   assert t.data != nil, "shared table use before initialization"
 
 include tableimpl
 
-template st_maybeRehashPutImpl(enlarge) {.dirty.} =
+template st_maybeRehashPutImpl(enlarge: untyped) {.dirty.} =
   if mustRehash(t):
     enlarge(t)
     index = rawGetKnownHC(t, key, hc)

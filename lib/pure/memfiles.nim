@@ -155,7 +155,7 @@ proc open*(filename: string, mode: FileMode = fmRead,
       # return false
       #raise newException(IOError, msg)
 
-    template callCreateFile(winApiProc, filename): untyped =
+    template callCreateFile(winApiProc, filename: untyped): untyped =
       winApiProc(
         filename,
         # GENERIC_ALL != (GENERIC_READ or GENERIC_WRITE)

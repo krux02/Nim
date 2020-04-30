@@ -326,7 +326,7 @@ proc upperBound*[T](a: openArray[T], key: T): int = upperBound(a, key, cmp[T])
   ## * `lowerBound proc<#lowerBound,openArray[T],K,proc(T,K)>`_ sorted by ``cmp`` in the specified order
   ## * `lowerBound proc<#lowerBound,openArray[T],T>`_
 
-template `<-` (a, b) =
+template `<-` (a, b: untyped) =
   when defined(gcDestructors):
     a = move b
   elif onlySafeCode:

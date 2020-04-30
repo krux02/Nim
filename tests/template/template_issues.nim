@@ -187,7 +187,7 @@ block t4292:
 
 
 block t2670:
-  template testTemplate(b: bool): typed =
+  template testTemplate(b: bool) =
     when b:
         var a = "hi"
     else:

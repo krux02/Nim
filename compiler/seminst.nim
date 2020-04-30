@@ -162,7 +162,7 @@ proc instGenericContainer(c: PContext, info: TLineInfo, header: PType,
     let genParam = genericTyp[i]
     var param: PSym
 
-    template paramSym(kind): untyped =
+    template paramSym(kind: untyped): untyped =
       newSym(kind, genParam.sym.name, genericTyp.sym, genParam.sym.info)
 
     if genParam.kind == tyStatic:

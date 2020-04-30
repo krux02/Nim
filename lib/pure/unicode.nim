@@ -616,7 +616,7 @@ proc isCombining*(c: Rune): bool {.rtl, extern: "nuc$1", procvar.} =
     (c >= 0x20d0 and c <= 0x20ff) or
     (c >= 0xfe20 and c <= 0xfe2f))
 
-template runeCheck(s, runeProc) =
+template runeCheck(s, runeProc: untyped) =
   ## Common code for isAlpha and isSpace.
   result = if len(s) == 0: false else: true
   var
@@ -643,7 +643,7 @@ proc isSpace*(s: string): bool {.noSideEffect, procvar,
   runeCheck(s, isWhiteSpace)
 
 
-template convertRune(s, runeProc) =
+template convertRune(s, runeProc: untyped) =
   ## Convert runes in ``s`` using ``runeProc`` as the converter.
   result = newString(len(s))
   var
@@ -854,7 +854,7 @@ proc reversed*(s: string): string =
     blockPos = 0
     r: Rune
 
-  template reverseUntil(pos) =
+  template reverseUntil(pos: untyped) =
     var j = pos - 1
     while j > blockPos:
       result[newPos] = s[j]
@@ -1171,7 +1171,7 @@ proc alignLeft*(s: string, count: Natural, padding = ' '.Rune): string {.
 # -----------------------------------------------------------------------------
 # deprecated
 
-template runeCaseCheck(s, runeProc, skipNonAlpha) =
+template runeCaseCheck(s, runeProc, skipNonAlpha: untyped) =
   ## Common code for rune.isLower and rune.isUpper.
   if len(s) == 0: return false
   var

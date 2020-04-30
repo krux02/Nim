@@ -17,7 +17,7 @@ type
     Prefix, ## prefix does match the symbol
 
 proc prefixMatch*(p, s: string): PrefixMatch =
-  template eq(a, b): bool = a.toLowerAscii == b.toLowerAscii
+  template eq(a, b: untyped): bool = a.toLowerAscii == b.toLowerAscii
   if p.len > s.len: return PrefixMatch.None
   var i = 0
   # check for prefix/contains:
