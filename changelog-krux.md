@@ -40,5 +40,6 @@ This changelog contains all changes that are specific to the krux-nim branch
 - something for concepts broke (sorry)
 - statement `using` is no longer supported.
 - removed builtin pragmas: `this` `partial` `liftLocal` `package`.
+- `typed` doesn't mean `void` anymore for macro/template return type contexts
 
 ## Tool changes

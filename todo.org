@@ -63,11 +63,10 @@ remove all WTFs from the codebase.
 ** DONE remove ~using~ statement
 ** remove ~ast~ based function overloading
 ** remove experimental code reordering
-** error on compile time var at runtime
+** DONE error on compile time var at runtime
 ** makes pragmas importable
 ** remove term rewriting macros
-** remove dot operator
 ** explain pragma explain
-** remove special operators ~.~ ~.=~ ~.()~
-** make sure, ~typed~ doesn't mean ~void~ in macro/templates anymore.
+** DONE remove special operators ~.~ ~.=~ ~.()~
+** DONE make sure, ~typed~ doesn't mean ~void~ in macro/templates anymore.
 ** testament run test/does/not/exist is a warning not an error

@@ -1277,18 +1277,6 @@ proc semProcTypeNode(c: PContext, n, genericParams: PNode,
   if n[0].kind != nkEmpty:
     r = semTypeNode(c, n[0], nil)
 
-  if r != nil and kind in {skMacro, skTemplate} and r.kind == tyTyped:
-    # XXX: To implement the propesed change in the warning, just
-    # delete this entire if block. The rest is (at least at time of
-    # writing this comment) already implemented.
-    let info = n[0].info
-    const msg = "`typed` will change its meaning in future versions of Nim. " &
-                "`void` or no return type declaration at all has the same " &
-                "meaning as the current meaning of `typed` as return type " &
-                "declaration."
-    message(c.config, info, warnDeprecated, msg)
-    r = nil
-
   if r != nil:
     # turn explicit 'void' return type into 'nil' because the rest of the
     # compiler only checks for 'nil':
