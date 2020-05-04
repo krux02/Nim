@@ -358,19 +358,6 @@ proc resolveOverloads(c: PContext, n: PNode,
 
   let overloadsState = result.state
   if overloadsState != csMatch:
-    if c.p != nil and c.p.selfSym != nil:
-      # we need to enforce semchecking of selfSym again because it
-      # might need auto-deref:
-      var hiddenArg = newSymNode(c.p.selfSym)
-      hiddenArg.typ = nil
-      n.sons.insert(hiddenArg, 1)
-
-      pickBest(f)
-      if result.state != csMatch:
-        n.sons.delete(1)
-        excl n.flags, nfExprCall
-      else: return
-
     if overloadsState == csEmpty and result.state == csEmpty:
       if efNoUndeclared notin flags: # for tests/pragmas/tcustom_pragma.nim
         localError(c.config, n.info, getMsgDiagnostic(c, flags, n, f))

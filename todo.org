@@ -79,4 +79,4 @@ remove all WTFs from the codebase.
 ** delete all dead code
 ** make ByteAddress unsigned
 ** do notation without argument solution without reintroducing typeless argument syntax?
-** getRid of TProcCon.selfSym
+** DONE getRid of TProcCon.selfSym
