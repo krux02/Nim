@@ -426,10 +426,10 @@ proc getBiggestInt*(x: Any): BiggestInt =
   of tyChar: result = BiggestInt(cast[ptr char](x.value)[])
   of tyEnum, tySet:
     case t.size
-    of 1: result = ze64(cast[ptr int8](x.value)[])
-    of 2: result = ze64(cast[ptr int16](x.value)[])
-    of 4: result = BiggestInt(cast[ptr int32](x.value)[])
-    of 8: result = BiggestInt(cast[ptr int64](x.value)[])
+    of 1: result = cast[BiggestInt](cast[ptr uint8](x.value)[])
+    of 2: result = cast[BiggestInt](cast[ptr uint16](x.value)[])
+    of 4: result = cast[BiggestInt](cast[ptr uint32](x.value)[])
+    of 8: result = cast[BiggestInt](cast[ptr uint64](x.value)[])
     else: assert false
   of tyUInt: result = BiggestInt(cast[ptr uint](x.value)[])
   of tyUInt8: result = BiggestInt(cast[ptr uint8](x.value)[])

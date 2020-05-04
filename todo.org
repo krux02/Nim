@@ -75,3 +75,6 @@ remove all WTFs from the codebase.
 ** enforce () for proc template definitions
 ** invert `cmp` and `<` dependency
 ** remove immediate templates
+** make sure testament works from any directory
+** delete all dead code
+** make ByteAddress unsigned
