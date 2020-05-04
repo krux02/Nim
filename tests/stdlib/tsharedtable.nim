@@ -28,11 +28,11 @@ block: # we use Table as groundtruth, it's well tested elsewhere
       t[i] = i
       t0[i] = i
 
-    template add2(i, val) =
+    template add2(i, val: untyped) =
       t.add(i, val)
       t0.add(i, val)
 
-    template del2(i) =
+    template del2(i: untyped) =
       t.del(i)
       t0.del(i)
 

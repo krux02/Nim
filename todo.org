@@ -78,3 +78,5 @@ remove all WTFs from the codebase.
 ** make sure testament works from any directory
 ** delete all dead code
 ** make ByteAddress unsigned
+** do notation without argument solution without reintroducing typeless argument syntax?
+** getRid of TProcCon.selfSym

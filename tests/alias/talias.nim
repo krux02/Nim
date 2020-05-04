@@ -12,13 +12,13 @@ template compileTimeAssert(cond: untyped) =
   when not cond:
     {.compile: "is false: " & astToStr(cond).}
 
-template `<|` (a, b) =
+template `<|` (a, b: untyped) =
   compileTimeAssert isPartOf(a, b) == arYes
 
-template `!<|` (a, b) =
+template `!<|` (a, b: untyped) =
   compileTimeAssert isPartOf(a, b) == arNo
 
-template `?<|` (a, b) =
+template `?<|` (a, b: untyped) =
   compileTimeAssert isPartOf(a, b) == arMaybe
 
 type
