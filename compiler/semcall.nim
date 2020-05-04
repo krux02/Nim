@@ -366,7 +366,6 @@ proc resolveOverloads(c: PContext, n: PNode,
       n.sons.insert(hiddenArg, 1)
 
       pickBest(f)
-
       if result.state != csMatch:
         n.sons.delete(1)
         excl n.flags, nfExprCall
@@ -380,11 +379,6 @@ proc resolveOverloads(c: PContext, n: PNode,
       if nfExprCall in n.flags:
         localError(c.config, n.info, "expression '$1' cannot be called" %
                    renderTree(n, {renderNoComments}))
-      else:
-        if {nfDotField, nfDotSetter} * n.flags != {}:
-          # clean up the inserted ops
-          n.sons.delete(2)
-          n[0] = f
       return
   if alt.state == csMatch and cmpCandidates(result, alt) == 0 and
       not sameMethodDispatcher(result.calleeSym, alt.calleeSym):
