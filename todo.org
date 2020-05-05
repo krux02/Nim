@@ -46,7 +46,6 @@ remove all WTFs from the codebase.
 ** refactor typetraits. Move sizeof/alignof to typetraits. Ensure all typetraits do have a macro API.
 ** restrict usage of typedesc https://github.com/nim-lang/Nim/pull/11959
 ** remove language feature "bind many"
-** callsite as experimental https://github.com/nim-lang/Nim/pull/11864
 ** revisit how nodes get their line information
 ** change ~enforceVoidContext~ to ~tyVoid~
 ** fix parser to read negative literals
@@ -56,7 +55,7 @@ remove all WTFs from the codebase.
 ** DONE remove all traces on ~nOrig~
 ** wtf is up with ~cast[type(foo.bar)](expr)~? Why does it still work even after ~type~ is removed from ~system.nim~
   semTypeNode returns only a PType, it should return a PNode.
-** require argument types for macros and templates
+** DONE require argument types for macros and templates
 ** remove MyType.field access
 ** DONE remove ~this~ pragma
 ** DONE remove ~using~ statement
@@ -80,3 +79,12 @@ remove all WTFs from the codebase.
 ** make ByteAddress unsigned
 ** do notation without argument solution without reintroducing typeless argument syntax?
 ** DONE getRid of TProcCon.selfSym
+** allow cast to pointer of all proc/callback/closure types
+** "range types need to be constructed with '..', '..<' is not supported"
+** warning in template declaration to prefer ~untyped~ over ~typed~.
+** remove unnecessary indirect type declarations
+** remove the ~Any~ type
+** normalize the magic syntax to a single syntax (identifier no strings)
+** document how magics work for contributors
+** DONE get rid of the weird `..Seq` type definitions
+** error about deprecation that doesn't mention a fallback solution.

@@ -65,7 +65,7 @@ proc nodeTableGet*(t: TNodeTable, key: PNode): int =
   if index >= 0: result = t.data[index].val
   else: result = low(int)
 
-proc nodeTableRawInsert(data: var TNodePairSeq, k: Hash, key: PNode,
+proc nodeTableRawInsert(data: var seq[TNodePair], k: Hash, key: PNode,
                         val: int) =
   var h: Hash = k and high(data)
   while data[h].key != nil: h = nextTry(h, high(data))
@@ -75,7 +75,7 @@ proc nodeTableRawInsert(data: var TNodePairSeq, k: Hash, key: PNode,
   data[h].val = val
 
 proc nodeTablePut*(t: var TNodeTable, key: PNode, val: int) =
-  var n: TNodePairSeq
+  var n: seq[TNodePair]
   var k: Hash = hashTree(key)
   var index = nodeTableRawGet(t, k, key)
   if index >= 0:
@@ -92,7 +92,7 @@ proc nodeTablePut*(t: var TNodeTable, key: PNode, val: int) =
     inc(t.counter)
 
 proc nodeTableTestOrSet*(t: var TNodeTable, key: PNode, val: int): int =
-  var n: TNodePairSeq
+  var n: seq[TNodePair]
   var k: Hash = hashTree(key)
   var index = nodeTableRawGet(t, k, key)
   if index >= 0:

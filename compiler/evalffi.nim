@@ -457,7 +457,7 @@ proc callForeignFunction*(conf: ConfigRef, call: PNode): PNode =
     dealloc args[i-1]
 
 proc callForeignFunction*(conf: ConfigRef, fn: PNode, fntyp: PType,
-                          args: var TNodeSeq, start, len: int,
+                          args: var seq[PNode], start, len: int,
                           info: TLineInfo): PNode =
   internalAssert conf, fn.kind == nkPtrLit
 

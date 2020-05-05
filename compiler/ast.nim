@@ -29,9 +29,18 @@ type
     ccNoConvention            # needed for generating proper C procs sometimes
 
 const
-  CallingConvToStr*: array[TCallingConvention, string] = ["", "stdcall",
-    "cdecl", "safecall", "syscall", "inline", "noinline", "fastcall",
-    "closure", "noconv"]
+  CallingConvToStr*: array[TCallingConvention, string] = [
+    ccDefault: "",
+    ccStdCall: "stdcall",
+    ccCDecl: "cdecl",
+    ccSafeCall: "safecall",
+    ccSysCall: "syscall",
+    ccInline: "inline",
+    ccNoInline: "noinline",
+    ccFastCall: "fastcall",
+    ccClosure: "closure",
+    ccNoConvention: "noconv",
+  ]
 
 type
   TNodeKind* = enum # order is extremely important, because ranges are used
@@ -378,18 +387,18 @@ type
                      # if you need to add a type, they can apparently be reused
     tyNone, tyBool, tyChar,
     tyEmpty, tyAlias, tyNil, tyUntyped, tyTyped, tyTypeDesc,
-    tyGenericInvocation, # ``T[a, b]`` for types to invoke
-    tyGenericBody,       # ``T[a, b, body]`` last parameter is the body
-    tyGenericInst,       # ``T[a, b, realInstance]`` instantiated generic type
-                         # realInstance will be a concrete type like tyObject
-                         # unless this is an instance of a generic alias type.
-                         # then realInstance will be the tyGenericInst of the
-                         # completely (recursively) resolved alias.
+    tyGenericInvocation, ## ``T[a, b]`` for types to invoke
+    tyGenericBody,       ## ``T[a, b, body]`` last parameter is the body
+    tyGenericInst,       ## ``T[a, b, realInstance]`` instantiated generic type
+                         ## realInstance will be a concrete type like tyObject
+                         ## unless this is an instance of a generic alias type.
+                         ## then realInstance will be the tyGenericInst of the
+                         ## completely (recursively) resolved alias.
 
-    tyGenericParam,      # ``a`` in the above patterns
+    tyGenericParam,      ## ``a`` in the above patterns
     tyDistinct,
     tyEnum,
-    tyOrdinal,           # integer types (including enums and boolean)
+    tyOrdinal,           ## integer types (including enums and boolean)
     tyArray,
     tyObject,
     tyTuple,
@@ -411,8 +420,7 @@ type
 
     tyProxy # used as errornous type (for idetools)
 
-    tyBuiltInTypeClass
-      # Type such as the catch-all object, tuple, seq, etc
+    tyBuiltInTypeClass # Type such as the catch-all object, tuple, seq, etc
 
     tyUserTypeClass
       # the body of a user-defined type class
@@ -736,7 +744,6 @@ const
 
 type
   PNode* = ref TNode
-  TNodeSeq* = seq[PNode]
   PType* = ref TType
   PSym* = ref TSym
   TNode*{.final, acyclic.} = object # on a 32bit machine, this takes 32 bytes
@@ -757,7 +764,7 @@ type
     of nkIdent:
       ident*: PIdent
     else:
-      sons*: TNodeSeq
+      sons*: seq[PNode]
     comment*: string
 
   TStrTable* = object         # a table[PIdent] of PSym
@@ -903,7 +910,6 @@ type
     when defined(nimsuggest):
       allUsages*: seq[TLineInfo]
 
-  TTypeSeq* = seq[PType]
   TLockLevel* = distinct int16
 
   TTypeAttachedOp* = enum ## as usual, order is important here
@@ -921,7 +927,7 @@ type
     kind*: TTypeKind          # kind of type
     callConv*: TCallingConvention # for procs
     flags*: TTypeFlags        # flags of the type
-    sons*: TTypeSeq           # base types, etc.
+    sons*: seq[PType]         # base types, etc.
     n*: PNode                 # node for types:
                               # for range types a nkRange node
                               # for record types a nkRecord node
@@ -947,44 +953,35 @@ type
     uniqueId*: int            # due to a design mistake, we need to keep the real ID here as it
                               # required by the --incremental:on mode.
 
-  TPair* = object
-    key*, val*: RootRef
-
-  TPairSeq* = seq[TPair]
-
   TIdPair* = object
     key*: PIdObj
     val*: RootRef
 
-  TIdPairSeq* = seq[TIdPair]
   TIdTable* = object # the same as table[PIdent] of PObject
     counter*: int
-    data*: TIdPairSeq
+    data*: seq[TIdPair]
 
   TIdNodePair* = object
     key*: PIdObj
     val*: PNode
 
-  TIdNodePairSeq* = seq[TIdNodePair]
   TIdNodeTable* = object # the same as table[PIdObj] of PNode
     counter*: int
-    data*: TIdNodePairSeq
+    data*: seq[TIdNodePair]
 
   TNodePair* = object
     h*: Hash                 # because it is expensive to compute!
     key*: PNode
     val*: int
 
-  TNodePairSeq* = seq[TNodePair]
   TNodeTable* = object # the same as table[PNode] of int;
                                 # nodes are compared by structure!
     counter*: int
-    data*: TNodePairSeq
+    data*: seq[TNodePair]
 
-  TObjectSeq* = seq[RootRef]
   TObjectSet* = object
     counter*: int
-    data*: TObjectSeq
+    data*: seq[RootRef]
 
   TImplication* = enum
     impUnknown, impNo, impYes
@@ -1260,7 +1257,7 @@ proc newNodeI*(kind: TNodeKind, info: TLineInfo, children: int): PNode =
       writeStackTrace()
     inc gNodeId
 
-proc newNode*(kind: TNodeKind, info: TLineInfo, sons: TNodeSeq = @[],
+proc newNode*(kind: TNodeKind, info: TLineInfo, sons: seq[PNode] = @[],
               typ: PType = nil): PNode =
   # XXX use shallowCopy here for ownership transfer:
   result = PNode(kind: kind, info: info, typ: typ)
@@ -1346,8 +1343,15 @@ const
   UnspecifiedLockLevel* = TLockLevel(-1'i16)
   MaxLockLevel* = 1000'i16
   UnknownLockLevel* = TLockLevel(1001'i16)
+
   AttachedOpToStr*: array[TTypeAttachedOp, string] = [
-    "=destroy", "=", "=sink", "=trace", "=dispose", "=deepcopy"]
+    attachedDestructor: "=destroy",
+    attachedAsgn:       "=",
+    attachedSink:       "=sink",
+    attachedTrace:      "=trace",
+    attachedDispose:    "=dispose",
+    attachedDeepCopy:   "=deepcopy",
+  ]
 
 proc `$`*(x: TLockLevel): string =
   if x.ord == UnspecifiedLockLevel.ord: result = "<unspecified>"

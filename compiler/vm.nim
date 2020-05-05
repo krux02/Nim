@@ -1202,7 +1202,7 @@ proc rawExecute(c: PCtx, start: int, tos: PStackFrame): TFullReg =
           let prcValue = c.globals[prc.position-1]
           if prcValue.kind == nkEmpty:
             globalError(c.config, c.debug[pc], "cannot run " & prc.name.s)
-          var slots2: TNodeSeq
+          var slots2: seq[PNode]
           slots2.setLen(tos.slots.len)
           for i in 0..<tos.slots.len:
             slots2[i] = regToNode(tos.slots[i])

@@ -21,25 +21,24 @@ type
   TRenderFlag* = enum
     renderNone, renderNoBody, renderNoComments, renderDocComments,
     renderNoPragmas, renderIds, renderNoProcDefs, renderSyms
-  TRenderFlags* = set[TRenderFlag]
+
   TRenderTok* = object
     kind*: TTokType
     length*: int16
     sym*: PSym
 
-  TRenderTokSeq* = seq[TRenderTok]
   TSrcGen* = object
     indent*: int
     lineLen*: int
     pos*: int              # current position for iteration over the buffer
     idx*: int              # current token index for iteration over the buffer
-    tokens*: TRenderTokSeq
+    tokens*: seq[TRenderTok]
     buf*: string
     pendingNL*: int        # negative if not active; else contains the
                            # indentation value
     pendingWhitespace: int
     comStack*: seq[PNode]  # comment stack
-    flags*: TRenderFlags
+    flags*: set[TRenderFlag]
     inGenericParams: bool
     checkAnon: bool        # we're in a context that can contain sfAnon
     inPragma: int
@@ -94,7 +93,7 @@ const
   MaxLineLen = 80
   LineCommentColumn = 30
 
-proc initSrcGen(g: var TSrcGen, renderFlags: TRenderFlags; config: ConfigRef) =
+proc initSrcGen(g: var TSrcGen, renderFlags: set[TRenderFlag]; config: ConfigRef) =
   g.comStack = @[]
   g.tokens = @[]
   g.indent = 0
@@ -1534,7 +1533,7 @@ proc gsub(g: var TSrcGen, n: PNode, c: TContext) =
     #nkNone, nkExplicitTypeListCall:
     internalError(g.config, n.info, "rnimsyn.gsub(" & $n.kind & ')')
 
-proc renderTree*(n: PNode, renderFlags: TRenderFlags = {}): string =
+proc renderTree*(n: PNode, renderFlags: set[TRenderFlag] = {}): string =
   if n == nil: return "<nil tree>"
   var g: TSrcGen
   initSrcGen(g, renderFlags, newPartialConfigRef())
@@ -1550,7 +1549,7 @@ proc renderTree*(n: PNode, renderFlags: TRenderFlags = {}): string =
 proc `$`*(n: PNode): string = n.renderTree
 
 proc renderModule*(n: PNode, infile, outfile: string,
-                   renderFlags: TRenderFlags = {};
+                   renderFlags: set[TRenderFlag] = {};
                    fid = FileIndex(-1);
                    conf: ConfigRef = nil) =
   var
@@ -1572,7 +1571,7 @@ proc renderModule*(n: PNode, infile, outfile: string,
   else:
     rawMessage(g.config, errGenerated, "cannot open file: " & outfile)
 
-proc initTokRender*(r: var TSrcGen, n: PNode, renderFlags: TRenderFlags = {}) =
+proc initTokRender*(r: var TSrcGen, n: PNode, renderFlags: set[TRenderFlag] = {}) =
   initSrcGen(r, renderFlags, newPartialConfigRef())
   gsub(r, n)
 

@@ -174,14 +174,14 @@ proc lastOptionEntry*(c: PContext): POptionEntry =
 
 proc popProcCon*(c: PContext) {.inline.} = c.p = c.p.next
 
-proc put*(p: PProcCon; key, val: PSym) =
+proc put(p: PProcCon; key, val: PSym) =
   if not p.mappingExists:
     initIdTable(p.mapping)
     p.mappingExists = true
   #echo "put into table ", key.info
   p.mapping.idTablePut(key, val)
 
-proc get*(p: PProcCon; key: PSym): PSym =
+proc get(p: PProcCon; key: PSym): PSym =
   if not p.mappingExists: return nil
   result = PSym(p.mapping.idTableGet(key))
 

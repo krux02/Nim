@@ -98,10 +98,9 @@ type
   TIIPair*{.final.} = object
     key*, val*: int
 
-  TIIPairSeq* = seq[TIIPair]
   TIITable*{.final.} = object # table[int, int]
     counter*: int
-    data*: TIIPairSeq
+    data*: seq[TIIPair]
 
 
 proc initIiTable*(x: var TIITable)
@@ -326,7 +325,7 @@ proc typeToYamlAux(conf: ConfigRef; n: PType, marker: var IntSet, indent: int,
     sonsRope = rope("null")
   elif containsOrIncl(marker, n.id):
     sonsRope = "\"$1 @$2\"" % [rope($n.kind), rope(
-        strutils.toHex(cast[ByteAddress](n), sizeof(n) * 2))]
+        strutils.toHex(cast[int](n), sizeof(n) * 2))]
   else:
     if n.len > 0:
       sonsRope = rope("[")
@@ -687,7 +686,7 @@ proc objectSetContains*(t: TObjectSet, obj: RootRef): bool =
     h = nextTry(h, high(t.data))
   result = false
 
-proc objectSetRawInsert(data: var TObjectSeq, obj: RootRef) =
+proc objectSetRawInsert(data: var seq[RootRef], obj: RootRef) =
   var h: Hash = hashNode(obj) and high(data)
   while data[h] != nil:
     assert(data[h] != obj)
@@ -696,7 +695,7 @@ proc objectSetRawInsert(data: var TObjectSeq, obj: RootRef) =
   data[h] = obj
 
 proc objectSetEnlarge(t: var TObjectSet) =
-  var n: TObjectSeq
+  var n: seq[RootRef]
   newSeq(n, t.data.len * GrowthFactor)
   for i in 0..high(t.data):
     if t.data[i] != nil: objectSetRawInsert(n, t.data[i])
@@ -895,7 +894,7 @@ iterator items*(tab: TStrTable): PSym =
     yield s
     s = nextIter(it, tab)
 
-proc hasEmptySlot(data: TIdPairSeq): bool =
+proc hasEmptySlot(data: seq[TIdPair]): bool =
   for h in 0..high(data):
     if data[h].key == nil:
       return true
@@ -930,7 +929,7 @@ iterator pairs*(t: TIdTable): tuple[key: int, value: RootRef] =
     if t.data[i].key != nil:
       yield (t.data[i].key.id, t.data[i].val)
 
-proc idTableRawInsert(data: var TIdPairSeq, key: PIdObj, val: RootRef) =
+proc idTableRawInsert(data: var seq[TIdPair], key: PIdObj, val: RootRef) =
   var h: Hash
   h = key.id and high(data)
   while data[h].key != nil:
@@ -943,7 +942,7 @@ proc idTableRawInsert(data: var TIdPairSeq, key: PIdObj, val: RootRef) =
 proc idTablePut(t: var TIdTable, key: PIdObj, val: RootRef) =
   var
     index: int
-    n: TIdPairSeq
+    n: seq[TIdPair]
   index = idTableRawGet(t, key.id)
   if index >= 0:
     assert(t.data[index].key != nil)
@@ -978,7 +977,7 @@ proc idNodeTableGet(t: TIdNodeTable, key: PIdObj): PNode =
   if index >= 0: result = t.data[index].val
   else: result = nil
 
-proc idNodeTableRawInsert(data: var TIdNodePairSeq, key: PIdObj, val: PNode) =
+proc idNodeTableRawInsert(data: var seq[TIdNodePair], key: PIdObj, val: PNode) =
   var h: Hash
   h = key.id and high(data)
   while data[h].key != nil:
@@ -995,7 +994,7 @@ proc idNodeTablePut(t: var TIdNodeTable, key: PIdObj, val: PNode) =
     t.data[index].val = val
   else:
     if mustRehash(t.data.len, t.counter):
-      var n: TIdNodePairSeq
+      var n: seq[TIdNodePair]
       newSeq(n, t.data.len * GrowthFactor)
       for i in 0..high(t.data):
         if t.data[i].key != nil:
@@ -1026,7 +1025,7 @@ proc iiTableGet(t: TIITable, key: int): int =
   if index >= 0: result = t.data[index].val
   else: result = InvalidKey
 
-proc iiTableRawInsert(data: var TIIPairSeq, key, val: int) =
+proc iiTableRawInsert(data: var seq[TIIPair], key, val: int) =
   var h: Hash
   h = key and high(data)
   while data[h].key != InvalidKey:
@@ -1043,7 +1042,7 @@ proc iiTablePut(t: var TIITable, key, val: int) =
     t.data[index].val = val
   else:
     if mustRehash(t.data.len, t.counter):
-      var n: TIIPairSeq
+      var n: seq[TIIPair]
       newSeq(n, t.data.len * GrowthFactor)
       for i in 0..high(n): n[i].key = InvalidKey
       for i in 0..high(t.data):

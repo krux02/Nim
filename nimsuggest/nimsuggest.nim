@@ -226,7 +226,7 @@ proc returnEpc(socket: Socket, uid: BiggestInt, s: SexpNode|string,
   socket.send(toHex(len(response), 6))
   socket.send(response)
 
-template checkSanity(client, sizeHex, size, messageBuffer: typed) =
+template checkSanity(client, sizeHex, size, messageBuffer: untyped) =
   if client.recv(sizeHex, 6) != 6:
     raise newException(ValueError, "didn't get all the hexbytes")
   if parseHex(sizeHex, size) == 0:
@@ -270,7 +270,7 @@ proc toEpc(client: Socket; uid: BiggestInt) {.gcsafe.} =
       list.add sexp(res)
   returnEpc(client, uid, list)
 
-template setVerbosity(level: typed) =
+template setVerbosity(level: untyped) =
   gVerbosity = level
   conf.notes = NotesVerbosity[gVerbosity]
 
@@ -404,7 +404,7 @@ proc execCmd(cmd: string; graph: ModuleGraph; cachedMsgs: CachedMsgs) =
     # send sentinel for the input reading thread:
     results.send(Suggest(section: ideNone))
 
-  template toggle(sw) =
+  template toggle(sw: untyped) =
     if sw in conf.globalOptions:
       excl(conf.globalOptions, sw)
     else:

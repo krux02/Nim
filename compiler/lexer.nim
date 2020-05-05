@@ -101,7 +101,8 @@ const
     ":", "::", "=", ".", "..", "[:",
     "tkOpr", "tkComment", "`",
     "tkSpaces", "tkInfixOpr",
-    "tkPrefixOpr", "tkPostfixOpr"]
+    "tkPrefixOpr", "tkPostfixOpr",
+  ]
 
 type
   TNumericalBase* = enum

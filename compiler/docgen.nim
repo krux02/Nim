@@ -349,7 +349,7 @@ proc externalDep(d: PDoc; module: PSym): string =
   else:
     result = extractFilename toFullPath(d.conf, FileIndex module.position)
 
-proc nodeToHighlightedHtml(d: PDoc; n: PNode; result: var Rope; renderFlags: TRenderFlags = {};
+proc nodeToHighlightedHtml(d: PDoc; n: PNode; result: var Rope; renderFlags: set[TRenderFlag] = {};
                            procLink: Rope) =
   var r: TSrcGen
   var literal = ""

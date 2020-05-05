@@ -381,22 +381,23 @@ compiler ucc:
 
 const
   CC*: array[succ(low(TSystemCC))..high(TSystemCC), TInfoCC] = [
-    gcc(),
-    nintendoSwitchGCC(),
-    llvmGcc(),
-    clang(),
-    zig(),
-    lcc(),
-    bcc(),
-    dmc(),
-    wcc(),
-    vcc(),
-    tcc(),
-    pcc(),
-    ucc(),
-    icl(),
-    icc(),
-    clangcl()]
+    ccGcc:            gcc(),
+    ccNintendoSwitch: nintendoSwitchGCC(),
+    ccLLVM_Gcc:       llvmGcc(),
+    ccCLang:          clang(),
+    ccZig:            zig(),
+    ccLcc:            lcc(),
+    ccBcc:            bcc(),
+    ccDmc:            dmc(),
+    ccWcc:            wcc(),
+    ccVcc:            vcc(),
+    ccTcc:            tcc(),
+    ccPcc:            pcc(),
+    ccUcc:            ucc(),
+    ccIcl:            icl(),
+    ccIcc:            icc(),
+    ccClangCl:        clangcl()
+  ]
 
   hExt* = ".h"
 

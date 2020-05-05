@@ -63,15 +63,12 @@ type
     rnLeaf                    # a leaf; the node's text field contains the
                               # leaf val
 
-
-  PRstNode* = ref RstNode    ## an RST node
-  RstNodeSeq* = seq[PRstNode]
-  RstNode* {.acyclic, final.} = object ## an RST node's description
+  PRstNode* {.acyclic, final.} = ref object ## an RST node
     kind*: RstNodeKind       ## the node's kind
     text*: string             ## valid for leafs in the AST; and the title of
                               ## the document or the section
     level*: int               ## valid for some node kinds
-    sons*: RstNodeSeq        ## the node's sons
+    sons*: seq[PRstNode]      ## the node's sons
 
 proc len*(n: PRstNode): int =
   result = len(n.sons)

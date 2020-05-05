@@ -98,7 +98,6 @@ type
     withinTryWithExcept*: int # required for goto based exception handling
     sigConflicts*: CountTable[string]
 
-  TTypeSeq* = seq[PType]
   TypeCache* = Table[SigHash, Rope]
 
   CodegenFlag* = enum
@@ -150,7 +149,7 @@ type
     typeInfoMarker*: TypeCache # needed for generating type information
     initProc*: BProc          # code for init procedure
     preInitProc*: BProc       # code executed before the init proc
-    typeStack*: TTypeSeq      # used for type generation
+    typeStack*: seq[PType]    # used for type generation
     dataCache*: TNodeTable
     typeNodes*, nimTypes*: int # used for type info generation
     typeNodesName*, nimTypesName*: Rope # used for type info generation

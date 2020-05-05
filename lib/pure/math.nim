@@ -714,8 +714,8 @@ when not defined(js): # C
       result = truncImpl(x)
 
     proc round*[T: float32|float64](x: T): T =
-      ## Windows compilers prior to MSVC 2012 do not implement 'round',
-      ## 'roundl' or 'roundf'.
+      # Windows compilers prior to MSVC 2012 do not implement 'round',
+      # 'roundl' or 'roundf'.
       result = if x < 0.0: ceil(x - T(0.5)) else: floor(x + T(0.5))
   else:
     proc round*(x: float32): float32 {.importc: "roundf", header: "<math.h>".}

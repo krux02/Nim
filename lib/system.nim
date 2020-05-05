@@ -1314,9 +1314,8 @@ when not defined(nimV2):
     ##  echo repr(i) # => 0x1055ed050[1, 2, 3, 4, 5]
 
 type
-  ByteAddress* = int
-    ## is the signed integer type that should be used for converting
-    ## pointers to integer addresses for readability.
+  ByteAddress* {.deprecated: "used ``uint`` instead".} = int
+    ## Don't use this.
 
   BiggestFloat* = float64
     ## is an alias for the biggest floating point type the Nim

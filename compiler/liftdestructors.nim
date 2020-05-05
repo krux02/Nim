@@ -28,6 +28,10 @@ type
     recurse: bool
     c: PContext # c can be nil, then we are called from lambdalifting!
 
+template graph*(arg: TLiftCtx): ModuleGraph =
+  # for nimfind only
+  arg.g
+
 proc fillBody(c: var TLiftCtx; t: PType; body, x, y: PNode)
 proc produceSym(g: ModuleGraph; c: PContext; typ: PType; kind: TTypeAttachedOp;
               info: TLineInfo): PSym
