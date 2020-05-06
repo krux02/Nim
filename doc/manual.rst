@@ -6083,35 +6083,12 @@ information that this cannot happen to the GC. If the programmer uses the
 ``acyclic`` pragma for data types that are in reality cyclic, the memory leaks
 can be the result, but memory safety is preserved.
 
-
-
 final pragma
 ------------
 The ``final`` pragma can be used for an object type to specify that it
 cannot be inherited from. Note that inheritance is only available for
 objects that inherit from an existing object (via the ``object of SuperType``
 syntax) or that have been marked as ``inheritable``.
-
-
-shallow pragma
---------------
-The ``shallow`` pragma affects the semantics of a type: The compiler is
-allowed to make a shallow copy. This can cause serious semantic issues and
-break memory safety! However, it can speed up assignments considerably,
-because the semantics of Nim require deep copying of sequences and strings.
-This can be expensive, especially if sequences are used to build a tree
-structure:
-
-.. code-block:: nim
-  type
-    NodeKind = enum nkLeaf, nkInner
-    Node {.shallow.} = object
-      case kind: NodeKind
-      of nkLeaf:
-        strVal: string
-      of nkInner:
-        children: seq[Node]
-
 
 pure pragma
 -----------

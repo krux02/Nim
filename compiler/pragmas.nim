@@ -963,10 +963,6 @@ proc singlePragma(c: PContext, sym: PSym, n: PNode, i: var int,
         noVal(c, it)
         if sym.typ == nil: invalidPragma(c, it)
         else: incl(sym.typ.flags, tfAcyclic)
-      of wShallow:
-        noVal(c, it)
-        if sym.typ == nil: invalidPragma(c, it)
-        else: incl(sym.typ.flags, tfShallow)
       of wThread:
         noVal(c, it)
         incl(sym.flags, sfThread)

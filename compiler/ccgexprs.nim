@@ -216,8 +216,6 @@ proc genOptAsgnTuple(p: BProc, dest, src: TLoc, flags: TAssignmentFlags) =
   let newflags =
     if src.storage == OnStatic:
       flags + {needToCopy}
-    elif tfShallow in dest.t.flags:
-      flags - {needToCopy}
     else:
       flags
   let t = skipTypes(dest.t, abstractInst).getUniqueType()
@@ -233,8 +231,6 @@ proc genOptAsgnObject(p: BProc, dest, src: TLoc, flags: TAssignmentFlags,
   let newflags =
     if src.storage == OnStatic:
       flags + {needToCopy}
-    elif tfShallow in dest.t.flags:
-      flags - {needToCopy}
     else:
       flags
   case t.kind
@@ -248,18 +244,11 @@ proc genOptAsgnObject(p: BProc, dest, src: TLoc, flags: TAssignmentFlags,
   else: discard
 
 proc genGenericAsgn(p: BProc, dest, src: TLoc, flags: TAssignmentFlags) =
-  # Consider:
-  # type TMyFastString {.shallow.} = string
-  # Due to the implementation of pragmas this would end up to set the
-  # tfShallow flag for the built-in string type too! So we check only
-  # here for this flag, where it is reasonably safe to do so
-  # (for objects, etc.):
   if optSeqDestructors in p.config.globalOptions:
     linefmt(p, cpsStmts,
         "$1 = $2;$n",
         [rdLoc(dest), rdLoc(src)])
-  elif needToCopy notin flags or
-      tfShallow in skipTypes(dest.t, abstractVarRange).flags:
+  elif needToCopy notin flags:
     if (dest.storage == OnStack and p.config.selectedGC != gcGo) or not usesWriteBarrier(p.config):
       linefmt(p, cpsStmts,
            "#nimCopyMem((void*)$1, (NIM_CONST void*)$2, sizeof($3));$n",

@@ -75,7 +75,7 @@ type
     col: int                    ## column the symbol has been declared/used in
     flags: set[NonTerminalFlag] ## the nonterminal's flags
     rule: Peg                   ## the rule that the symbol refers to
-  Peg* {.shallow.} = object ## type that represents a PEG
+  Peg* = object ## type that represents a PEG
     case kind: PegKind
     of pkEmpty..pkWhitespace: nil
     of pkTerminal, pkTerminalIgnoreCase, pkTerminalIgnoreStyle: term: string
@@ -866,30 +866,30 @@ proc rawMatch*(s: string, p: Peg, start: int, c: var Captures): int
   result = matchIt(s, p, start, c)
 
 macro mkHandlerTplts(handlers: untyped): untyped =
-  # Transforms the handler spec in *handlers* into handler templates.
-  # The AST structure of *handlers[0]*:
-  #
-  # .. code-block::
-  # StmtList
-  #   Call
-  #     Ident "pkNonTerminal"
-  #     StmtList
-  #       Call
-  #         Ident "enter"
-  #         StmtList
-  #           <handler code block>
-  #       Call
-  #         Ident "leave"
-  #         StmtList
-  #           <handler code block>
-  #   Call
-  #     Ident "pkChar"
-  #     StmtList
-  #       Call
-  #         Ident "leave"
-  #         StmtList
-  #           <handler code block>
-  #   ...
+  ## Transforms the handler spec in ``handlers`` into handler templates.
+  ## The AST structure of ``handlers[0]``:
+  ##
+  ## .. code-block::
+  ## StmtList
+  ##   Call
+  ##     Ident "pkNonTerminal"
+  ##     StmtList
+  ##       Call
+  ##         Ident "enter"
+  ##         StmtList
+  ##           <handler code block>
+  ##       Call
+  ##         Ident "leave"
+  ##         StmtList
+  ##           <handler code block>
+  ##   Call
+  ##     Ident "pkChar"
+  ##     StmtList
+  ##       Call
+  ##         Ident "leave"
+  ##         StmtList
+  ##           <handler code block>
+  ##   ...
   proc mkEnter(hdName, body: NimNode): NimNode =
     template helper(hdName, body: untyped) {.dirty.} =
       template hdName(s, p, start: untyped) =
