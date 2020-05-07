@@ -17,40 +17,40 @@ import
   lineinfos, std / sha1, streams, pathutils, times, strtabs
 
 type
-  TInfoCCProp* = enum         # properties of the C compiler:
-    hasSwitchRange,           # CC allows ranges in switch statements (GNU C)
-    hasComputedGoto,          # CC has computed goto (GNU C extension)
-    hasCpp,                   # CC is/contains a C++ compiler
-    hasAssume,                # CC has __assume (Visual C extension)
-    hasGcGuard,               # CC supports GC_GUARD to keep stack roots
-    hasGnuAsm,                # CC's asm uses the absurd GNU assembler syntax
-    hasDeclspec,              # CC has __declspec(X)
-    hasAttribute,             # CC has __attribute__((X))
+  TInfoCCProp* = enum         ## properties of the C compiler:
+    hasSwitchRange,           ## CC allows ranges in switch statements (GNU C)
+    hasComputedGoto,          ## CC has computed goto (GNU C extension)
+    hasCpp,                   ## CC is/contains a C++ compiler
+    hasAssume,                ## CC has __assume (Visual C extension)
+    hasGcGuard,               ## CC supports GC_GUARD to keep stack roots
+    hasGnuAsm,                ## CC's asm uses the absurd GNU assembler syntax
+    hasDeclspec,              ## CC has __declspec(X)
+    hasAttribute,             ## CC has __attribute__((X))
   TInfoCCProps* = set[TInfoCCProp]
-  TInfoCC* = tuple[
-    name: string,        # the short name of the compiler
-    objExt: string,      # the compiler's object file extension
-    optSpeed: string,    # the options for optimization for speed
-    optSize: string,     # the options for optimization for size
-    compilerExe: string, # the compiler's executable
-    cppCompiler: string, # name of the C++ compiler's executable (if supported)
-    compileTmpl: string, # the compile command template
-    buildGui: string,    # command to build a GUI application
-    buildDll: string,    # command to build a shared library
-    buildLib: string,    # command to build a static library
-    linkerExe: string,   # the linker's executable (if not matching compiler's)
-    linkTmpl: string,    # command to link files to produce an exe
-    includeCmd: string,  # command to add an include dir
-    linkDirCmd: string,  # command to add a lib dir
-    linkLibCmd: string,  # command to link an external library
-    debug: string,       # flags for debug build
-    pic: string,         # command for position independent code
-                         # used on some platforms
-    asmStmtFrmt: string, # format of ASM statement
-    structStmtFmt: string, # Format for struct statement
-    produceAsm: string,  # Format how to produce assembler listings
-    cppXsupport: string, # what to do to enable C++X support
-    props: TInfoCCProps] # properties of the C compiler
+  TInfoCC* = object
+    name*: string          ## the short name of the compiler
+    objExt*: string        ## the compiler's object file extension
+    optSpeed*: string      ## the options for optimization for speed
+    optSize*: string       ## the options for optimization for size
+    compilerExe*: string   ## the compiler's executable
+    cppCompiler*: string   ## name of the C++ compiler's executable (if supported)
+    compileTmpl*: string   ## the compile command template
+    buildGui*: string      ## command to build a GUI application
+    buildDll*: string      ## command to build a shared library
+    buildLib*: string      ## command to build a static library
+    linkerExe*: string     ## the linker's executable (if not matching compiler's)
+    linkTmpl*: string      ## command to link files to produce an exe
+    includeCmd*: string    ## command to add an include dir
+    linkDirCmd*: string    ## command to add a lib dir
+    linkLibCmd*: string    ## command to link an external library
+    debug*: string         ## flags for debug build
+    pic*: string           ## command for position independent code
+                           ## used on some platforms
+    asmStmtFrmt*: string   ## format of ASM statement
+    structStmtFmt*: string ## Format for struct statement
+    produceAsm*: string    ## Format how to produce assembler listings
+    cppXsupport*: string   ## what to do to enable C++X support
+    props*: TInfoCCProps   ## properties of the C compiler
 
 
 # Configuration settings for various compilers.
@@ -65,57 +65,55 @@ const
 
 # GNU C and C++ Compiler
 compiler gcc:
-  result = (
-    name: "gcc",
-    objExt: "o",
-    optSpeed: " -O3 -fno-ident",
-    optSize: " -Os -fno-ident",
-    compilerExe: "gcc",
-    cppCompiler: "g++",
-    compileTmpl: "-c $options $include -o $objfile $file",
-    buildGui: " -mwindows",
-    buildDll: " -shared",
-    buildLib: "ar rcs $libfile $objfiles",
-    linkerExe: "",
-    linkTmpl: "$buildgui $builddll -o $exefile $objfiles $options",
-    includeCmd: " -I",
-    linkDirCmd: " -L",
-    linkLibCmd: " -l$1",
-    debug: "",
-    pic: "-fPIC",
-    asmStmtFrmt: "asm($1);$n",
-    structStmtFmt: "$1 $3 $2 ", # struct|union [packed] $name
-    produceAsm: gnuAsmListing,
-    cppXsupport: "-std=gnu++14 -funsigned-char",
-    props: {hasSwitchRange, hasComputedGoto, hasCpp, hasGcGuard, hasGnuAsm,
-            hasAttribute})
+  result.name = "gcc"
+  result.objExt = "o"
+  result.optSpeed = " -O3 -fno-ident"
+  result.optSize = " -Os -fno-ident"
+  result.compilerExe = "gcc"
+  result.cppCompiler = "g++"
+  result.compileTmpl = "-c $options $include -o $objfile $file"
+  result.buildGui = " -mwindows"
+  result.buildDll = " -shared"
+  result.buildLib = "ar rcs $libfile $objfiles"
+  result.linkerExe = ""
+  result.linkTmpl = "$buildgui $builddll -o $exefile $objfiles $options"
+  result.includeCmd = " -I"
+  result.linkDirCmd = " -L"
+  result.linkLibCmd = " -l$1"
+  result.debug = ""
+  result.pic = "-fPIC"
+  result.asmStmtFrmt = "asm($1);$n"
+  result.structStmtFmt = "$1 $3 $2 " # struct|union [packed] $name
+  result.produceAsm = gnuAsmListing
+  result.cppXsupport = "-std=gnu++14 -funsigned-char"
+  result.props = {hasSwitchRange, hasComputedGoto, hasCpp, hasGcGuard,
+                   hasGnuAsm, hasAttribute}
 
 # GNU C and C++ Compiler
 compiler nintendoSwitchGCC:
-  result = (
-    name: "switch_gcc",
-    objExt: "o",
-    optSpeed: " -O3 ",
-    optSize: " -Os ",
-    compilerExe: "aarch64-none-elf-gcc",
-    cppCompiler: "aarch64-none-elf-g++",
-    compileTmpl: "-w -MMD -MP -MF $dfile -c $options $include -o $objfile $file",
-    buildGui: " -mwindows",
-    buildDll: " -shared",
-    buildLib: "aarch64-none-elf-gcc-ar rcs $libfile $objfiles",
-    linkerExe: "aarch64-none-elf-gcc",
-    linkTmpl: "$buildgui $builddll -Wl,-Map,$mapfile -o $exefile $objfiles $options",
-    includeCmd: " -I",
-    linkDirCmd: " -L",
-    linkLibCmd: " -l$1",
-    debug: "",
-    pic: "-fPIE",
-    asmStmtFrmt: "asm($1);$n",
-    structStmtFmt: "$1 $3 $2 ", # struct|union [packed] $name
-    produceAsm: gnuAsmListing,
-    cppXsupport: "-std=gnu++14 -funsigned-char",
-    props: {hasSwitchRange, hasComputedGoto, hasCpp, hasGcGuard, hasGnuAsm,
-            hasAttribute})
+  result.name = "switch_gcc"
+  result.objExt = "o"
+  result.optSpeed = " -O3 "
+  result.optSize = " -Os "
+  result.compilerExe = "aarch64-none-elf-gcc"
+  result.cppCompiler = "aarch64-none-elf-g++"
+  result.compileTmpl = "-w -MMD -MP -MF $dfile -c $options $include -o $objfile $file"
+  result.buildGui = " -mwindows"
+  result.buildDll = " -shared"
+  result.buildLib = "aarch64-none-elf-gcc-ar rcs $libfile $objfiles"
+  result.linkerExe = "aarch64-none-elf-gcc"
+  result.linkTmpl = "$buildgui $builddll -Wl,-Map,$mapfile -o $exefile $objfiles $options"
+  result.includeCmd = " -I"
+  result.linkDirCmd = " -L"
+  result.linkLibCmd = " -l$1"
+  result.debug = ""
+  result.pic = "-fPIE"
+  result.asmStmtFrmt = "asm($1);$n"
+  result.structStmtFmt = "$1 $3 $2 " # struct|union [packed] $name
+  result.produceAsm = gnuAsmListing
+  result.cppXsupport = "-std=gnu++14 -funsigned-char"
+  result.props = {hasSwitchRange, hasComputedGoto, hasCpp, hasGcGuard,
+                   hasGnuAsm, hasAttribute}
 
 # LLVM Frontend for GCC/G++
 compiler llvmGcc:
@@ -150,29 +148,28 @@ compiler zig:
 
 # Microsoft Visual C/C++ Compiler
 compiler vcc:
-  result = (
-    name: "vcc",
-    objExt: "obj",
-    optSpeed: " /Ogityb2 ",
-    optSize: " /O1 ",
-    compilerExe: "cl",
-    cppCompiler: "cl",
-    compileTmpl: "/c$vccplatform $options $include /Fo$objfile $file",
-    buildGui: " /link /SUBSYSTEM:WINDOWS ",
-    buildDll: " /LD",
-    buildLib: "lib /OUT:$libfile $objfiles",
-    linkerExe: "cl",
-    linkTmpl: "$builddll$vccplatform /Fe$exefile $objfiles $buildgui $options",
-    includeCmd: " /I",
-    linkDirCmd: " /LIBPATH:",
-    linkLibCmd: " $1.lib",
-    debug: " /RTC1 /Z7 ",
-    pic: "",
-    asmStmtFrmt: "__asm{$n$1$n}$n",
-    structStmtFmt: "$3$n$1 $2",
-    produceAsm: "/Fa$asmfile",
-    cppXsupport: "",
-    props: {hasCpp, hasAssume, hasDeclspec})
+  result.name = "vcc"
+  result.objExt = "obj"
+  result.optSpeed = " /Ogityb2 "
+  result.optSize = " /O1 "
+  result.compilerExe = "cl"
+  result.cppCompiler = "cl"
+  result.compileTmpl = "/c$vccplatform $options $include /Fo$objfile $file"
+  result.buildGui = " /link /SUBSYSTEM:WINDOWS "
+  result.buildDll = " /LD"
+  result.buildLib = "lib /OUT:$libfile $objfiles"
+  result.linkerExe = "cl"
+  result.linkTmpl = "$builddll$vccplatform /Fe$exefile $objfiles $buildgui $options"
+  result.includeCmd = " /I"
+  result.linkDirCmd = " /LIBPATH:"
+  result.linkLibCmd = " $1.lib"
+  result.debug = " /RTC1 /Z7 "
+  result.pic = ""
+  result.asmStmtFrmt = "__asm{$n$1$n}$n"
+  result.structStmtFmt = "$3$n$1 $2"
+  result.produceAsm = "/Fa$asmfile"
+  result.cppXsupport = ""
+  result.props = {hasCpp, hasAssume, hasDeclspec}
 
 compiler clangcl:
   result = vcc()
@@ -197,187 +194,180 @@ compiler icc:
 
 # Local C Compiler
 compiler lcc:
-  result = (
-    name: "lcc",
-    objExt: "obj",
-    optSpeed: " -O -p6 ",
-    optSize: " -O -p6 ",
-    compilerExe: "lcc",
-    cppCompiler: "",
-    compileTmpl: "$options $include -Fo$objfile $file",
-    buildGui: " -subsystem windows",
-    buildDll: " -dll",
-    buildLib: "", # XXX: not supported yet
-    linkerExe: "lcclnk",
-    linkTmpl: "$options $buildgui $builddll -O $exefile $objfiles",
-    includeCmd: " -I",
-    linkDirCmd: "", # XXX: not supported yet
-    linkLibCmd: "", # XXX: not supported yet
-    debug: " -g5 ",
-    pic: "",
-    asmStmtFrmt: "_asm{$n$1$n}$n",
-    structStmtFmt: "$1 $2",
-    produceAsm: "",
-    cppXsupport: "",
-    props: {})
+  result.name = "lcc"
+  result.objExt = "obj"
+  result.optSpeed = " -O -p6 "
+  result.optSize = " -O -p6 "
+  result.compilerExe = "lcc"
+  result.cppCompiler = ""
+  result.compileTmpl = "$options $include -Fo$objfile $file"
+  result.buildGui = " -subsystem windows"
+  result.buildDll = " -dll"
+  # result.buildLib = ... not supported yet
+  result.linkerExe = "lcclnk"
+  result.linkTmpl = "$options $buildgui $builddll -O $exefile $objfiles"
+  result.includeCmd = " -I"
+  # result.linkDirCmd = ... not supported yet
+  # result.linkLibCmd = ... not supported yet
+  result.debug = " -g5 "
+  result.pic = ""
+  result.asmStmtFrmt = "_asm{$n$1$n}$n"
+  result.structStmtFmt = "$1 $2"
+  result.produceAsm = ""
+  result.cppXsupport = ""
+  result.props = {}
 
 # Borland C Compiler
 compiler bcc:
-  result = (
-    name: "bcc",
-    objExt: "obj",
-    optSpeed: " -O3 -6 ",
-    optSize: " -O1 -6 ",
-    compilerExe: "bcc32c",
-    cppCompiler: "cpp32c",
-    compileTmpl: "-c $options $include -o$objfile $file",
-    buildGui: " -tW",
-    buildDll: " -tWD",
-    buildLib: "", # XXX: not supported yet
-    linkerExe: "bcc32",
-    linkTmpl: "$options $buildgui $builddll -e$exefile $objfiles",
-    includeCmd: " -I",
-    linkDirCmd: "", # XXX: not supported yet
-    linkLibCmd: "", # XXX: not supported yet
-    debug: "",
-    pic: "",
-    asmStmtFrmt: "__asm{$n$1$n}$n",
-    structStmtFmt: "$1 $2",
-    produceAsm: "",
-    cppXsupport: "",
-    props: {hasSwitchRange, hasComputedGoto, hasCpp, hasGcGuard,
-            hasAttribute})
+  result.name = "bcc"
+  result.objExt = "obj"
+  result.optSpeed = " -O3 -6 "
+  result.optSize = " -O1 -6 "
+  result.compilerExe = "bcc32c"
+  result.cppCompiler = "cpp32c"
+  result.compileTmpl = "-c $options $include -o$objfile $file"
+  result.buildGui = " -tW"
+  result.buildDll = " -tWD"
+  result.buildLib = "" # XXX: not supported yet
+  result.linkerExe = "bcc32"
+  result.linkTmpl = "$options $buildgui $builddll -e$exefile $objfiles"
+  result.includeCmd = " -I"
+  result.linkDirCmd = "" # XXX: not supported yet
+  result.linkLibCmd = "" # XXX: not supported yet
+  result.debug = ""
+  result.pic = ""
+  result.asmStmtFrmt = "__asm{$n$1$n}$n"
+  result.structStmtFmt = "$1 $2"
+  result.produceAsm = ""
+  result.cppXsupport = ""
+  result.props = {hasSwitchRange, hasComputedGoto, hasCpp, hasGcGuard,
+            hasAttribute}
 
 # Digital Mars C Compiler
 compiler dmc:
-  result = (
-    name: "dmc",
-    objExt: "obj",
-    optSpeed: " -ff -o -6 ",
-    optSize: " -ff -o -6 ",
-    compilerExe: "dmc",
-    cppCompiler: "",
-    compileTmpl: "-c $options $include -o$objfile $file",
-    buildGui: " -L/exet:nt/su:windows",
-    buildDll: " -WD",
-    buildLib: "", # XXX: not supported yet
-    linkerExe: "dmc",
-    linkTmpl: "$options $buildgui $builddll -o$exefile $objfiles",
-    includeCmd: " -I",
-    linkDirCmd: "", # XXX: not supported yet
-    linkLibCmd: "", # XXX: not supported yet
-    debug: " -g ",
-    pic: "",
-    asmStmtFrmt: "__asm{$n$1$n}$n",
-    structStmtFmt: "$3$n$1 $2",
-    produceAsm: "",
-    cppXsupport: "",
-    props: {hasCpp})
+  result.name = "dmc"
+  result.objExt = "obj"
+  result.optSpeed = " -ff -o -6 "
+  result.optSize = " -ff -o -6 "
+  result.compilerExe = "dmc"
+  result.cppCompiler = ""
+  result.compileTmpl = "-c $options $include -o$objfile $file"
+  result.buildGui = " -L/exet:nt/su:windows"
+  result.buildDll = " -WD"
+  result.buildLib = "" # XXX: not supported yet
+  result.linkerExe = "dmc"
+  result.linkTmpl = "$options $buildgui $builddll -o$exefile $objfiles"
+  result.includeCmd = " -I"
+  result.linkDirCmd = "" # XXX: not supported yet
+  result.linkLibCmd = "" # XXX: not supported yet
+  result.debug = " -g "
+  result.pic = ""
+  result.asmStmtFrmt = "__asm{$n$1$n}$n"
+  result.structStmtFmt = "$3$n$1 $2"
+  result.produceAsm = ""
+  result.cppXsupport = ""
+  result.props = {hasCpp}
 
 # Watcom C Compiler
 compiler wcc:
-  result = (
-    name: "wcc",
-    objExt: "obj",
-    optSpeed: " -ox -on -6 -d0 -fp6 -zW ",
-    optSize: "",
-    compilerExe: "wcl386",
-    cppCompiler: "",
-    compileTmpl: "-c $options $include -fo=$objfile $file",
-    buildGui: " -bw",
-    buildDll: " -bd",
-    buildLib: "", # XXX: not supported yet
-    linkerExe: "wcl386",
-    linkTmpl: "$options $buildgui $builddll -fe=$exefile $objfiles ",
-    includeCmd: " -i=",
-    linkDirCmd: "", # XXX: not supported yet
-    linkLibCmd: "", # XXX: not supported yet
-    debug: " -d2 ",
-    pic: "",
-    asmStmtFrmt: "__asm{$n$1$n}$n",
-    structStmtFmt: "$1 $2",
-    produceAsm: "",
-    cppXsupport: "",
-    props: {hasCpp})
+  result.name = "wcc"
+  result.objExt = "obj"
+  result.optSpeed = " -ox -on -6 -d0 -fp6 -zW "
+  result.optSize = ""
+  result.compilerExe = "wcl386"
+  result.cppCompiler = ""
+  result.compileTmpl = "-c $options $include -fo=$objfile $file"
+  result.buildGui = " -bw"
+  result.buildDll = " -bd"
+  result.buildLib = "" # XXX: not supported yet
+  result.linkerExe = "wcl386"
+  result.linkTmpl = "$options $buildgui $builddll -fe=$exefile $objfiles "
+  result.includeCmd = " -i="
+  result.linkDirCmd = "" # XXX: not supported yet
+  result.linkLibCmd = "" # XXX: not supported yet
+  result.debug = " -d2 "
+  result.pic = ""
+  result.asmStmtFrmt = "__asm{$n$1$n}$n"
+  result.structStmtFmt = "$1 $2"
+  result.produceAsm = ""
+  result.cppXsupport = ""
+  result.props = {hasCpp}
 
 # Tiny C Compiler
 compiler tcc:
-  result = (
-    name: "tcc",
-    objExt: "o",
-    optSpeed: "",
-    optSize: "",
-    compilerExe: "tcc",
-    cppCompiler: "",
-    compileTmpl: "-c $options $include -o $objfile $file",
-    buildGui: "-Wl,-subsystem=gui",
-    buildDll: " -shared",
-    buildLib: "", # XXX: not supported yet
-    linkerExe: "tcc",
-    linkTmpl: "-o $exefile $options $buildgui $builddll $objfiles",
-    includeCmd: " -I",
-    linkDirCmd: "", # XXX: not supported yet
-    linkLibCmd: "", # XXX: not supported yet
-    debug: " -g ",
-    pic: "",
-    asmStmtFrmt: "asm($1);$n",
-    structStmtFmt: "$1 $2",
-    produceAsm: gnuAsmListing,
-    cppXsupport: "",
-    props: {hasSwitchRange, hasComputedGoto, hasGnuAsm})
+  result.name = "tcc"
+  result.objExt = "o"
+  result.optSpeed = ""
+  result.optSize = ""
+  result.compilerExe = "tcc"
+  result.cppCompiler = ""
+  result.compileTmpl = "-c $options $include -o $objfile $file"
+  result.buildGui = "-Wl,-subsystem=gui"
+  result.buildDll = " -shared"
+  result.buildLib = "" # XXX: not supported yet
+  result.linkerExe = "tcc"
+  result.linkTmpl = "-o $exefile $options $buildgui $builddll $objfiles"
+  result.includeCmd = " -I"
+  result.linkDirCmd = "" # XXX: not supported yet
+  result.linkLibCmd = "" # XXX: not supported yet
+  result.debug = " -g "
+  result.pic = ""
+  result.asmStmtFrmt = "asm($1);$n"
+  result.structStmtFmt = "$1 $2"
+  result.produceAsm = gnuAsmListing
+  result.cppXsupport = ""
+  result.props = {hasSwitchRange, hasComputedGoto, hasGnuAsm}
 
 # Pelles C Compiler
 compiler pcc:
   # Pelles C
-  result = (
-    name: "pcc",
-    objExt: "obj",
-    optSpeed: " -Ox ",
-    optSize: " -Os ",
-    compilerExe: "cc",
-    cppCompiler: "",
-    compileTmpl: "-c $options $include -Fo$objfile $file",
-    buildGui: " -SUBSYSTEM:WINDOWS",
-    buildDll: " -DLL",
-    buildLib: "", # XXX: not supported yet
-    linkerExe: "cc",
-    linkTmpl: "$options $buildgui $builddll -OUT:$exefile $objfiles",
-    includeCmd: " -I",
-    linkDirCmd: "", # XXX: not supported yet
-    linkLibCmd: "", # XXX: not supported yet
-    debug: " -Zi ",
-    pic: "",
-    asmStmtFrmt: "__asm{$n$1$n}$n",
-    structStmtFmt: "$1 $2",
-    produceAsm: "",
-    cppXsupport: "",
-    props: {})
+  result.name = "pcc"
+  result.objExt = "obj"
+  result.optSpeed = " -Ox "
+  result.optSize = " -Os "
+  result.compilerExe = "cc"
+  result.cppCompiler = ""
+  result.compileTmpl = "-c $options $include -Fo$objfile $file"
+  result.buildGui = " -SUBSYSTEM:WINDOWS"
+  result.buildDll = " -DLL"
+  result.buildLib = "" # XXX: not supported yet
+  result.linkerExe = "cc"
+  result.linkTmpl = "$options $buildgui $builddll -OUT:$exefile $objfiles"
+  result.includeCmd = " -I"
+  result.linkDirCmd = "" # XXX: not supported yet
+  result.linkLibCmd = "" # XXX: not supported yet
+  result.debug = " -Zi "
+  result.pic = ""
+  result.asmStmtFrmt = "__asm{$n$1$n}$n"
+  result.structStmtFmt = "$1 $2"
+  result.produceAsm = ""
+  result.cppXsupport = ""
+  result.props = {}
 
 # Your C Compiler
 compiler ucc:
-  result = (
-    name: "ucc",
-    objExt: "o",
-    optSpeed: " -O3 ",
-    optSize: " -O1 ",
-    compilerExe: "cc",
-    cppCompiler: "",
-    compileTmpl: "-c $options $include -o $objfile $file",
-    buildGui: "",
-    buildDll: " -shared ",
-    buildLib: "", # XXX: not supported yet
-    linkerExe: "cc",
-    linkTmpl: "-o $exefile $buildgui $builddll $objfiles $options",
-    includeCmd: " -I",
-    linkDirCmd: "", # XXX: not supported yet
-    linkLibCmd: "", # XXX: not supported yet
-    debug: "",
-    pic: "",
-    asmStmtFrmt: "__asm{$n$1$n}$n",
-    structStmtFmt: "$1 $2",
-    produceAsm: "",
-    cppXsupport: "",
-    props: {})
+  result.name = "ucc"
+  result.objExt = "o"
+  result.optSpeed = " -O3 "
+  result.optSize = " -O1 "
+  result.compilerExe = "cc"
+  result.cppCompiler = ""
+  result.compileTmpl = "-c $options $include -o $objfile $file"
+  result.buildGui = ""
+  result.buildDll = " -shared "
+  result.buildLib = "" # XXX: not supported yet
+  result.linkerExe = "cc"
+  result.linkTmpl = "-o $exefile $buildgui $builddll $objfiles $options"
+  result.includeCmd = " -I"
+  result.linkDirCmd = "" # XXX: not supported yet
+  result.linkLibCmd = "" # XXX: not supported yet
+  result.debug = ""
+  result.pic = ""
+  result.asmStmtFrmt = "__asm{$n$1$n}$n"
+  result.structStmtFmt = "$1 $2"
+  result.produceAsm = ""
+  result.cppXsupport = ""
+  result.props = {}
 
 const
   CC*: array[succ(low(TSystemCC))..high(TSystemCC), TInfoCC] = [
