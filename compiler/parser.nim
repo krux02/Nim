@@ -972,9 +972,10 @@ proc identWithPragma(p: var TParser): PNode =
 type
   TDeclaredIdentFlag = enum
     withPragma,               # identifier may have pragma
+    withBothOptional          # both ':' and '=' parts are optional
   TDeclaredIdentFlags = set[TDeclaredIdentFlag]
 
-proc parseIdentColonEquals(p: var TParser, withPragma: bool): PNode =
+proc parseIdentColonEquals(p: var TParser, flags: TDeclaredIdentFlags): PNode =
   #| declColonEquals = identWithPragma (comma identWithPragma)* comma?
   #|                   (':' optInd typeDesc)? ('=' optInd expr)?
   #| identColonEquals = IDENT (comma IDENT)* comma?
@@ -985,8 +986,8 @@ proc parseIdentColonEquals(p: var TParser, withPragma: bool): PNode =
   while true:
     case p.tok.tokType
     of tkSymbol, tkAccent:
-      if withPragma: a = identWithPragma(p)
-      else:          a = parseSymbol(p)
+      if withPragma in flags: a = identWithPragma(p)
+      else: a = parseSymbol(p)
       if a.kind == nkEmpty: return
     else: break
     result.add(a)
@@ -999,7 +1000,7 @@ proc parseIdentColonEquals(p: var TParser, withPragma: bool): PNode =
     result.add(parseTypeDesc(p))
   else:
     result.add(newNodeP(nkEmpty, p))
-    if p.tok.tokType != tkEquals:
+    if p.tok.tokType != tkEquals and withBothOptional notin flags:
       parMessage(p, "':' or '=' expected, but got '$1'", p.tok)
   if p.tok.tokType == tkEquals:
     getTok(p)
@@ -1021,7 +1022,7 @@ proc parseTuple(p: var TParser, indentAllowed = false): PNode =
     optInd(p, result)
     # progress guaranteed
     while p.tok.tokType in {tkSymbol, tkAccent}:
-      var a = parseIdentColonEquals(p, withPragma = false)
+      var a = parseIdentColonEquals(p, {})
       result.add(a)
       if p.tok.tokType notin {tkComma, tkSemiColon}: break
       when defined(nimpretty):
@@ -1039,7 +1040,7 @@ proc parseTuple(p: var TParser, indentAllowed = false): PNode =
         while true:
           case p.tok.tokType
           of tkSymbol, tkAccent:
-            var a = parseIdentColonEquals(p, withPragma = false)
+            var a = parseIdentColonEquals(p, {})
             if p.tok.indent < 0 or p.tok.indent >= p.currInd:
               rawSkipComment(p, a)
             result.add(a)
@@ -1071,7 +1072,7 @@ proc parseParamList(p: var TParser, retColon = true): PNode =
     while true:
       case p.tok.tokType
       of tkSymbol, tkAccent:
-        a = parseIdentColonEquals(p, withPragma = true)
+        a = parseIdentColonEquals(p, {withBothOptional, withPragma})
       of tkParRi:
         break
       of tkVar:
@@ -1968,7 +1969,7 @@ proc parseObjectPart(p: var TParser): PNode =
     of tkCase:
       result = parseObjectCase(p)
     of tkSymbol, tkAccent:
-      result = parseIdentColonEquals(p, withPragma = true)
+      result = parseIdentColonEquals(p, {withPragma})
       if p.tok.indent < 0 or p.tok.indent >= p.currInd:
         rawSkipComment(p, result)
     of tkNil, tkDiscard:
@@ -2126,7 +2127,7 @@ proc parseVariable(p: var TParser): PNode =
     optInd(p, result)
     result.add(parseExpr(p))
   else:
-    result = parseIdentColonEquals(p, withPragma = true)
+    result = parseIdentColonEquals(p, {withPragma})
   result[^1] = postExprBlocks(p, result[^1])
   indAndComment(p, result)
 
