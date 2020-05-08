@@ -1,8 +1,8 @@
 discard """
-  errormsg: "The Foo type requires the following fields to be initialized: bar, baz"
-  line: "17"
+errormsg: "The Foo type requires the following fields to be initialized: bar, baz"
+line: "17"
+cmd: "nim $target --experimental:notnil $options $file"
 """
-{.experimental: "notnil".}
 # bug #2355
 type
   Base = object of RootObj

@@ -2,7 +2,6 @@
 # meta.nim
 #
 
-import tables
 import macros
 
 type

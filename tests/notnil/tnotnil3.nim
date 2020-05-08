@@ -1,11 +1,11 @@
 discard """
   errormsg: "cannot prove 'variable' is not nil"
   line: 31
+cmd: "nim $target --experimental:notnil $options $file"
 """
 
 # bug #584
 # Testprogram for 'not nil' check
-{.experimental: "notnil".}
 const testWithResult = true
 
 type
@@ -32,4 +32,3 @@ variable.testNotNil() # Here 'not nil' is proved
 
 when testWithResult:
   discard testNotNilOnResult()
-

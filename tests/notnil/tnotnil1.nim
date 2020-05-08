@@ -1,10 +1,10 @@
 discard """
-  errormsg: "'y' is provably nil"
-  line:25
+errormsg: "'y' is provably nil"
+line:25
+cmd: "nim $target --experimental:notnil $options $file"
 """
 
 import strutils
-{.experimental: "notnil".}
 
 type
   TObj = object

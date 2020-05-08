@@ -5834,120 +5834,12 @@ iterator in which case the overloading resolution takes place:
   var x = 4
   write(stdout, x) # not ambiguous: uses the module C's x
 
-Code reordering
-~~~~~~~~~~~~~~~
-
-**Note**: Code reordering is experimental and must be enabled via the
-``{.experimental.}`` pragma.
-
-The code reordering feature can implicitly rearrange procedure, template, and
-macro definitions along with variable declarations and initializations at the top
-level scope so that, to a large extent, a programmer should not have to worry
-about ordering definitions correctly or be forced to use forward declarations to
-preface definitions inside a module.
-
-..
-   NOTE: The following was documentation for the code reordering precursor,
-   which was {.noForward.}.
-
-   In this mode, procedure definitions may appear out of order and the compiler
-   will postpone their semantic analysis and compilation until it actually needs
-   to generate code using the definitions. In this regard, this mode is similar
-   to the modus operandi of dynamic scripting languages, where the function
-   calls are not resolved until the code is executed. Here is the detailed
-   algorithm taken by the compiler:
-
-   1. When a callable symbol is first encountered, the compiler will only note
-   the symbol callable name and it will add it to the appropriate overload set
-   in the current scope. At this step, it won't try to resolve any of the type
-   expressions used in the signature of the symbol (so they can refer to other
-   not yet defined symbols).
-
-   2. When a top level call is encountered (usually at the very end of the
-   module), the compiler will try to determine the actual types of all of the
-   symbols in the matching overload set. This is a potentially recursive process
-   as the signatures of the symbols may include other call expressions, whose
-   types will be resolved at this point too.
-
-   3. Finally, after the best overload is picked, the compiler will start
-   compiling the body of the respective symbol. This in turn will lead the
-   compiler to discover more call expressions that need to be resolved and steps
-   2 and 3 will be repeated as necessary.
-
-   Please note that if a callable symbol is never used in this scenario, its
-   body will never be compiled. This is the default behavior leading to best
-   compilation times, but if exhaustive compilation of all definitions is
-   required, using ``nim check`` provides this option as well.
-
-Example:
-
-.. code-block:: nim
-
-  {.experimental: "codeReordering".}
-
-  proc foo(x: int) =
-    bar(x)
-
-  proc bar(x: int) =
-    echo(x)
-
-  foo(10)
-
-Variables can also be reordered as well. Variables that are *initialized* (i.e.
-variables that have their declaration and assignment combined in a single
-statement) can have their entire initialization statement reordered. Be wary of
-what code is executed at the top level:
-
-.. code-block:: nim
-  {.experimental: "codeReordering".}
-
-  proc a() =
-    echo(foo)
-
-  var foo = 5
-
-  a() # outputs: "5"
-
-..
-   TODO: Let's table this for now. This is an *experimental feature* and so the
-   specific manner in which ``declared`` operates with it can be decided in
-   eventuality, because right now it works a bit weirdly.
-
-   The values of expressions involving ``declared`` are decided *before* the
-   code reordering process, and not after. As an example, the output of this
-   code is the same as it would be with code reordering disabled.
-
-   .. code-block:: nim
-     {.experimental: "codeReordering".}
-
-     proc x() =
-       echo(declared(foo))
-
-     var foo = 4
-
-     x() # "false"
-
-It is important to note that reordering *only* works for symbols at top level
-scope. Therefore, the following will *fail to compile:*
-
-.. code-block:: nim
-  {.experimental: "codeReordering".}
-
-  proc a() =
-    b()
-    proc b() =
-      echo("Hello!")
-
-  a()
-
 Compiler Messages
 =================
 
 The Nim compiler emits different kinds of messages: `hint`:idx:,
 `warning`:idx:, and `error`:idx: messages. An *error* message is emitted if
 the compiler encounters any static error.
-
-
 
 Pragmas
 =======
@@ -6412,51 +6304,9 @@ This prevents the "Unused import" warning:
 experimental pragma
 -------------------
 
-The ``experimental`` pragma enables experimental language features. Depending
-on the concrete feature this means that the feature is either considered
-too unstable for an otherwise stable release or that the future of the feature
-is uncertain (it may be removed any time).
-
-Example:
-
-.. code-block:: nim
-  import threadpool
-  {.experimental: "parallel".}
-
-  proc threadedEcho(s: string, i: int) =
-    echo(s, " ", $i)
-
-  proc useParallel() =
-    parallel:
-      for i in 0..4:
-        spawn threadedEcho("echo in parallel", i)
-
-  useParallel()
-
-
-As a top level statement, the experimental pragma enables a feature for the
-rest of the module it's enabled in. This is problematic for macro and generic
-instantiations that cross a module scope. Currently these usages have to be
-put into a ``.push/pop`` environment:
-
-.. code-block:: nim
-
-  # client.nim
-  proc useParallel*[T](unused: T) =
-    # use a generic T here to show the problem.
-    {.push experimental: "parallel".}
-    parallel:
-      for i in 0..4:
-        echo "echo in parallel"
-
-    {.pop.}
-
-
-.. code-block:: nim
-
-  import client
-  useParallel(1)
-
+The ``experimental`` pragma has been disabled but still reserved in
+this branch of the compiler. Experimental language features have to be
+enabled via compiler flags.
 
 Implementation Specific Pragmas
 ===============================

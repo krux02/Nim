@@ -1,10 +1,10 @@
 discard """
   errormsg: "cannot prove 'y' is not nil"
   line:20
+cmd: "nim $target --experimental:notnil $options $file"
 """
 
 import strutils
-{.experimental: "notnil".}
 
 type
   TObj = object

@@ -13,7 +13,7 @@
 import
   options, ast, llstream, msgs,
   idents,
-  syntaxes, idgen, modulegraphs, reorder, rod,
+  syntaxes, idgen, modulegraphs, rod,
   lineinfos, pathutils
 
 type
@@ -181,21 +181,7 @@ proc processModule*(graph: ModuleGraph; module: PSym, stream: PLLStream): bool {
         if graph.stopCompile(): break
         var n = parseTopLevelStmt(p)
         if n.kind == nkEmpty: break
-        if (sfSystemModule notin module.flags and
-            ({sfNoForward, sfReorder} * module.flags != {} or
-            codeReordering in graph.config.features)):
-          # read everything, no streaming possible
-          var sl = newNodeI(nkStmtList, n.info)
-          sl.add n
-          while true:
-            var n = parseTopLevelStmt(p)
-            if n.kind == nkEmpty: break
-            sl.add n
-          if sfReorder in module.flags or codeReordering in graph.config.features:
-            sl = reorder(graph, sl, module)
-          discard processTopLevelStmt(graph, sl, a)
-          break
-        elif n.kind in imperativeCode:
+        if n.kind in imperativeCode:
           # read everything until the next proc declaration etc.
           var sl = newNodeI(nkStmtList, n.info)
           sl.add n

@@ -60,13 +60,14 @@ remove all WTFs from the codebase.
 ** DONE remove ~this~ pragma
 ** DONE remove ~using~ statement
 ** remove ~ast~ based function overloading
-** remove experimental code reordering
+** DONE remove experimental code reordering
 ** DONE error on compile time var at runtime
 ** makes pragmas importable
 ** remove term rewriting macros
 ** explain pragma explain
 ** DONE remove special operators ~.~ ~.=~ ~.()~
 ** DONE make sure, ~typed~ doesn't mean ~void~ in macro/templates anymore.
+** document all special operators and how they are called
 ** testament run test/does/not/exist is a warning not an error
 ** make ~not~ a normal identifier (not an operator)
 ** inject base type fields into node (make iterating fields easier).
@@ -88,4 +89,7 @@ remove all WTFs from the codebase.
 ** document how magics work for contributors
 ** DONE get rid of the weird `..Seq` type definitions
 ** error about deprecation that doesn't mention a fallback solution.
-** implement unreachable
+** implement unreachable (assert false, "this section should be unreachable")
+** DONE remove manyloc tests
+** remove pragma noforward
+** reenabled niminaction tests and js tests

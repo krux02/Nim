@@ -1,10 +1,11 @@
 discard """
 action: compile
+cmd: "nim $target --experimental:notnil $options $file"
 """
 
 # bug #3313
 import unittest, sugar
-{.experimental: "notnil".}
+
 type
   ListNodeKind = enum
     lnkNil, lnkCons

@@ -4,8 +4,9 @@ output: '''
 0
 0
 '''
+cmd: "nim $target --experimental:notnil $options $file"
 """
-{.experimental: "notnil".}
+
 type
   MyPointer = distinct pointer
   MyString = distinct string

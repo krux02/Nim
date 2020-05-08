@@ -1,9 +1,9 @@
 discard """
   errormsg: "cannot prove 'x' is not nil"
+cmd: "nim $target --experimental:notnil $options $file"
 """
 
 # bug #2216
-{.experimental: "notnil".}
 
 type
     A[T] = ref object

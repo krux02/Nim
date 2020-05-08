@@ -3,12 +3,14 @@ discard """
   line:51
   action: run
   output: "abc abc"
+
+cmd: "nim $target --experimental:notnil $options $file"
 """
 
 import strutils
 
 {.warning[ProveField]: on.}
-{.experimental: "notnil".}
+
 type
   TNodeKind = enum
     nkBinary, nkTernary, nkStr

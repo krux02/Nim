@@ -9,7 +9,7 @@ import jsffi
 
 var a = JsAssoc[cstring, int]{a: 2}
 
-for z, b in a:
+for z, b in a.pairs:
   echo z, " -> ", b
 
 proc f =

@@ -260,19 +260,6 @@ proc onOff(c: PContext, n: PNode, op: TOptions, resOptions: var TOptions) =
   if isTurnedOn(c, n): resOptions = resOptions + op
   else: resOptions = resOptions - op
 
-proc pragmaNoForward(c: PContext, n: PNode; flag=sfNoForward) =
-  if isTurnedOn(c, n):
-    incl(c.module.flags, flag)
-    c.features.incl codeReordering
-  else:
-    excl(c.module.flags, flag)
-    # c.features.excl codeReordering
-
-  # deprecated as of 0.18.1
-  message(c.config, n.info, warnDeprecated,
-          "use {.experimental: \"codeReordering\".} instead; " &
-          (if flag == sfNoForward: "{.noForward.}" else: "{.reorder.}") & " is deprecated")
-
 proc processCallConv(c: PContext, n: PNode) =
   if n.kind in nkPragmaCallKinds and n.len == 2 and n[1].kind == nkIdent:
     let sw = whichKeyword(n[1].ident)
@@ -382,26 +369,6 @@ proc pragmaToOptions(w: TSpecialWord): TOptions {.inline.} =
   of wSinkInference: {optSinkInference}
   else: {}
 
-proc processExperimental(c: PContext; n: PNode) =
-  if n.kind notin nkPragmaCallKinds or n.len != 2:
-    c.features.incl oldExperimentalFeatures
-  else:
-    n[1] = c.semConstExpr(c, n[1])
-    case n[1].kind
-    of nkStrLit, nkRStrLit, nkTripleStrLit:
-      try:
-        let feature = parseEnum[Feature](n[1].strVal)
-        c.features.incl feature
-        if feature == codeReordering:
-          if not isTopLevel(c):
-              localError(c.config, n.info,
-                         "Code reordering experimental pragma only valid at toplevel")
-          c.module.flags.incl sfReorder
-      except ValueError:
-        localError(c.config, n[1].info, "unknown experimental feature")
-    else:
-      localError(c.config, n.info, errStringLiteralExpected)
-
 proc tryProcessOption(c: PContext, n: PNode, resOptions: var TOptions): bool =
   result = true
   if n.kind notin nkPragmaCallKinds or n.len != 2: result = false
@@ -410,7 +377,7 @@ proc tryProcessOption(c: PContext, n: PNode, resOptions: var TOptions): bool =
   else:
     let sw = whichKeyword(n[0].ident)
     if sw == wExperimental:
-      processExperimental(c, n)
+      localError(c.config, n.info, "'experimental' option is reserved for future use.")
       return true
     let opts = pragmaToOptions(sw)
     if opts != {}:
@@ -763,6 +730,8 @@ proc semCustomPragma(c: PContext, n: PNode): PNode =
     # pragma(arg) -> pragma: arg
     result.transitionSonsKind(n.kind)
 
+from astalgo import debug
+
 proc singlePragma(c: PContext, sym: PSym, n: PNode, i: var int,
                   validPragmas: TSpecialWords,
                   comesFromPush, isStatement: bool): bool =
@@ -869,8 +838,6 @@ proc singlePragma(c: PContext, sym: PSym, n: PNode, i: var int,
         noVal(c, it)
         incl(sym.flags, {sfThread, sfGlobal})
       of wDeadCodeElimUnused: discard  # deprecated, dead code elim always on
-      of wNoForward: pragmaNoForward(c, it)
-      of wReorder: pragmaNoForward(c, it, flag = sfReorder)
       of wMagic: processMagic(c, it, sym)
       of wCompileTime:
         noVal(c, it)
@@ -1128,9 +1095,10 @@ proc singlePragma(c: PContext, sym: PSym, n: PNode, i: var int,
         else:
           it[1] = c.semExpr(c, it[1])
       of wExperimental:
-        if not isTopLevel(c):
-          localError(c.config, n.info, "'experimental' pragma only valid as toplevel statement or in a 'push' environment")
-        processExperimental(c, it)
+        if it.len == 2 and it[1].kind == nkStrLit:
+          localError(c.config, n.info, "'experimental' feature must be enabled via compiler flag, e.g.: --experimental:" & it[1].strVal)
+        else:
+          localError(c.config, n.info, "'experimental' pragma reserved for future use.")
       of wNoRewrite:
         noVal(c, it)
       of wBase:

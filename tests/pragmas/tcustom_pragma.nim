@@ -1,4 +1,6 @@
-{.experimental: "notnil".}
+discard """
+cmd: "nim $target --experimental:notnil $options $file"
+"""
 
 import macros, asyncmacro, asyncfutures
 

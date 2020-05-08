@@ -162,7 +162,7 @@ proc asmx64() {.compileTime} =
 
   echo($cpp)
 
-macro asmx64x(code_in:untyped) : typed =
+macro asmx64x(code_in:untyped) =
   code = $code_in
   echo("code.len = $1, code = >>>$2<<<" % [$code.len, code])
   asmx64()

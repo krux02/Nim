@@ -315,7 +315,6 @@ type
     #                   # symbol
 
     # sfNoForward,      # forward declarations are not required (per module)
-    # sfReorder,        # reordering pass is enabled
 
     # sfCompileToCpp    # compile the module as C++ code
     # sfCompileToObjC   # compile the module as Objective-C code
@@ -350,8 +349,6 @@ const
 
   sfNoForward* = sfRegister
     # forward declarations are not required (per module)
-  sfReorder* = sfForward
-    # reordering pass is enabled
 
   sfCompileToCpp* = sfInfixCall       # compile the module as C++ code
   sfCompileToObjC* = sfNamedParamCall # compile the module as Objective-C code

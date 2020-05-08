@@ -1,5 +1,4 @@
 import osproc, streams, os, strutils, re
-{.experimental.}
 
 ## Compiler as a service tester.
 ##

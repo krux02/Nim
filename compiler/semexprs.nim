@@ -2178,7 +2178,7 @@ proc semMagic(c: PContext, n: PNode, s: PSym, flags: TExprFlags): PNode =
   of mParallel:
     markUsed(c, n.info, s)
     if parallel notin c.features:
-      localError(c.config, n.info, "use the {.experimental.} pragma to enable 'parallel'")
+      localError(c.config, n.info, "use the --experimental:parallel flag to enable parallel")
     result = setMs(n, s)
     var x = n.lastSon
     if x.kind == nkDo: x = x[bodyPos]

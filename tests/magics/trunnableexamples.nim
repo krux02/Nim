@@ -6,7 +6,6 @@ foo1
 foo2
 foo3
 foo5
-foo6
 foo7
 foo8
 foo9
@@ -30,13 +29,6 @@ proc fun*() =
     # ditto
     proc fun*()=echo "foo5"
     fun()
-
-  runnableExamples:
-    # `codeReordering` only allowed at top level
-    {.experimental: "codeReordering".}
-    proc fun1() = fun2()
-    proc fun2() = echo "foo6"
-    fun1()
 
   runnableExamples:
     # only works at top level

@@ -1,8 +1,8 @@
-discard ""
+discard """
+cmd: "nim $target --experimental:notnil $options $file"
+"""
 type
    TObj = ref object
-
-{.experimental: "notnil".}
 
 proc check(a: TObj not nil) =
   echo repr(a)

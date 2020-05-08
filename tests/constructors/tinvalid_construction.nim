@@ -1,10 +1,13 @@
+discard """
+cmd: "nim $target --experimental:notnil $options $file"
+"""
+
+
 template accept(x) =
   static: assert compiles(x)
 
 template reject(x) =
   static: assert(not compiles(x))
-
-{.experimental: "notnil".}
 
 type
   TRefObj = ref object
@@ -436,4 +439,3 @@ block:
                               b: allocNotNil(ref Bar),
                               c: allocNotNil(ref Bar))
   mutateThing thing
-

@@ -8,11 +8,14 @@ discard """
 0 1
 1 2
 2 3
-3 5'''
+3 5
+'''
+
+cmd: "nim $target --experimental:forLoopMacros $options $file"
 """
 
 import macros
-{.experimental: "forLoopMacros".}
+
 macro mymacro(): untyped =
   result = newLit([1, 2, 3])
 

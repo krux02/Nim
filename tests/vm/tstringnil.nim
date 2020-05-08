@@ -41,7 +41,7 @@ proc buildSuiteContents(suiteName, suiteDesc, suiteBloc: NimNode): tuple[tests: 
 
   return (tests: tests)
 
-macro suite(suiteName, suiteDesc, suiteBloc: untyped): typed =
+macro suite(suiteName, suiteDesc, suiteBloc: untyped) =
   let contents = buildSuiteContents(suiteName, suiteDesc, suiteBloc)
 
 # Test above

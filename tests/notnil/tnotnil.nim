@@ -1,8 +1,8 @@
 discard """
   errormsg: "type mismatch"
   line: 13
+cmd: "nim $target --experimental:notnil $options $file"
 """
-{.experimental: "notnil".}
 type
   PObj = ref TObj not nil
   TObj = object

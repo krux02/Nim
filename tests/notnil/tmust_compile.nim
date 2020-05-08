@@ -1,9 +1,9 @@
 discard """
   output: '''success'''
+cmd: "nim $target --experimental:notnil $options $file"
 """
 
 # bug #6682
-{.experimental: "notnil".}
 
 type
     Fields = enum

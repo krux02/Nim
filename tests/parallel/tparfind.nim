@@ -1,10 +1,9 @@
 discard """
-  output: "500"
+output: "500"
+cmd: "nim $target --experimental:parallel $options $file"
 """
 
 import threadpool, sequtils
-
-{.experimental: "parallel".}
 
 proc linearFind(a: openArray[int]; x, offset: int): int =
   for i, y in a:
@@ -25,4 +24,3 @@ proc parFind(a: seq[int]; x: int): int =
 
 let data = toSeq(0..1000)
 echo parFind(data, 500)
-

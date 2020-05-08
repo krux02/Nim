@@ -20,6 +20,7 @@ This changelog contains all changes that are specific to the krux-nim branch
   anymore.
 - Removed arity, genericHead, stripGenericParams, genericParams from
   typetraits module.
+- Removed sharedstrings
 
 ## Language changes
 
@@ -40,6 +41,8 @@ This changelog contains all changes that are specific to the krux-nim branch
 - something for concepts broke (sorry)
 - statement `using` is no longer supported.
 - removed builtin pragmas: `this` `partial` `liftLocal` `package`.
-- `typed` doesn't mean `void` anymore for macro/template return type contexts
+- `typed` doesn't mean `void` anymore for macro/template return type
+  contexts
+- removed codeReordering
 
 ## Tool changes
