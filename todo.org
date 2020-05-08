@@ -88,4 +88,4 @@ remove all WTFs from the codebase.
 ** document how magics work for contributors
 ** DONE get rid of the weird `..Seq` type definitions
 ** error about deprecation that doesn't mention a fallback solution.
-** DONE remove shallow pragma
+** implement unreachable

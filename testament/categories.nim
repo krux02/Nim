@@ -28,7 +28,6 @@ const
     "ic",
     "lib",
     "longgc",
-    "manyloc",
     "nimble-packages",
     "niminaction",
     "rodfiles",
@@ -357,34 +356,6 @@ proc testNimInAction(r: var TResults, cat: Category, options: string) =
   let cppFile = "tests/niminaction/Chapter8/sfml/sfml_test.nim"
   testCPP cppFile
 
-# ------------------------- manyloc -------------------------------------------
-
-proc findMainFile(dir: string): string =
-  # finds the file belonging to ".nim.cfg"; if there is no such file
-  # it returns the some ".nim" file if there is only one:
-  const cfgExt = ".nim.cfg"
-  result = ""
-  var nimFiles = 0
-  for kind, file in os.walkDir(dir):
-    if kind == pcFile:
-      if file.endsWith(cfgExt): return file[.. ^(cfgExt.len+1)] & ".nim"
-      elif file.endsWith(".nim"):
-        if result.len == 0: result = file
-        inc nimFiles
-  if nimFiles != 1: result.setLen(0)
-
-proc manyLoc(r: var TResults, cat: Category, options: string) =
-  for kind, dir in os.walkDir("tests/manyloc"):
-    if kind == pcDir:
-      when defined(windows):
-        if dir.endsWith"nake": continue
-      if dir.endsWith"named_argument_bug": continue
-      let mainfile = findMainFile(dir)
-      if mainfile != "":
-        var test = makeTest(mainfile, options, cat)
-        test.spec.action = actionCompile
-        testSpec r, test
-
 proc compileExample(r: var TResults, pattern, options: string, cat: Category) =
   for test in os.walkFiles(pattern):
     var test = makeTest(test, options, cat)
@@ -521,12 +492,12 @@ proc testNimblePackages(r: var TResults; cat: Category; packageFilter: string) =
 const AdditionalCategories = ["debugger", "examples", "lib", "ic"]
 const MegaTestCat = "megatest"
 
-proc `&.?`(a, b: string): string =
+proc ensurePrefix(prefix, value: string): string =
   # candidate for the stdlib?
-  result = if b.startsWith(a): b else: a & b
+  result = if value.startsWith(prefix): value else: prefix & value
 
 proc processSingleTest(r: var TResults, cat: Category, options, test: string) =
-  let test = testsDir &.? cat.string / test
+  let test = ensurePrefix(testsDir, string(cat) / test)
   let target = if cat.string.normalize == "js": targetJS else: targetC
   if existsFile(test):
     testSpec r, makeTest(test, options, cat), {target}
@@ -585,12 +556,6 @@ proc runJoinedTest(r: var TResults, cat: Category, testsDir: string) =
     return
 
   var megatest: string
-  #[
-  TODO(minor):
-  get from Nim cmd
-  put outputGotten.txt, outputGotten.txt, megatest.nim there too
-  delete upon completion, maybe
-  ]#
   var outDir = nimcacheDir(testsDir / "megatest", "", targetC)
   const marker = "megatest:processing: "
 
@@ -671,14 +636,12 @@ proc processCategory(r: var TResults, cat: Category,
     longGCTests(r, cat, options)
   of "debugger":
     debuggerTests(r, cat, options)
-  of "manyloc":
-    manyLoc r, cat, options
   of "threads":
-    threadTests r, cat, options & " --threads:on"
+    threadTests(r, cat, options & " --threads:on")
   of "io":
-    ioTests r, cat, options
+    ioTests(r, cat, options)
   of "async":
-    asyncTests r, cat, options
+    asyncTests(r, cat, options)
   of "lib":
     testStdlib(r, "lib/pure/", options, cat)
     testStdlib(r, "lib/packages/docutils/", options, cat)

@@ -63,17 +63,25 @@ proc `=sink`*[T](dest: var SharedPtr[T]; src: SharedPtr[T]) =
 proc get*[T](s: SharedPtr[T]): lent T =
   s.x[]
 
+proc isNil*(s: SharedPtr): bool =
+  s.x == nil
+
 template `.`*[T](s: SharedPtr[T]; field: untyped): untyped =
   s.x.field
 
 template `.=`*[T](s: SharedPtr[T]; field, value: untyped) =
   s.x.field = value
 
-from macros import unpackVarargs
+import macros
 
-template `.()`*[T](s: SharedPtr[T]; field: untyped, args: varargs[untyped]): untyped =
-  unpackVarargs(s.x.field, args)
-
+macro `->`*[T](this: SharedPtr[T], call: untyped): untyped =
+  if call.kind == nnkIdent:
+    result = newDotExpr(newCall(bindSym"get", this), call)
+  else:
+    call.expectKind nnkCall
+    result = newCall(newDotExpr(newCall(bindSym"get", this), call[0]))
+    for i in 1 ..< call.len:
+      result.add call[i]
 
 type
   Tree = SharedPtr[TreeObj]
@@ -84,9 +92,9 @@ type
 
 proc takesTree(a: Tree) =
   if not a.isNil:
-    takesTree(a.le)
-    echo a.data
-    takesTree(a.ri)
+    takesTree(a -> le)
+    echo a->data
+    takesTree(a -> ri)
 
 proc createTree(data: int): Tree =
   result = makeShared(TreeObj(refcount: 1, data: data))

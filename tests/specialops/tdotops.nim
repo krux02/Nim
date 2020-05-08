@@ -12,8 +12,13 @@ no params call to b
 100
 one param call to c with 10
 100
-0 4'''
+0 4
+'''
+
+disabled: true
 """
+
+# dotops have been removed
 
 type
   T1 = object

@@ -34,7 +34,7 @@ proc init(my: var TRectangle) =
   my.height = 10
   my.draw = cast[proc (my: var TFigure) {.nimcall.}](drawRectangle)
 
-macro `!` (n: varargs[untyped]): typed =
+macro `!` (n: varargs[untyped]) =
   result = newNimNode(nnkCall, callsite())
   var dot = newNimNode(nnkDotExpr, callsite())
   dot.add(n[0])    # obj

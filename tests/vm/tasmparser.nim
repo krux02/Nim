@@ -168,7 +168,7 @@ macro asmx64x(code_in:untyped) : typed =
   asmx64()
   discard result
 
-asmx64x """
+asmx64x("""
     mov rax, {m}
     ret
-"""
+""")

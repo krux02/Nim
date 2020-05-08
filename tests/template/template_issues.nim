@@ -93,7 +93,7 @@ block t993:
   litNode PIntNode, int
 
   template withKey(j: JsonNode; key: string; varname,
-                    body: untyped): typed =
+                    body: untyped) =
     if j.hasKey(key):
       let varname{.inject.}= j[key]
       block:
@@ -149,8 +149,6 @@ block t8052:
   doAssert a.lo.raw_data.len == 2
   doAssert a.lo.raw_data[0] == 1
   doAssert a.lo.raw_data[1] == 2
-
-
 
 block t2585:
   type
