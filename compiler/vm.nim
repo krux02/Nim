@@ -2207,18 +2207,13 @@ proc errorNode(owner: PSym, n: PNode): PNode =
 
 proc evalMacroCall*(module: PSym; g: ModuleGraph;
                     n: PNode, sym: PSym): PNode =
-  if g.config.errorCounter > 0: return errorNode(module, n)
+  if g.config.errorCounter > 0:
+    return errorNode(module, n)
 
   # XXX globalError() is ugly here, but I don't know a better solution for now
   inc(g.config.evalMacroCounter)
   if g.config.evalMacroCounter > evalMacroLimit:
     globalError(g.config, n.info, "macro instantiation too nested")
-
-  # immediate macros can bypass any type and arity checking so we check the
-  # arity here too:
-  if sym.typ.len > n.safeLen and sym.typ.len > 1:
-    globalError(g.config, n.info, "in call '$#' got $#, but expected $# argument(s)" % [
-        n.renderTree, $(n.safeLen-1), $(sym.typ.len-1)])
 
   setupGlobalCtx(module, g)
   var c = PCtx g.vm
@@ -2234,6 +2229,7 @@ proc evalMacroCall*(module: PSym; g: ModuleGraph;
   # setup arguments:
   var L = n.safeLen
   if L == 0: L = 1
+
   # This is wrong for tests/reject/tind1.nim where the passed 'else' part
   # doesn't end up in the parameter:
   #InternalAssert tos.slots.len >= L
@@ -2246,15 +2242,15 @@ proc evalMacroCall*(module: PSym; g: ModuleGraph;
     tos.slots[i] = setupMacroParam(n[i], sym.typ[i])
 
   let gp = sym.ast[genericParamsPos]
-  for i in 0..<gp.len:
+  for i in 0 ..< gp.len:
     let idx = sym.typ.len + i
     if idx < n.len:
       tos.slots[idx] = setupMacroParam(n[idx], gp[i].sym.typ)
     else:
       dec(g.config.evalMacroCounter)
       c.callsite = nil
-      localError(c.config, n.info, "expected " & $gp.len &
-                 " generic parameter(s)")
+      localError(c.config, n.info, "expected " & $gp.len & " generic parameter(s)")
+
   # temporary storage:
   #for i in L..<maxSlots: tos.slots[i] = newNode(nkEmpty)
   result = rawExecute(c, start, tos).regToNode

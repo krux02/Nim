@@ -4,10 +4,9 @@ reports. Deprecated features won't stay for long. The goal is to
 remove all WTFs from the codebase.
 
 * TODO
-** DONE use nnkTupleConstr consistently (replace nnkPar where necessary)
+
 ** raise error on union at compile time
 ** add entry to tutorial about init pattern (inheritable types should provide init and newMyType)
-** rename down cast / up cast
 ** new statement: ~includedFrom "foo.nim"~ ~template includedFrom(x: string) = discard~
 ** nimi for included nim files
 ** deprecated flag on export statements (non breaking pattern to change module of something)
@@ -33,7 +32,6 @@ remove all WTFs from the codebase.
 ** move documentation comments to identifier/symbol properties
 ** move export marker to identifier/symbol properties
 ** getTypeInst, getTypeImpl fix needs a better/compatible solution.
-** DONE inconsistency, getType: (BracketExpr (Sym "ref") ...) vs. getTypeInst  (RefTy ...)  (deprecated getType)
 ** provide ~getTypeInstSkipAlias~ as substitution of ~typetraits.genericParams~
 ** fix ~proc len*[TOpenArray: openArray|varargs](x: TOpenArray): int~ (WTF)
 ** consistent argument names in stdlib functions
@@ -52,21 +50,13 @@ remove all WTFs from the codebase.
 ** fix literals of type ~int~
 ** Tutorial, Nim for C++ Developers: class type member -> template with typedesc argument
 ** full c lib wrapper
-** DONE remove all traces on ~nOrig~
 ** wtf is up with ~cast[type(foo.bar)](expr)~? Why does it still work even after ~type~ is removed from ~system.nim~
   semTypeNode returns only a PType, it should return a PNode.
-** TODO require argument types for macros and templates (not in the parser, that is a bad idea)
 ** remove MyType.field access
-** DONE remove ~this~ pragma
-** DONE remove ~using~ statement
 ** remove ~ast~ based function overloading
-** DONE remove experimental code reordering
-** DONE error on compile time var at runtime
 ** makes pragmas importable
 ** remove term rewriting macros
 ** explain pragma explain
-** DONE remove special operators ~.~ ~.=~ ~.()~
-** DONE make sure, ~typed~ doesn't mean ~void~ in macro/templates anymore.
 ** document all special operators and how they are called
 ** testament run test/does/not/exist is a warning not an error
 ** make ~not~ a normal identifier (not an operator)
@@ -78,8 +68,6 @@ remove all WTFs from the codebase.
 ** make sure testament works from any directory
 ** delete all dead code
 ** make ByteAddress unsigned
-** do notation without argument solution without reintroducing typeless argument syntax?
-** DONE getRid of TProcCon.selfSym
 ** allow cast to pointer of all proc/callback/closure types
 ** "range types need to be constructed with '..', '..<' is not supported"
 ** warning in template declaration to prefer ~untyped~ over ~typed~.
@@ -87,9 +75,22 @@ remove all WTFs from the codebase.
 ** remove the ~Any~ type
 ** normalize the magic syntax to a single syntax (identifier no strings)
 ** document how magics work for contributors
-** DONE get rid of the weird `..Seq` type definitions
 ** error about deprecation that doesn't mention a fallback solution.
 ** implement unreachable (assert false, "this section should be unreachable")
+** reenabled niminaction tests and js tests
+** do something about generic parameters for macro declarations. They are a bit weird.
+** rename down cast / up cast
+** TODO require argument types for macros and templates (not in the parser, that is a bad idea)
+** DONE use nnkTupleConstr consistently (replace nnkPar where necessary)
 ** DONE remove manyloc tests
 ** DONE remove pragma noforward
-** reenabled niminaction tests and js tests
+** DONE get rid of the weird `..Seq` type definitions
+** DONE getRid of TProcCon.selfSym
+** DONE remove special operators ~.~ ~.=~ ~.()~
+** DONE make sure, ~typed~ doesn't mean ~void~ in macro/templates anymore.
+** DONE remove experimental code reordering
+** DONE error on compile time var at runtime
+** DONE remove ~this~ pragma
+** DONE remove ~using~ statement
+** DONE remove all traces on ~nOrig~
+** DONE inconsistency, getType: (BracketExpr (Sym "ref") ...) vs. getTypeInst  (RefTy ...)  (deprecated getType)
