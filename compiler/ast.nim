@@ -314,8 +314,6 @@ type
     #                   # variable.  the flag is applied to the var/let
     #                   # symbol
 
-    # sfNoForward,      # forward declarations are not required (per module)
-
     # sfCompileToCpp    # compile the module as C++ code
     # sfCompileToObjC   # compile the module as Objective-C code
     # sfExperimental    # module uses the .experimental switch
@@ -346,9 +344,6 @@ const
   sfHoisted* = sfForward
     # an expression was hoised to an anonymous variable.
     # the flag is applied to the var/let symbol
-
-  sfNoForward* = sfRegister
-    # forward declarations are not required (per module)
 
   sfCompileToCpp* = sfInfixCall       # compile the module as C++ code
   sfCompileToObjC* = sfNamedParamCall # compile the module as Objective-C code
@@ -1872,9 +1867,6 @@ when false:
       if n[i].containsNil: return true
 
 template hasDestructor*(t: PType): bool = {tfHasAsgn, tfHasOwned} * t.flags != {}
-
-template typeCompleted*(s: PSym) =
-  incl s.flags, sfNoForward
 
 template getBody*(s: PSym): PNode = s.ast[bodyPos]
 

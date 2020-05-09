@@ -40,7 +40,7 @@ This changelog contains all changes that are specific to the krux-nim branch
 - hot code reloading has been removed (unmaintainable)
 - something for concepts broke (sorry)
 - statement `using` is no longer supported.
-- removed builtin pragmas: `this` `partial` `liftLocal` `package`.
+- removed builtin pragmas: `this` `partial` `liftLocal` `package` `noforward`.
 - `typed` doesn't mean `void` anymore for macro/template return type
   contexts
 - removed codeReordering

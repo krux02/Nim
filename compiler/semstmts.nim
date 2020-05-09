@@ -1281,60 +1281,11 @@ proc typeSectionFinalPass(c: PContext, n: PNode) =
           if s.typ.kind == tyObject and not isTopLevel(c): incl(s.flags, sfGenSym)
   #instAllTypeBoundOp(c, n.info)
 
-
-proc semAllTypeSections(c: PContext; n: PNode): PNode =
-  proc gatherStmts(c: PContext; n: PNode; result: PNode) {.nimcall.} =
-    case n.kind
-    of nkIncludeStmt:
-      for i in 0..<n.len:
-        var f = checkModuleName(c.config, n[i])
-        if f != InvalidFileIdx:
-          if containsOrIncl(c.includedFiles, f.int):
-            localError(c.config, n.info, errRecursiveDependencyX % toMsgFilename(c.config, f))
-          else:
-            let code = c.graph.includeFileCallback(c.graph, c.module, f)
-            gatherStmts c, code, result
-            excl(c.includedFiles, f.int)
-    of nkStmtList:
-      for i in 0..<n.len:
-        gatherStmts(c, n[i], result)
-    of nkTypeSection:
-      incl n.flags, nfSem
-      typeSectionLeftSidePass(c, n)
-      result.add n
-    else:
-      result.add n
-
-  result = newNodeI(nkStmtList, n.info)
-  gatherStmts(c, n, result)
-
-  template rec(name: untyped) =
-    for i in 0..<result.len:
-      if result[i].kind == nkTypeSection:
-        name(c, result[i])
-
-  rec typeSectionRightSidePass
-  rec typeSectionFinalPass
-  when false:
-    # too beautiful to delete:
-    template rec(name: untyped; setbit=false) =
-      proc `name rec`(c: PContext; n: PNode) {.nimcall.} =
-        if n.kind == nkTypeSection:
-          when setbit: incl n.flags, nfSem
-          name(c, n)
-        elif n.kind == nkStmtList:
-          for i in 0..<n.len:
-            `name rec`(c, n[i])
-      `name rec`(c, n)
-    rec typeSectionLeftSidePass, true
-    rec typeSectionRightSidePass
-    rec typeSectionFinalPass
-
 proc semTypeSection(c: PContext, n: PNode): PNode =
   ## Processes a type section. This must be done in separate passes, in order
   ## to allow the type definitions in the section to reference each other
   ## without regard for the order of their definitions.
-  if sfNoForward notin c.module.flags or nfSem notin n.flags:
+  if nfSem notin n.flags:
     inc c.inTypeContext
     typeSectionLeftSidePass(c, n)
     typeSectionRightSidePass(c, n)
@@ -1783,20 +1734,11 @@ proc semProcAux(c: PContext, n: PNode, kind: TSymKind,
       s = semIdentDef(c, n[0], kind)
     n[namePos] = newSymNode(s)
     s.ast = n
-    #s.scope = c.currentScope
-    when false:
-      # disable for now
-      if sfNoForward in c.module.flags and
-         sfSystemModule notin c.module.flags:
-        addInterfaceOverloadableSymAt(c, c.currentScope, s)
-        s.flags.incl sfForward
-        return
   else:
     s = n[namePos].sym
     s.owner = getCurrOwner(c)
     typeIsDetermined = s.typ == nil
     s.ast = n
-    #s.scope = c.currentScope
 
   s.options = c.config.options
 

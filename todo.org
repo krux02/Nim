@@ -91,5 +91,5 @@ remove all WTFs from the codebase.
 ** error about deprecation that doesn't mention a fallback solution.
 ** implement unreachable (assert false, "this section should be unreachable")
 ** DONE remove manyloc tests
-** remove pragma noforward
+** DONE remove pragma noforward
 ** reenabled niminaction tests and js tests
