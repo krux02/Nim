@@ -824,11 +824,6 @@ proc astGenRepr*(n: NimNode): string {.compileTime, benign.} =
       result.add tmp[i]
     inc i
 
-
-
-
-
-
 macro dumpTree*(s: untyped): untyped = echo s.treeRepr
   ## Accepts a block of nim code and prints the parsed abstract syntax
   ## tree using the ``treeRepr`` proc. Printing is done *at compile time*.
