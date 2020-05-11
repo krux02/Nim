@@ -5,6 +5,7 @@ remove all WTFs from the codebase.
 
 * tools
 ** make sure testament works from any directory
+** make sure testament run tmytest.nim works for any test
 ** testament run test/does/not/exist is a warning not an error
 ** nimi for included nim files
 ** validate links in nimdoc automatically
@@ -20,6 +21,11 @@ remove all WTFs from the codebase.
 ** document cast behavior for different sized integers in the spec
 ** default pattern for module test
 ** document very well differences to mainline Nim
+** document workflow
+*** emacs
+**** *compile* mode for tests, for files
+**** jump to definition and back (with etags)
+
 
 * linting / warnings / errors
 ** error about deprecation that doesn't mention a fallback solution.
@@ -42,7 +48,7 @@ remove all WTFs from the codebase.
 ** move/create jsNumber, jsString, jsObject to jstypes.nim
 
 * fixes
-** fix how openArrays work
+** fix how varargs work
 ** do something about generic parameters for macro declarations. They are a bit weird.
 ** fix parser to read negative literals
 ** DONE use nnkTupleConstr consistently (replace nnkPar where necessary)
@@ -52,13 +58,14 @@ remove all WTFs from the codebase.
 ** raise error on union at compile time
 ** DONE generic typedesc T should not be visible anymore in the getImpl of generic instantiations.
 ** move documentation comments to identifier/symbol properties
-** [#A] Refactor nkPostfix export marker and backticks around identifiers into flags on identifiers.
+** Refactor nkPostfix export marker and backticks around identifiers into flags on identifiers.
 ** fix literals of type ~int~
 ** support ~toOpenArray~ in the VM
 ** fix crash on ~seq[MySimdType]~ (aligned allocation)
 ** fix ~proc len*[TOpenArray: openArray|varargs](x: TOpenArray): int~ (WTF)
 ** fix how newNimNode/newTree sets line information
 ** allow conversion of ~seq[byte](mystring)~ and ~string(mySeqofBytes)~.
+** allow assigning the key of variant objects again.
 
 * feature stripping
 ** DONE remove manyloc tests
@@ -108,3 +115,4 @@ remove all WTFs from the codebase.
 ** forbid/warn overload ~foobar(arg: untyped)~ ~foobar(arg: int)~
 ** ensure automatically that all compilation branches js C C++ define the same set of symbols
 ** WTF is ~type Foo[T: static typedesc] = object~ supposed to mean?
+** check what happens with default values for typed/untyped arguments for macros

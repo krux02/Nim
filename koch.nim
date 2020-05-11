@@ -426,12 +426,11 @@ proc winRelease*() =
 
 # -------------- tests --------------------------------------------------------
 
-template `|`(a, b: untyped): string = (if a.len > 0: a else: b)
-
 proc tests(args: string) =
+  let args = if args.len > 0: args else "all"
   nimexec "cc --opt:speed testament/testament"
   let tester = quoteShell(getCurrentDir() / "testament/testament".exe)
-  let success = tryExec tester & " " & (args|"all")
+  let success = tryExec tester & " " & args
   if not success:
     quit("tests failed", QuitFailure)
 
