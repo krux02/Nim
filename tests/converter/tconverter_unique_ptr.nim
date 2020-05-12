@@ -4,6 +4,7 @@ discard """
   output: ""
 """
 
+# converters from integer literals have been removed, becaus the `lit` constraint has been removed.
 ## Bugs 9698 and 9699
 
 type
@@ -69,10 +70,6 @@ proc newMySeq*(size: int, initial_value = 0.0): MySeq =
 
   result.setTo(initial_value)
 
-converter literalToLen*(x: int{lit}): MyLen =
-  x.MyLen
-
-
 #-------------------------------------------------------------
 # Unique pointer implementation
 #-------------------------------------------------------------
@@ -100,15 +97,15 @@ converter convertPtrToObj*[T](p: UniquePtr[T]): var T =
 
 var pu = newUniquePtr(newMySeq(5, 1.0))
 let pu2 = newUniquePtr(newMySeq(5, 1.0))
-doAssert: pu.len == 5
-doAssert: pu2.len == 5
-doAssert: pu.lenx == 5
-doAssert: pu2.lenx == 5
+doAssert: pu.len == MyLen(5)
+doAssert: pu2.len == MyLen(5)
+doAssert: pu.lenx == MyLen(5)
+doAssert: pu2.lenx == MyLen(5)
 
-pu[0] = 2.0
-pu2[0] = 2.0
-doAssert pu[0] == 2.0
-doAssert: pu2[0] == 2.0
+pu[MyLen(0)] = 2.0
+pu2[MyLen(0)] = 2.0
+doAssert pu[MyLen(0)] == 2.0
+doAssert: pu2[MyLen(0)] == 2.0
 
 ##-----------------------------------------------------------------------------------------
 ## Bugs #9735 and #9736
@@ -141,12 +138,12 @@ converter convertConstPtrToObj*[T](p: ConstPtr[T]): lent T =
 
 var pc = newConstPtr(newMySeq(3, 1.0))
 let pc2 = newConstPtr(newMySeq(3, 1.0))
-doAssert: pc.len == 3
-doAssert: pc.len == 3
-doAssert: compiles(pc.lenx == 2) == false
-doAssert: compiles(pc2.lenx == 2) == false
-doAssert: compiles(pc[0] = 2.0) == false
-doAssert: compiles(pc2[0] = 2.0) == false
+doAssert: pc.len == MyLen(3)
+doAssert: pc.len == MyLen(3)
+doAssert: compiles(pc.lenx == MyLen(2)) == false
+doAssert: compiles(pc2.lenx == MyLen(2)) == false
+doAssert: compiles(pc[MyLen(0)] = 2.0) == false
+doAssert: compiles(pc2[MyLen(0)] = 2.0) == false
 
-doAssert: pc[0] == 1.0
-doAssert: pc2[0] == 1.0
+doAssert: pc[MyLen(0)] == 1.0
+doAssert: pc2[MyLen(0)] == 1.0

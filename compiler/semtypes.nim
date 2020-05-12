@@ -1143,18 +1143,6 @@ proc liftParamType(c: PContext, procKind: TSymKind, genericParams: PNode,
 
   else: discard
 
-proc semParamType(c: PContext, n: PNode, constraint: var PNode): PType =
-  if n.kind == nkCurlyExpr:
-    result = semTypeNode(c, n[0], nil)
-    constraint = semNodeKindConstraints(n, c.config, 1)
-  elif n.kind == nkCall and
-      n[0].kind in {nkIdent, nkSym, nkOpenSymChoice, nkClosedSymChoice} and
-      considerQuotedIdent(c, n[0]).s == "{}":
-    result = semTypeNode(c, n[1], nil)
-    constraint = semNodeKindConstraints(n, c.config, 2)
-  else:
-    result = semTypeNode(c, n, nil)
-
 proc newProcType(c: PContext; info: TLineInfo; prev: PType = nil): PType =
   result = newOrPrevType(tyProc, prev, c)
   result.callConv = lastOptionEntry(c).defaultCC
@@ -1192,12 +1180,11 @@ proc semProcTypeNode(c: PContext, n, genericParams: PNode,
     var
       typ: PType = nil
       def: PNode = nil
-      constraint: PNode = nil
       hasType = a[^2].kind != nkEmpty
       hasDefault = a[^1].kind != nkEmpty
 
-    if hasType:
-      typ = semParamType(c, a[^2], constraint)
+    if hasType:  # XXX <- this should not be optional anymore
+      typ = semTypeNode(c, a[^2], nil)
       let sym = getCurrOwner(c)
       var owner = sym.owner
       # TODO: Disallow typed/untyped in procs in the compiler/stdlib
@@ -1261,7 +1248,6 @@ proc semProcTypeNode(c: PContext, n, genericParams: PNode,
       let finalType = if lifted != nil: lifted else: typ.skipIntLit
       arg.typ = finalType
       arg.position = counter
-      arg.constraint = constraint
       inc(counter)
       if def != nil and def.kind != nkEmpty:
         arg.ast = copyTree(def)

@@ -914,9 +914,6 @@ proc finishTypeDescriptions(m: BModule) =
       discard getTypeDescAux(m, t, check)
     inc(i)
 
-template cgDeclFrmt*(s: PSym): string =
-  s.constraint.strVal
-
 proc genProcHeader(m: BModule, prc: PSym): Rope =
   var
     rettype, params: Rope
@@ -935,12 +932,12 @@ proc genProcHeader(m: BModule, prc: PSym): Rope =
   genProcParams(m, prc.typ, rettype, params, check)
   # careful here! don't access ``prc.ast`` as that could reload large parts of
   # the object graph!
-  if prc.constraint.isNil:
+  if prc.codegendecl == nil:
     result.addf("$1($2, $3)$4",
          [rope(CallingConvToStr[prc.typ.callConv]), rettype, prc.loc.r,
          params])
   else:
-    result = runtimeFormat(prc.cgDeclFrmt, [rettype, prc.loc.r, params])
+    result = runtimeFormat(prc.codegendecl.strVal, [rettype, prc.loc.r, params])
 
 # ------------------ type info generation -------------------------------------
 

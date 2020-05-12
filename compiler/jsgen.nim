@@ -1653,13 +1653,13 @@ proc genVarInit(p: PProc, v: PSym, n: PNode) =
     varCode: string
     varName = mangleName(p.module, v)
 
-  if v.constraint.isNil:
+  if v.codegendecl.isNil:
     varCode = "var $2"
   else:
     # Is this really a thought through feature?  this basically unused
     # feature makes it impossible for almost all format strings in
     # this function to be checked at compile time.
-    varCode = v.constraint.strVal
+    varCode = v.codegendecl.strVal
 
   if n.kind == nkEmpty:
     if not isIndirect(v) and
@@ -2238,8 +2238,8 @@ proc genProc(oldProc: PProc, prc: PSym): Rope =
     result = lineDir(p.config, prc.info, toLinenumber(prc.info))
 
   var def: Rope
-  if not prc.constraint.isNil:
-    def = runtimeFormat(prc.constraint.strVal & " {$n$#$#$#$#$#",
+  if prc.codegendecl != nil:
+    def = runtimeFormat(prc.codegendecl.strVal & " {$n$#$#$#$#$#",
             [ returnType,
               name,
               header,

@@ -86,7 +86,7 @@ remove all WTFs from the codebase.
 ** DONE deprecate ByteAddress
 ** DONE remove immediate/macros templates
 ** remove MyType.field access
-** remove ~ast~ based function overloading
+** DONE remove ~ast~ based function overloading
 ** DONE remove term rewriting macros
 ** enforce () for proc template definitions
 ** remove any knowlege about nimble from the compiler

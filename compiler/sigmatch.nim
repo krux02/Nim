@@ -12,8 +12,8 @@
 
 import
   intsets, ast, astalgo, semdata, types, msgs, renderer, lookups, semtypinst,
-  magicsys, idents, lexer, options, parampatterns, strutils, trees,
-  linter, lineinfos, lowerings, modulegraphs
+  magicsys, idents, lexer, options, strutils, trees,
+  linter, lineinfos, lowerings, modulegraphs, parampatterns
 
 type
   MismatchKind* = enum
@@ -1885,10 +1885,7 @@ proc userConvMatch(c: PContext, m: var TCandidate, f, a: PType,
     if srca notin {isEqual, isGeneric, isSubtype}: continue
 
     # What's done below matches the logic in ``matchesAux``
-    let constraint = c.converters[i].typ.n[1].sym.constraint
-    if not constraint.isNil and not matchNodeKinds(constraint, arg):
-      continue
-    if src.kind in {tyVar, tyLent} and not arg.isLValue:
+    if src.kind in {tyVar, tyLent} and not isLValue(arg):
       continue
 
     let destIsGeneric = containsGenericType(dest)
@@ -2312,14 +2309,6 @@ proc matchesAux(c: PContext, n: PNode,
     m.firstMismatch.formal = formal
 
   template checkConstraint(n: untyped) {.dirty.} =
-    if not formal.constraint.isNil:
-      if matchNodeKinds(formal.constraint, n):
-        # better match over other routines with no such restriction:
-        inc(m.genericMatches, 100)
-      else:
-        noMatch()
-        return
-
     if formal.typ.kind == tyVar:
       let argConverter = if arg.kind == nkHiddenDeref: arg[0] else: arg
       if argConverter.kind == nkHiddenCallConv:

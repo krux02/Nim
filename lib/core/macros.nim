@@ -1521,7 +1521,7 @@ proc hasCustomPragma*(n: NimNode, name: string): bool =
   let pragmaNode = getCustomPragmaNode(n, name)
   result = pragmaNode != nil
 
-macro hasCustomPragma*(n: typed, cp: typed{nkSym}): bool =
+macro hasCustomPragma*(n: typed, cp: typed): bool =
   ## Expands to `true` if expression `n` which is expected to be `nnkDotExpr`
   ## (if checking a field), a proc or a type has custom pragma `cp`.
   ##
@@ -1538,6 +1538,7 @@ macro hasCustomPragma*(n: typed, cp: typed{nkSym}): bool =
   ##   var o: MyObj
   ##   assert(o.myField.hasCustomPragma(myAttr))
   ##   assert(myProc.hasCustomPragma(myAttr))
+  cp.expectKind nnkSym
   case n.kind
   of nnkDotExpr:
     result = newLit(hasCustomPragma(n[1],$cp))
@@ -1564,7 +1565,7 @@ macro hasCustomPragma*(n: typed, cp: typed{nkSym}): bool =
   else:
     n.expectKind({nnkDotExpr, nnkCheckedFieldExpr, nnkSym, nnkTypeOfExpr})
 
-macro getCustomPragmaVal*(n: typed, cp: typed{nkSym}): untyped =
+macro getCustomPragmaVal*(n: typed, cp: typed): untyped =
   ## Expands to value of custom pragma `cp` of expression `n` which is expected
   ## to be `nnkDotExpr`, a proc or a type.
   ##
@@ -1579,8 +1580,8 @@ macro getCustomPragmaVal*(n: typed, cp: typed{nkSym}): untyped =
   ##   assert(o.myField.getCustomPragmaVal(serializationKey) == "mf")
   ##   assert(o.getCustomPragmaVal(serializationKey) == "mo")
   ##   assert(MyObj.getCustomPragmaVal(serializationKey) == "mo")
-
   n.expectKind({nnkDotExpr, nnkCheckedFieldExpr, nnkSym, nnkTypeOfExpr})
+  cp.expectKind(nnkSym)
   let pragmaNode =
     case n.kind
     of nnkDotExpr:

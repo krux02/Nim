@@ -227,7 +227,7 @@ proc getOptionalStr(c: PContext, n: PNode, defaultStr: string): string =
   else: result = defaultStr
 
 proc processCodegenDecl(c: PContext, n: PNode, sym: PSym) =
-  sym.constraint = getStrLitNode(c, n)
+  sym.codegendecl = getStrLitNode(c, n)
 
 proc processMagic(c: PContext, n: PNode, s: PSym) =
   #if sfSystemModule notin c.module.flags:
@@ -664,7 +664,7 @@ proc deprecatedStmt(c: PContext; outerPragma: PNode) =
   let pragma = outerPragma[1]
   if pragma.kind in {nkStrLit..nkTripleStrLit}:
     incl(c.module.flags, sfDeprecated)
-    c.module.constraint = getStrLitNode(c, outerPragma)
+    c.module.codegendecl = getStrLitNode(c, outerPragma)
     return
   if pragma.kind != nkBracket:
     localError(c.config, pragma.info, "list of key:value pairs expected"); return

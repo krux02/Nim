@@ -204,7 +204,8 @@ let xx = compiles:
       s.len
 doAssert: xx == false
 
-macro checkSym(s: typed{nkSym}): untyped =
+macro checkSym(s: typed): untyped =
+  s.expectKind nnkSym
   let body = s.getImpl.body
   doAssert body[1].kind == nnkPragmaBlock
   doAssert body[1][0].kind == nnkPragma

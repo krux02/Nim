@@ -881,8 +881,7 @@ proc sameTypeOrNil*(a, b: PType, flags: TTypeCmpFlags = {}): bool =
     else: result = sameType(a, b, flags)
 
 proc equalParam(a, b: PSym): TParamsEquality =
-  if sameTypeOrNil(a.typ, b.typ, {ExactTypeDescValues}) and
-      exprStructuralEquivalent(a.constraint, b.constraint):
+  if sameTypeOrNil(a.typ, b.typ, {ExactTypeDescValues}):
     if a.ast == b.ast:
       result = paramsEqual
     elif a.ast != nil and b.ast != nil:
@@ -898,10 +897,6 @@ proc equalParam(a, b: PSym): TParamsEquality =
 proc sameConstraints(a, b: PNode): bool =
   if isNil(a) and isNil(b): return true
   if a.len != b.len: return false
-  for i in 1..<a.len:
-    if not exprStructuralEquivalent(a[i].sym.constraint,
-                                    b[i].sym.constraint):
-      return false
   return true
 
 proc equalParams(a, b: PNode): TParamsEquality =

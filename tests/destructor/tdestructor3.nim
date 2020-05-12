@@ -45,7 +45,7 @@ type
 proc `=destroy`(a: var Foo) =
   echo "destroy Foo: " & $a.x
 
-template toFooPtr(a: int{lit}): ptr Foo =
+template toFooPtr(a: int): ptr Foo =
   var temp = Foo(x:a)
   temp.addr
 

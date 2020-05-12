@@ -892,11 +892,9 @@ type
     when hasFFI:
       cname*: string          # resolved C declaration name in importc decl, eg:
                               # proc fun() {.importc: "$1aux".} => cname = funaux
-    constraint*: PNode        # additional constraints like 'lit|result'; also
-                              # misused for the codegenDecl pragma in the hope
-                              # it won't cause problems
-                              # for skModule the string literal to output for
-                              # deprecated modules.
+    codegendecl*: PNode       ## for ``codegenDecl`` pragma.  Abused
+                              ## in skModule: the string literal to
+                              ## output for deprecated modules.
     when defined(nimsuggest):
       allUsages*: seq[TLineInfo]
 
@@ -1593,7 +1591,7 @@ template transitionSymKindCommon*(k: TSymKind) =
   s[] = TSym(kind: k, id: obj.id, magic: obj.magic, typ: obj.typ, name: obj.name,
              info: obj.info, owner: obj.owner, flags: obj.flags, ast: obj.ast,
              options: obj.options, position: obj.position, offset: obj.offset,
-             loc: obj.loc, annex: obj.annex, constraint: obj.constraint)
+             loc: obj.loc, annex: obj.annex)
   when hasFFI:
     s.cname = obj.cname
   when defined(nimsuggest):

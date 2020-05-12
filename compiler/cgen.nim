@@ -474,7 +474,7 @@ proc localVarDecl(p: BProc; n: PNode): Rope =
   if s.kind in {skLet, skVar, skField, skForVar} and s.alignment > 0:
     result.addf("NIM_ALIGN($1) ", [rope(s.alignment)])
   result.add getTypeDesc(p.module, s.typ)
-  if s.constraint.isNil:
+  if s.codegendecl.isNil:
     if sfRegister in s.flags: result.add(" register")
     #elif skipTypes(s.typ, abstractInst).kind in GcTypeKinds:
     #  decl.add(" GC_GUARD")
@@ -482,7 +482,7 @@ proc localVarDecl(p: BProc; n: PNode): Rope =
     result.add(" ")
     result.add(s.loc.r)
   else:
-    result = runtimeFormat(s.cgDeclFrmt, [result, s.loc.r])
+    result = runtimeFormat(s.codegendecl.strVal, [result, s.loc.r])
 
 proc assignLocalVar(p: BProc, n: PNode) =
   #assert(s.loc.k == locNone) # not yet assigned
@@ -521,7 +521,7 @@ proc assignGlobalVar(p: BProc, n: PNode; value: Rope) =
     else:
       var decl: Rope = nil
       var td = getTypeDesc(p.module, s.loc.t)
-      if s.constraint.isNil:
+      if s.codegendecl.isNil:
         if s.kind in {skLet, skVar, skField, skForVar} and s.alignment > 0:
           decl.addf "NIM_ALIGN($1) ", [rope(s.alignment)]
         if sfImportc in s.flags: decl.add("extern ")
@@ -537,9 +537,9 @@ proc assignGlobalVar(p: BProc, n: PNode; value: Rope) =
           decl.addf(" $1;$n", [s.loc.r])
       else:
         if value != nil:
-          decl = runtimeFormat(s.cgDeclFrmt & " = $#;$n", [td, s.loc.r, value])
+          decl = runtimeFormat(s.codegendecl.strVal & " = $#;$n", [td, s.loc.r, value])
         else:
-          decl = runtimeFormat(s.cgDeclFrmt & ";$n", [td, s.loc.r])
+          decl = runtimeFormat(s.codegendecl.strVal & ";$n", [td, s.loc.r])
       p.module.s[cfsVars].add(decl)
   if p.withinLoop > 0 and value == nil:
     # fixes tests/run/tzeroarray:

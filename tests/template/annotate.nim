@@ -1,7 +1,8 @@
 import macros, parseutils
 
 # Generate tags
-macro make(names: untyped{nkBracket}): untyped =
+macro make(names: untyped): untyped =
+    names.expectKind nnkBracket
     result = newStmtList()
 
     for i in 0 .. names.len-1:

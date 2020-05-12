@@ -166,8 +166,8 @@ proc myImportModule(c: PContext, n: PNode; importStmtResult: PNode): PSym =
           result.info.fileIndex == n.info.fileIndex:
         localError(c.config, n.info, "A module cannot import itself")
     if sfDeprecated in result.flags:
-      if result.constraint != nil:
-        message(c.config, n.info, warnDeprecated, result.constraint.strVal & "; " & result.name.s & " is deprecated")
+      if result.codegendecl != nil: # abuse of field `codegendecl` here.
+        message(c.config, n.info, warnDeprecated, result.codegendecl.strVal & "; " & result.name.s & " is deprecated")
       else:
         message(c.config, n.info, warnDeprecated, result.name.s & " is deprecated")
     suggestSym(c.config, n.info, result, c.graph.usageSym, false)

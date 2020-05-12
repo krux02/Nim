@@ -20,7 +20,8 @@ iterator tokenize(format: string): char =
     else: discard
     i.inc
 
-macro printf(formatString: string{lit}, args: varargs[typed]): untyped =
+macro printf(formatString: string, args: varargs[typed]): untyped =
+  formatString.expectKind nnkStrLit
   var i = 0
   let err = getType(bindSym"ValueError")
   for c in tokenize(formatString.strVal):
