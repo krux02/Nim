@@ -496,7 +496,6 @@ type
                 # but unfortunately it has measurable impact for compilation
                 # efficiency
     nfTransf,   # node has been transformed
-    nfNoRewrite # node should not be transformed anymore
     nfSem       # node has been checked for semantics
     nfLL        # node has gone through lambda lifting
     nfDotField  # the call can use a dot operator
@@ -1014,7 +1013,7 @@ const
                                       nfIsRef, nfIsPtr, nfPreventCg, nfLL,
                                       nfFromTemplate, nfDefaultRefsParam}
   namePos* = 0
-  patternPos* = 1    # empty except for term rewriting macros
+  patternPos* = 1 # unused, was used for term rewriting macros
   genericParamsPos* = 2
   paramsPos* = 3
   pragmasPos* = 4
@@ -1780,9 +1779,6 @@ proc requiredParams*(s: PSym): int =
     if s.typ.n[i].sym.ast != nil:
       return i - 1
   return s.typ.len - 1
-
-proc hasPattern*(s: PSym): bool {.inline.} =
-  result = isRoutine(s) and s.ast[patternPos].kind != nkEmpty
 
 iterator items*(n: PNode): PNode =
   for i in 0..<n.safeLen: yield n[i]

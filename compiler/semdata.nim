@@ -94,7 +94,6 @@ type
     compilesContextIdGenerator*: int
     inGenericInst*: int        # > 0 if we are instantiating a generic
     converters*: seq[PSym]
-    patterns*: seq[PSym]       # sequence of pattern matchers
     optionStack*: seq[POptionEntry]
     symMapping*: TIdTable      # every gensym'ed symbol needs to be mapped
                                # to some new symbol in a generic instantiation
@@ -240,7 +239,6 @@ proc newContext*(graph: ModuleGraph; module: PSym): PContext =
   result.module = module
   result.friendModules = @[module]
   result.converters = @[]
-  result.patterns = @[]
   result.includedFiles = initIntSet()
   initStrTable(result.pureEnumFields)
   initStrTable(result.userPragmas)
@@ -258,9 +256,6 @@ proc inclSym(sq: var seq[PSym], s: PSym) =
 
 proc addConverter*(c: PContext, conv: PSym) =
   inclSym(c.converters, conv)
-
-proc addPattern*(c: PContext, p: PSym) =
-  inclSym(c.patterns, p)
 
 proc newLib*(kind: TLibKind): PLib =
   new(result)

@@ -26,7 +26,6 @@ type system, concepts          zahary
 transf                         cooldome, araq
 semfold constant folding       araq
 template instantiation         zahary, araq
-term rewriting macros          cooldome, araq
 closure interators             yglukhov, araq
 lambda lifting                 yglukhov, araq
 c, cpp codegen                 lemonboy, araq

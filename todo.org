@@ -11,6 +11,9 @@ remove all WTFs from the codebase.
 ** validate links in nimdoc automatically
 ** log time for every test persistently
 ** [#B] make every test runable with ~testament run file.nim~ from any directory
+** testament
+*** new action ~check~ for testatment
+*** support for multiple error messages to check for
 
 * documentation
 ** document how magics work for contributors
@@ -25,6 +28,7 @@ remove all WTFs from the codebase.
 *** emacs
 **** *compile* mode for tests, for files
 **** jump to definition and back (with etags)
+** revisit codeowners.rst
 
 
 * linting / warnings / errors
@@ -83,8 +87,7 @@ remove all WTFs from the codebase.
 ** DONE remove immediate/macros templates
 ** remove MyType.field access
 ** remove ~ast~ based function overloading
-** remove term rewriting macros
-** remove emdb
+** DONE remove term rewriting macros
 ** enforce () for proc template definitions
 ** remove any knowlege about nimble from the compiler
 ** remove language feature "bind many"

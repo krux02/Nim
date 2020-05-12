@@ -31,7 +31,32 @@
 
 import ast, types, intsets, lineinfos, renderer
 
-from patterns import sameTrees
+proc canonKind(n: PNode): TNodeKind {.inline.} =
+  ## nodekind canonilization for pattern matching.
+  case n.kind
+  of nkCallKinds:              result = nkCall
+  of nkStrLit..nkTripleStrLit: result = nkStrLit
+  of nkFastAsgn:               result = nkAsgn
+  else:                        result = n.kind
+
+proc sameKinds(a, b: PNode): bool {.inline.} =
+  result = a.kind == b.kind or a.canonKind == b.canonKind
+
+proc sameTrees*(a, b: PNode): bool =
+  if sameKinds(a, b):
+    case a.kind
+    of nkSym: result = a.sym == b.sym
+    of nkIdent: result = a.ident.id == b.ident.id
+    of nkCharLit..nkInt64Lit: result = a.intVal == b.intVal
+    of nkFloatLit..nkFloat64Lit: result = a.floatVal == b.floatVal
+    of nkStrLit..nkTripleStrLit: result = a.strVal == b.strVal
+    of nkEmpty, nkNilLit: result = true
+    of nkType: result = sameTypeOrNil(a.typ, b.typ)
+    else:
+      if a.len == b.len:
+        for i in 0..<a.len:
+          if not sameTrees(a[i], b[i]): return
+        result = true
 
 type
   InstrKind* = enum

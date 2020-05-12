@@ -14,8 +14,8 @@ import
   wordrecg, ropes, msgs, idents, renderer, types, platform, math,
   magicsys, nversion, nimsets, semfold, modulepaths, importer,
   procfind, lookups, pragmas, passes, semdata, semtypinst, sigmatch,
-  intsets, transf, vmdef, vm, idgen, aliases, cgmeth, lambdalifting,
-  evaltempl, patterns, parampatterns, sempass2, linter, semmacrosanity,
+  intsets, vmdef, vm, idgen, aliases, cgmeth, lambdalifting,
+  evaltempl, parampatterns, sempass2, linter, semmacrosanity,
   lowerings, plugins/active, rod, lineinfos, strtabs, int128
 
 from modulegraphs import ModuleGraph, PPassContext, onUse, onDef, onDefResolveForward
@@ -377,7 +377,7 @@ proc semExprFlagDispatched(c: PContext, n: PNode, flags: TExprFlags): PNode =
       evaluated = evalAtCompileTime(c, result)
       if evaluated != nil: return evaluated
 
-include hlo, seminst, semcall
+include seminst, semcall
 
 when false:
   # hopefully not required:
@@ -578,7 +578,6 @@ proc semStmtAndGenerateGenerics(c: PContext, n: PNode): PNode =
         # a generic has been added to `a`:
         if result.kind != nkEmpty: a.add result
         result = a
-  result = hloStmt(c, result)
   if c.config.cmd == cmdInteractive and not isEmptyType(result.typ):
     result = buildEchoStmt(c, result)
   if c.config.cmd == cmdIdeTools:

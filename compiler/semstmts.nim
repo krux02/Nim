@@ -1448,7 +1448,7 @@ proc semLambda(c: PContext, n: PNode, flags: TExprFlags): PNode =
       pushProcCon(c, s)
       addResult(c, s.typ[0], n.info, skProc)
       addResultNode(c, n)
-      s.ast[bodyPos] = hloBody(c, semProcBody(c, n[bodyPos]))
+      s.ast[bodyPos] = semProcBody(c, n[bodyPos])
       trackProc(c, s, s.ast[bodyPos])
       popProcCon(c)
     elif efOperand notin flags:
@@ -1491,7 +1491,7 @@ proc semInferredLambda(c: PContext, pt: TIdTable, n: PNode): PNode =
   pushProcCon(c, s)
   addResult(c, n.typ[0], n.info, skProc)
   addResultNode(c, n)
-  s.ast[bodyPos] = hloBody(c, semProcBody(c, n[bodyPos]))
+  s.ast[bodyPos] = semProcBody(c, n[bodyPos])
   trackProc(c, s, s.ast[bodyPos])
   popProcCon(c)
   popOwner(c)
@@ -1766,7 +1766,8 @@ proc semProcAux(c: PContext, n: PNode, kind: TSymKind,
     s.typ = newProcType(c, n.info)
   if tfTriggersCompileTime in s.typ.flags: incl(s.flags, sfCompileTime)
   if n[patternPos].kind != nkEmpty:
-    n[patternPos] = semPattern(c, n[patternPos])
+    localError(c.config, n[patternPos].info, "pattern not supported by this comiler C")
+    n[patternPos] = c.graph.emptyNode
   if s.kind == skIterator:
     s.typ.flags.incl(tfIterator)
   elif s.kind == skFunc:
@@ -1855,7 +1856,7 @@ proc semProcAux(c: PContext, n: PNode, kind: TSymKind,
         c.p.wasForwarded = proto != nil
         maybeAddResult(c, s, n)
         # semantic checking also needed with importc in case used in VM
-        s.ast[bodyPos] = hloBody(c, semProcBody(c, n[bodyPos]))
+        s.ast[bodyPos] = semProcBody(c, n[bodyPos])
         # unfortunately we cannot skip this step when in 'system.compiles'
         # context as it may even be evaluated in 'system.compiles':
         trackProc(c, s, s.ast[bodyPos])
@@ -1890,8 +1891,6 @@ proc semProcAux(c: PContext, n: PNode, kind: TSymKind,
   closeScope(c)           # close scope for parameters
   # c.currentScope = oldScope
   popOwner(c)
-  if n[patternPos].kind != nkEmpty:
-    c.patterns.add(s)
   if isAnon:
     n.transitionSonsKind(nkLambda)
     result.typ = s.typ
@@ -2041,7 +2040,6 @@ proc semPragmaBlock(c: PContext, n: PNode): PNode =
   for i in 0..<pragmaList.len:
     case whichPragma(pragmaList[i])
     of wLine: setLine(result, pragmaList[i].info)
-    of wNoRewrite: incl(result.flags, nfNoRewrite)
     else: discard
 
 proc semStaticStmt(c: PContext, n: PNode): PNode =

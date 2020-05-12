@@ -17,20 +17,6 @@ block arglist:
   f 1, 2, false, 3, "ha"
 
 
-
-block tcse:
-  template cse{f(a, a, x)}(a: typed{(nkDotExpr|call|nkBracketExpr)&noSideEffect},
-                         f: typed, x: varargs[typed]): untyped =
-    let aa = a
-    f(aa, aa, x)+4
-
-  var
-    a: array[0..10, int]
-    i = 3
-  doAssert a[i] + a[i] == 4
-
-
-
 block hoist:
   template optPeg{peg(pattern)}(pattern: string{lit}): Peg =
     var gl {.global, gensym.} = peg(pattern)

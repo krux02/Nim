@@ -55,7 +55,7 @@ type
     wHints, wOptimization, wRaises, wWrites, wReads, wSize, wEffects, wTags,
     wRequires, wEnsures, wInvariant, wAssume, wAssert,
     wDeadCodeElimUnused,  # deprecated, dead code elim always happens
-    wSafecode, wPackage, wNoForward, wReorder, wNoRewrite, wNoDestroy,
+    wSafecode, wPackage, wNoForward, wReorder, wNoDestroy,
     wPragma,
     wCompileTime, wNoInit,
     wPassc, wPassl, wLocalPassc, wBorrow, wDiscardable,
@@ -281,7 +281,6 @@ const
     wPackage:            "package",
     wNoForward:          "noforward",
     wReorder:            "reorder",
-    wNoRewrite:          "norewrite",
     wNoDestroy:          "nodestroy",
     wPragma:             "pragma",
     wCompileTime:        "compiletime",

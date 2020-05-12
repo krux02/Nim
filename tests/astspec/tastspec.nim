@@ -1038,7 +1038,7 @@ static:
     ast.peelOff(nnkStmtList).matchAst:
     of nnkProcDef(
       nnkPostfix(ident"*", ident"hello"), # the exported proc name
-      nnkEmpty, # patterns for term rewriting in templates and macros (not procs)
+      nnkEmpty, # always empty
       nnkGenericParams( # generic type parameters, like with type declaration
         nnkIdentDefs(
           ident"T",

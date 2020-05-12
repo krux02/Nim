@@ -108,8 +108,7 @@ proc instantiateBody(c: PContext, n, params: PNode, result, orig: PSym) =
         if sfGenSym in param.flags:
           idTablePut(symMap, params[i].sym, result.typ.n[param.position+1].sym)
     freshGenSyms(b, result, orig, symMap)
-    b = semProcBody(c, b)
-    result.ast[bodyPos] = hloBody(c, b)
+    result.ast[bodyPos] = semProcBody(c, b)
     trackProc(c, result, result.ast[bodyPos])
     excl(result.flags, sfForward)
     dec c.inGenericInst

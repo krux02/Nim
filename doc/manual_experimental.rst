@@ -809,79 +809,6 @@ In other words, the macro needs to transform the full ``case`` statement
 but only the statement's selector expression is used to determine which
 macro to call.
 
-
-Term rewriting macros
-=====================
-
-Term rewriting macros are macros or templates that have not only
-a *name* but also a *pattern* that is searched for after the semantic checking
-phase of the compiler: This means they provide an easy way to enhance the
-compilation pipeline with user defined optimizations:
-
-.. code-block:: nim
-  template optMul{`*`(a, 2)}(a: int): int = a+a
-
-  let x = 3
-  echo x * 2
-
-The compiler now rewrites ``x * 2`` as ``x + x``. The code inside the
-curlies is the pattern to match against. The operators ``*``,  ``**``,
-``|``, ``~`` have a special meaning in patterns if they are written in infix
-notation, so to match verbatim against ``*`` the ordinary function call syntax
-needs to be used.
-
-Term rewriting macro are applied recursively, up to a limit. This means that
-if the result of a term rewriting macro is eligible for another rewriting,
-the compiler will try to perform it, and so on, until no more optimizations
-are applicable. To avoid putting the compiler into an infinite loop, there is
-a hard limit on how many times a single term rewriting macro can be applied.
-Once this limit has been passed, the term rewriting macro will be ignored.
-
-Unfortunately optimizations are hard to get right and even the tiny example
-is **wrong**:
-
-.. code-block:: nim
-  template optMul{`*`(a, 2)}(a: int): int = a+a
-
-  proc f(): int =
-    echo "side effect!"
-    result = 55
-
-  echo f() * 2
-
-We cannot duplicate 'a' if it denotes an expression that has a side effect!
-Fortunately Nim supports side effect analysis:
-
-.. code-block:: nim
-  template optMul{`*`(a, 2)}(a: int{noSideEffect}): int = a+a
-
-  proc f(): int =
-    echo "side effect!"
-    result = 55
-
-  echo f() * 2 # not optimized ;-)
-
-You can make one overload matching with a constraint and one without, and the
-one with a constraint will have precedence, and so you can handle both cases
-differently.
-
-So what about ``2 * a``? We should tell the compiler ``*`` is commutative. We
-cannot really do that however as the following code only swaps arguments
-blindly:
-
-.. code-block:: nim
-  template mulIsCommutative{`*`(a, b)}(a, b: int): int = b*a
-
-What optimizers really need to do is a *canonicalization*:
-
-.. code-block:: nim
-  template canonMul{`*`(a, b)}(a: int{lit}, b: int): int = b*a
-
-The ``int{lit}`` parameter pattern matches against an expression of
-type ``int``, but only if it's a literal.
-
-
-
 Parameter constraints
 ---------------------
 
@@ -1511,27 +1438,6 @@ having unknown lock level as well:
   method testMethod(g: SomeDerived) =
     if g.memberProc != nil:
       g.memberProc()
-
-
-noRewrite pragma
-----------------
-
-Term rewriting macros and templates are currently greedy and
-they will rewrite as long as there is a match.
-There was no way to ensure some rewrite happens only once,
-eg. when rewriting term to same term plus extra content.
-
-``noRewrite`` pragma can actually prevent further rewriting on marked code,
-e.g. with given example ``echo("ab")`` will be rewritten just once:
-
-.. code-block:: nim
-  template pwnEcho{echo(x)}(x: expr) =
-    {.noRewrite.}: echo("pwned!")
-
-  echo "ab"
-
-``noRewrite`` pragma can be useful to control term-rewriting macros recursion.
-
 
 Taint mode
 ==========

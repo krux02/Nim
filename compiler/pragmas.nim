@@ -41,7 +41,7 @@ const
     wMagic, wBorrow,
     wDiscardable, wGensym, wInject, wRaises,
     wTags, wLocks, wGcSafe, wRequires, wEnsures}
-  exprPragmas* = {wLine, wLocks, wNoRewrite, wGcSafe, wNoSideEffect}
+  exprPragmas* = {wLine, wLocks, wGcSafe, wNoSideEffect}
   stmtPragmas* = {wChecks, wObjChecks, wFieldChecks, wRangeChecks,
     wBoundChecks, wOverflowChecks, wNilChecks, wStaticBoundchecks,
     wStyleChecks, wAssertions,
@@ -1099,8 +1099,6 @@ proc singlePragma(c: PContext, sym: PSym, n: PNode, i: var int,
           localError(c.config, n.info, "'experimental' feature must be enabled via compiler flag, e.g.: --experimental:" & it[1].strVal)
         else:
           localError(c.config, n.info, "'experimental' pragma reserved for future use.")
-      of wNoRewrite:
-        noVal(c, it)
       of wBase:
         noVal(c, it)
         sym.flags.incl sfBase

@@ -1288,7 +1288,7 @@ AST:
 .. code-block:: nim
   nnkProcDef(
     nnkPostfix(nnkIdent("*"), nnkIdent("hello")), # the exported proc name
-    nnkEmpty(), # patterns for term rewriting in templates and macros (not procs)
+    nnkEmpty(), # always empty
     nnkGenericParams( # generic type parameters, like with type declaration
       nnkIdentDefs(
         nnkIdent("T"), nnkIdent("SomeInteger")
@@ -1395,30 +1395,22 @@ AST:
 Template declaration
 --------------------
 
-Templates (as well as macros, as we'll see) have a slightly expanded AST when
-compared to procs and iterators. The reason for this is [term-rewriting
-macros](manual.html#term-rewriting-macros). Notice
-the ``nnkEmpty()`` as the second argument to ``nnkProcDef`` and
-``nnkIteratorDef`` above? That's where the term-rewriting macros go.
+The syntax for templates is similar to procs, but with
+``nnkTemplateDef`` replacing ``nnkProcDef``.
 
 Concrete syntax:
 
 .. code-block:: nim
-  template optOpt{expr1}(a: int): int
+  template optOpt(a: int): int = ...
 
 AST:
 
 .. code-block:: nim
   nnkTemplateDef(
     nnkIdent("optOpt"),
-    nnkStmtList( # instead of nnkEmpty()
-      expr1
-    ),
+    nnkEmpty(),
     # follows like a proc or iterator
   )
-
-If the template does not have types for its parameters, the type identifiers
-inside ``nnkFormalParams`` just becomes ``nnkEmpty``.
 
 Macro declaration
 -----------------
