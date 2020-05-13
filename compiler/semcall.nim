@@ -60,7 +60,7 @@ proc pickBestCandidate(c: PContext, headSymbol: PNode,
                        initialBinding: PNode,
                        filter: TSymKinds,
                        best, alt: var TCandidate,
-                       errors: var CandidateErrors,
+                       errors: var seq[CandidateError],
                        diagnosticsFlag: bool,
                        errorsEnabled: bool) =
   var o: TOverloadIter
@@ -164,7 +164,7 @@ proc renderNotLValue(n: PNode): string =
   elif n.kind in {nkHiddenStdConv, nkHiddenSubConv} and n.len == 2:
     result = typeToString(n.typ.skipTypes(abstractVar)) & "(" & result & ")"
 
-proc presentFailedCandidates(c: PContext, n: PNode, errors: CandidateErrors):
+proc presentFailedCandidates(c: PContext, n: PNode, errors: seq[CandidateError]):
                             (TPreferedDesc, string) =
   var prefer = preferName
   # to avoid confusing errors like:
@@ -262,12 +262,11 @@ proc presentFailedCandidates(c: PContext, n: PNode, errors: CandidateErrors):
 const
   errTypeMismatch = "type mismatch: got <"
   errButExpected = "but expected one of: "
-  errUndeclaredField = "undeclared field: '$1'"
   errUndeclaredRoutine = "attempting to call undeclared routine: '$1'"
   errBadRoutine = "attempting to call routine: '$1'$2"
   errAmbiguousCallXYZ = "ambiguous call; both $1 and $2 match for: $3"
 
-proc notFoundError*(c: PContext, n: PNode, errors: CandidateErrors) =
+proc notFoundError*(c: PContext, n: PNode, errors: seq[CandidateError]) =
   # Gives a detailed error message; this is separated from semOverloadedCall,
   # as semOverlodedCall is already pretty slow (and we need this information
   # only in case of an error).
@@ -288,7 +287,7 @@ proc notFoundError*(c: PContext, n: PNode, errors: CandidateErrors) =
   localError(c.config, n.info, result & "\nexpression: " & $n)
 
 proc bracketNotFoundError(c: PContext; n: PNode) =
-  var errors: CandidateErrors = @[]
+  var errors: seq[CandidateError]
   var o: TOverloadIter
   let headSymbol = n[0]
   var symx = initOverloadIter(o, c, headSymbol)
@@ -330,14 +329,14 @@ proc getMsgDiagnostic(c: PContext, flags: TExprFlags, n, f: PNode): string =
       discard
     else:
       typeHint = " for type " & getProcHeader(c.config, sym)
-    result = errUndeclaredField % ident & typeHint & " " & result
+    result = "undeclared field: '$1'" % ident & typeHint & " " & result
   else:
     if result.len == 0: result = errUndeclaredRoutine % ident
     else: result = errBadRoutine % [ident, result]
 
 proc resolveOverloads(c: PContext, n: PNode,
                       filter: TSymKinds, flags: TExprFlags,
-                      errors: var CandidateErrors,
+                      errors: var seq[CandidateError],
                       errorsEnabled: bool): TCandidate =
   var initialBinding: PNode
   var alt: TCandidate
@@ -501,7 +500,7 @@ proc tryDeref(n: PNode): PNode =
 
 proc semOverloadedCall(c: PContext, n: PNode,
                        filter: TSymKinds, flags: TExprFlags): PNode =
-  var errors: CandidateErrors = @[] # if efExplain in flags: @[] else: nil
+  var errors: seq[CandidateError] = @[] # if efExplain in flags: @[] else: nil
   var r = resolveOverloads(c, n, filter, flags, errors, efExplain in flags)
   if r.state == csMatch:
     # this may be triggered, when the explain pragma is used

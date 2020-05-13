@@ -1326,12 +1326,6 @@ proc builtinFieldAccess(c: PContext, n: PNode, flags: TExprFlags): PNode =
         markUsed(c, n.info, f)
         onUse(n.info, f)
         return
-    of tyObject, tyTuple:
-      if ty.n != nil and ty.n.kind == nkRecList:
-        let field = lookupInRecord(ty.n, i)
-        if field != nil:
-          n.typ = makeTypeDesc(c, field.typ)
-          return n
     else:
       tryReadingGenericParam(ty)
       return

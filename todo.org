@@ -84,7 +84,7 @@ remove all WTFs from the codebase.
 ** DONE remove the ~Any~ type
 ** DONE deprecate ByteAddress
 ** DONE remove immediate/macros templates
-** remove MyType.field access
+** DONE remove MyType.field access
 ** DONE remove ~ast~ based function overloading
 ** DONE remove term rewriting macros
 ** enforce () for proc template definitions

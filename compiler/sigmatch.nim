@@ -35,8 +35,6 @@ type
     diagnostics*: seq[string]
     enabled*: bool
 
-  CandidateErrors* = seq[CandidateError]
-
   TCandidate* = object
     c*: PContext
     exactMatches*: int       # also misused to prefer iters over procs
