@@ -1,9 +1,9 @@
-proc baz(o: any): int = 5 # if bar is exported, it works
+proc baz[T](o: T): int = 5 # if bar is exported, it works
 
 type MyObj = object
   x: int
 
-proc foo*(b: any) =
+proc foo*[T](b: T) =
   var o: MyObj
   echo b.baz, " ", o.x.baz, " ", b.baz()
 

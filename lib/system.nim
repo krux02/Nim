@@ -46,7 +46,6 @@ type
 
   void* {.magic: "VoidType".}    ## Meta type to denote the absence of any type.
   auto* {.magic: Expr.}          ## Meta type for automatic type determination.
-  any* = distinct auto           ## Meta type for any supported type.
   untyped* {.magic: Expr.}       ## Meta type to denote an expression that
                                  ## is not resolved (for templates).
   typed* {.magic: Stmt.}         ## Meta type to denote an expression that

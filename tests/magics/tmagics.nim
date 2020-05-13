@@ -2,10 +2,6 @@ discard """
   output: '''
 true
 true
-false
-true
-true
-false
 true
 '''
 joinable: false
@@ -39,11 +35,7 @@ block t8693:
 
   doAssert bar(int, Foo) == false
   doAssert bar(4, Foo) == false
-  doAssert bar(any, int)
-  doAssert bar(int, any) == false
   doAssert bar(Foo, Foo)
-  doAssert bar(any, Foo)
-  doAssert bar(Foo, any) == false
 
 block t9442:
   var v1: ref char
