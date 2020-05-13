@@ -82,7 +82,7 @@ remove all WTFs from the codebase.
 ** DONE remove ~using~ statement
 ** DONE remove all traces on ~nOrig~
 ** DONE remove experimental code reordering
-** remove the ~Any~ type
+** DONE remove the ~Any~ type
 ** DONE deprecate ByteAddress
 ** DONE remove immediate/macros templates
 ** remove MyType.field access

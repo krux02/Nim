@@ -419,21 +419,71 @@ proc rangeToStr(n: PNode): string =
   result = valueToString(n[0]) & ".." & valueToString(n[1])
 
 const
-  typeToStr: array[TTypeKind, string] = ["None", "bool", "char", "empty",
-    "Alias", "typeof(nil)", "untyped", "typed", "typeDesc",
-    "GenericInvocation", "GenericBody", "GenericInst", "GenericParam",
-    "distinct $1", "enum", "ordinal[$1]", "array[$1, $2]", "object", "tuple",
-    "set[$1]", "range[$1]", "ptr ", "ref ", "var ", "seq[$1]", "proc",
-    "pointer", "OpenArray[$1]", "string", "cstring", "Forward",
-    "int", "int8", "int16", "int32", "int64",
-    "float", "float32", "float64", "float128",
-    "uint", "uint8", "uint16", "uint32", "uint64",
-    "owned", "sink",
-    "lent ", "varargs[$1]", "UncheckedArray[$1]", "Error Type",
-    "BuiltInTypeClass", "UserTypeClass",
-    "UserTypeClassInst", "CompositeTypeClass", "inferred",
-    "and", "or", "not", "any", "static", "TypeFromExpr", "FieldAccessor",
-    "void"]
+  typeToStr: array[TTypeKind, string] = [
+    tyNone:              "None",
+    tyBool:              "bool",
+    tyChar:              "char",
+    tyEmpty:             "empty",
+    tyAlias:             "Alias",
+    tyNil:               "typeof(nil)",
+    tyUntyped:           "untyped",
+    tyTyped:             "typed",
+    tyTypeDesc:          "typeDesc",
+    tyGenericInvocation: "GenericInvocation",
+    tyGenericBody:       "GenericBody",
+    tyGenericInst:       "GenericInst",
+    tyGenericParam:      "GenericParam",
+    tyDistinct:          "distinct $1",
+    tyEnum:              "enum",
+    tyOrdinal:           "ordinal[$1]",
+    tyArray:             "array[$1, $2]",
+    tyObject:            "object",
+    tyTuple:             "tuple",
+    tySet:               "set[$1]",
+    tyRange:             "range[$1]",
+    tyPtr:               "ptr ",
+    tyRef:               "ref ",
+    tyVar:               "var ",
+    tySequence:          "seq[$1]",
+    tyProc:              "proc",
+    tyPointer:           "pointer",
+    tyOpenArray:         "OpenArray[$1]",
+    tyString:            "string",
+    tyCString:           "cstring",
+    tyForward:           "Forward",
+    tyInt:               "int",
+    tyInt8:              "int8",
+    tyInt16:             "int16",
+    tyInt32:             "int32",
+    tyInt64:             "int64",
+    tyFloat:             "float",
+    tyFloat32:           "float32",
+    tyFloat64:           "float64",
+    tyFloat128:          "float128",
+    tyUInt:              "uint",
+    tyUInt8:             "uint8",
+    tyUInt16:            "uint16",
+    tyUInt32:            "uint32",
+    tyUInt64:            "uint64",
+    tyOwned:             "owned",
+    tySink:              "sink",
+    tyLent:              "lent ",
+    tyVarargs:           "varargs[$1]",
+    tyUncheckedArray:    "UncheckedArray[$1]",
+    tyProxy:             "Error Type",
+    tyBuiltInTypeClass:  "BuiltInTypeClass",
+    tyUserTypeClass:     "UserTypeClass",
+    tyUserTypeClassInst: "UserTypeClassInst",
+    tyCompositeTypeClass:"CompositeTypeClass",
+    tyInferred:          "inferred",
+    tyAnd:               "and",
+    tyOr:                "or",
+    tyNot:               "not",
+    tyAnything:          "any",
+    tyStatic:            "static",
+    tyFromExpr:          "TypeFromExpr",
+    tyVoid:              "void",
+  ]
 
 const preferToResolveSymbols = {preferName, preferTypeName, preferModuleInfo,
   preferGenericArg, preferResolved, preferMixed}
@@ -596,8 +646,6 @@ proc typeToString(typ: PType, prefer: TPreferedDesc = preferName): string =
         result = t.sym.name.s
       else:
         result = "seq[" & typeToString(t[0]) & ']'
-    of tyOpt:
-      result = "opt[" & typeToString(t[0]) & ']'
     of tyOrdinal:
       result = "ordinal[" & typeToString(t[0]) & ']'
     of tySet:
@@ -1125,7 +1173,7 @@ proc sameTypeAux(x, y: PType, c: var TSameTypeClosure): bool =
   of tyGenericInvocation, tyGenericBody, tySequence, tyOpenArray, tySet, tyRef,
      tyPtr, tyVar, tyLent, tySink, tyUncheckedArray, tyArray, tyProc, tyVarargs,
      tyOrdinal, tyCompositeTypeClass, tyUserTypeClass, tyUserTypeClassInst,
-     tyAnd, tyOr, tyNot, tyAnything, tyOpt, tyOwned:
+     tyAnd, tyOr, tyNot, tyAnything, tyOwned:
     cycleCheck()
     if a.kind == tyUserTypeClass and a.n != nil: return a.n == b.n
     result = sameChildrenAux(a, b, c)
@@ -1332,7 +1380,7 @@ proc typeAllowedAux(marker: var IntSet, typ: PType, kind: TSymKind,
       result = t
     else:
       result = typeAllowedAux(marker, lastSon(t), kind, flags-{taHeap})
-  of tySequence, tyOpt:
+  of tySequence:
     if t[0].kind != tyEmpty:
       result = typeAllowedAux(marker, t[0], kind, flags+{taHeap})
     elif kind in {skVar, skLet}:

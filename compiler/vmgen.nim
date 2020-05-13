@@ -1806,8 +1806,6 @@ proc getNullValue(typ: PType, info: TLineInfo; conf: ConfigRef): PNode =
       result.add getNullValue(t[i], info, conf)
   of tySet:
     result = newNodeIT(nkCurly, info, t)
-  of tyOpt:
-    result = newNodeIT(nkNilLit, info, t)
   of tySequence:
     result = newNodeIT(nkBracket, info, t)
   else:

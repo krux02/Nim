@@ -105,7 +105,7 @@ type
     ntyError,
     ntyBuiltinTypeClass, ntyUserTypeClass, ntyUserTypeClassInst,
     ntyCompositeTypeClass, ntyInferred, ntyAnd, ntyOr, ntyNot,
-    ntyAnything, ntyStatic, ntyFromExpr, ntyOpt, ntyVoid
+    ntyAnything, ntyStatic, ntyFromExpr, ntyVoid
 
   NimSymKind* = enum
     nskUnknown, nskConditional, nskDynLib, nskParam,

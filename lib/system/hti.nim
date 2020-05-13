@@ -69,7 +69,6 @@ type
     tyAnythingHidden,
     tyStaticHidden,
     tyFromExprHidden,
-    tyOpt,
     tyVoidHidden
 
   TNimNodeKind = enum nkNone, nkSlot, nkList, nkCase
