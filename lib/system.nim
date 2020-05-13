@@ -35,16 +35,15 @@ type
   cstring* {.magic: Cstring.}   ## Built-in cstring (*compatible string*) type.
   pointer* {.magic: Pointer.}   ## Built-in pointer type, use the ``addr``
                                 ## operator to get a pointer to a variable.
-
   typedesc* {.magic: TypeDesc.} ## Meta type to denote a type description.
 
 type
   `ptr`*[T] {.magic: Pointer.}   ## Built-in generic untraced pointer type.
   `ref`*[T] {.magic: Pointer.}   ## Built-in generic traced pointer type.
 
-  `nil` {.magic: "Nil".}
+  `nil` {.magic: Nil.}
 
-  void* {.magic: "VoidType".}    ## Meta type to denote the absence of any type.
+  void* {.magic: VoidType.}    ## Meta type to denote the absence of any type.
   auto* {.magic: Expr.}          ## Meta type for automatic type determination.
   untyped* {.magic: Expr.}       ## Meta type to denote an expression that
                                  ## is not resolved (for templates).

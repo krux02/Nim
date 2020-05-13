@@ -1240,7 +1240,7 @@ proc semProcTypeNode(c: PContext, n, genericParams: PNode,
 
     for j in 0..<a.len-2:
       var arg = newSymG(skParam, a[j], c)
-      if not hasType and not hasDefault and kind notin {skTemplate, skMacro}:
+      if not hasType and not hasDefault:
         localError(c.config, a[j].info, "parameter needs a type")
         typ = errorType(c)
       let lifted = liftParamType(c, kind, genericParams, typ,

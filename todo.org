@@ -77,10 +77,9 @@ remove all WTFs from the codebase.
 ** DONE get rid of the weird `..Seq` type definitions
 ** DONE getRid of TProcCon.selfSym
 ** DONE remove special operators ~.~ ~.=~ ~.()~
-** TODO require argument types for macros and templates (not in the parser, that is a bad idea)
+** DONE require argument types for macros and templates (not in the parser, that is a bad idea)
 ** DONE remove ~this~ pragma
 ** DONE remove ~using~ statement
-** DONE remove all traces on ~nOrig~
 ** DONE remove experimental code reordering
 ** DONE remove the ~Any~ type
 ** DONE deprecate ByteAddress
@@ -96,6 +95,7 @@ remove all WTFs from the codebase.
 ** require full path names in ~nim c myfile.nim~
 
 * refactoring
+** DONE remove all traces on ~nOrig~
 ** change ~enforceVoidContext~ to ~tyVoid~
 ** rename down cast / up cast
 ** normalize the magic syntax to a single syntax (identifier no strings)
