@@ -298,11 +298,11 @@ proc mainCommand*(graph: ModuleGraph) =
 
       var hints = newJObject() # consider factoring with `listHints`
       for a in hintMin..hintMax:
-        let key = lineinfos.HintsToStr[ord(a) - ord(hintMin)]
+        let key = lineinfos.HintsToStr[a]
         hints[key] = %(a in conf.notes)
       var warnings = newJObject()
       for a in warnMin..warnMax:
-        let key = lineinfos.WarningsToStr[ord(a) - ord(warnMin)]
+        let key = lineinfos.WarningsToStr[a]
         warnings[key] = %(a in conf.notes)
 
       var dumpdata = %[
