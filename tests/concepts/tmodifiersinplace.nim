@@ -17,8 +17,8 @@ type
 proc put(x: BadContainer, y: int) = discard
 proc put(x: var GoodContainer, y: int) = discard
 
-template ok(x) = assert(x)
-template no(x) = assert(not(x))
+template ok(x: untyped) = assert(x)
+template no(x: untyped) = assert(not(x))
 
 static:
   ok GoodContainer is VarContainer[int]
@@ -27,4 +27,3 @@ static:
   no BadContainer is AltVarContainer[int]
   ok GoodContainer is NonVarContainer[int]
   ok BadContainer is NonVarContainer[int]
-

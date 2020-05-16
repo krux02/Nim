@@ -8,11 +8,11 @@ yes
 block expression works'''
 """
 
-template x(body): untyped =
+template x(body: untyped): int =
   body
   44
 
-template y(val, body): untyped =
+template y(val, body: untyped): untyped =
   body
   val
 
@@ -62,8 +62,8 @@ block:
 
 
 # bug 10861
-macro foo(a: untyped): untyped = 
-  a             
+macro foo(a: untyped): untyped =
+  a
 
 let c1 = foo:
   1 + 1
@@ -71,5 +71,5 @@ let c1 = foo:
 const c2 = foo:
   1 + 1
 
-const c3 = 
+const c3 =
   foo: 1 + 1

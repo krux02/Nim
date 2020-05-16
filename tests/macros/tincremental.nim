@@ -65,7 +65,7 @@ macro graph_discovery(n: typed): untyped =
 macro incremental_input(key: static[string], n: untyped): untyped =
   # mark leaf nodes of the graph
   n.expectKind nnkFuncDef
-  template getInput(key) {.dirty.} =
+  template getInput(key: untyped) {.dirty.} =
     {.noSideEffect.}:
       inputs[key]
   result = n
@@ -77,7 +77,7 @@ macro incremental(n: untyped): untyped =
   ## wraps function into caching layer, mark caching function as a graph_node
   ## injects dependency discovery between graph nodes
   n.expectKind nnkFuncDef
-  template cache_func_body(func_name, func_name_str, func_call) {.dirty.} =
+  template cache_func_body(func_name, func_name_str, func_call: untyped) {.dirty.} =
     {.noSideEffect.}:
       graph_discovery(func_name)
       let key = graph_node_key(func_name)

@@ -1,7 +1,7 @@
-template accept(x) =
+template accept(x: untyped) =
   static: assert(compiles(x))
 
-template reject(x) =
+template reject(x: untyped) =
   static: assert(not compiles(x))
 
 type
@@ -75,4 +75,3 @@ block:
 
   accept wantsBaseContainer2(derivedContainer)
   reject wantsBaseContainer2(nonDerivedContainer)
-

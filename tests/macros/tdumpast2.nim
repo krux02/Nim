@@ -21,7 +21,7 @@ proc dumpit(n: NimNode): string {.compileTime.} =
       add(result, dumpit(n[j]))
   add(result, ")")
 
-macro dumpAST(n): untyped =
+macro dumpAST(n: untyped): untyped =
   # dump AST as a side-effect and return the inner node
   echo dumpit(n)
   result = n[1]

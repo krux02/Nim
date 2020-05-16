@@ -62,7 +62,7 @@ macro testX(x,inst0: typed; recurse: static[bool]; implX: typed) =
     result.add getAst(testDecl(inst.symToIdent, impl.symToIdent))
 
 # test with a variable (instance) of type
-template testV(inst, recurse, impl) =
+template testV(inst, recurse, impl: untyped) =
   block:
     #echo "testV(" & astToStr(inst) & ", " & $recurse & "):" & astToStr(impl)
     var x: inst
@@ -70,19 +70,19 @@ template testV(inst, recurse, impl) =
 
 # test with a newly created typedesc (myType)
 # using the passed type as the implementation
-template testT(impl, recurse) =
+template testT(impl, recurse: untyped) =
   block:
     type myType = impl
     testV(myType, recurse):
       type _ = impl
 
 # test a built-in type whose instance is equal to the implementation
-template test(inst) =
+template test(inst: untyped) =
   testT(inst, false)
   testV(inst, true, nil)
 
 # test a custom type with provided implementation
-template test(inst, impl) =
+template test(inst, impl: untyped) =
   testV(inst, true, impl)
 
 type

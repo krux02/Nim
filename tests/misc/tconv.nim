@@ -1,4 +1,4 @@
-template reject(x) =
+template reject(x: untyped) =
     static: assert(not compiles(x))
 
 reject:

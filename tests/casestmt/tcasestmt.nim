@@ -82,7 +82,7 @@ block tduplicates:
   type Kind = enum A, B
   var k = A
 
-  template reject(b) =
+  template reject(b: untyped) =
     static: doAssert(not compiles(b))
 
   reject:

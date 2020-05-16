@@ -126,7 +126,7 @@ iterator parse_compound_statements(value, identifier: string, index: int): strin
     ## and returns the initialization of each as an empty statement
     ## i.e. if x == 5 { ... } becomes if x == 5: nil.
 
-    template get_next_ident(expected) =
+    template get_next_ident(expected: untyped) =
         var nextIdent: string
         discard value.parseWhile(nextIdent, {'$'} + identChars, i)
 

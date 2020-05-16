@@ -8,7 +8,7 @@ proc concat(strings: varargs[string]): string =
   result = newString(0)
   for s in items(strings): result.add(s)
 
-template processInterpolations(e) =
+template processInterpolations(e: untyped) =
   var s = e[1].strVal
   for f in interpolatedFragments(s):
     case f.kind

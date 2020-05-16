@@ -205,7 +205,7 @@ block tsets3:
     assert(not disjoint(s2, s2))
 
 block: # https://github.com/nim-lang/Nim/issues/13496
-  template testDel(body) =
+  template testDel(body: untyped) =
     block:
       body
       t.incl(15)
@@ -227,7 +227,7 @@ block: # https://github.com/nim-lang/Nim/issues/13496
   testDel(): (var t: OrderedSet[int])
 
 block: # test correctness after a number of inserts/deletes
-  template testDel(body) =
+  template testDel(body: untyped) =
     block:
       body
       var expected: seq[int]

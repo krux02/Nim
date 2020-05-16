@@ -9,7 +9,7 @@ import macros, strutils
 
 # bug #1025
 
-macro foo(icname): untyped =
+macro foo(icname: untyped): untyped =
   let ic = newStrLitNode($icname)
   result = quote do:
     proc x* =

@@ -71,7 +71,7 @@ var ri: ref int
 gen(ri) # "ref T"
 
 
-template rem(x) = discard
+template rem(x: untyped) = discard
 #proc rem[T](x: T) = discard
 
 rem unresolvedExpression(undeclaredIdentifier)

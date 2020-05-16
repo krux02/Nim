@@ -38,7 +38,7 @@ block:
 block:
   # now check that invalid identifiers cause a compilation error
   # by using reject template.
-  template reject(b) =
+  template reject(b: untyped) =
     static: doAssert(not compiles(b))
 
   reject:

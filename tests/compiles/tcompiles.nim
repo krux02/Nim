@@ -3,11 +3,11 @@
 template supports(opr, x: untyped): bool =
   compiles(opr(x)) or compiles(opr(x, x))
 
-template ok(x) =
+template ok(x: untyped) =
   static:
     assert(x)
 
-template no(x) =
+template no(x: untyped) =
   static:
     assert(not x)
 

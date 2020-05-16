@@ -159,9 +159,9 @@ block overload_precedence:
 
 
 block templates:
-  template typeLen(x): int = typeof(x).name.len
+  template typeLen(x: untyped): int = typeof(x).name.len
 
-  template bunchOfChecks(x) =
+  template bunchOfChecks(x: untyped) =
     x.typeLen > 3
     x != 10 is bool
 
@@ -190,10 +190,10 @@ block templates:
     ConceptUsingTemplate2 = concept x
       stmtListExprTmpl x
 
-  template ok(x) =
+  template ok(x: untyped) =
     static: assert(x)
 
-  template no(x) =
+  template no(x: untyped) =
     static: assert(not(x))
 
   ok int is Eq
@@ -232,10 +232,10 @@ block titerable:
 
 
 block tmanual:
-  template accept(e) =
+  template accept(e: untyped) =
     static: assert compiles(e)
 
-  template reject(e) =
+  template reject(e: untyped) =
     static: assert(not compiles(e))
 
   type
@@ -277,8 +277,8 @@ block modifiers_in_place:
   proc put(x: BadContainer, y: int) = discard
   proc put(x: var GoodContainer, y: int) = discard
 
-  template ok(x) = assert(x)
-  template no(x) = assert(not(x))
+  template ok(x: untyped) = assert(x)
+  template no(x: untyped) = assert(not(x))
 
   static:
     ok GoodContainer is VarContainer[int]
@@ -375,7 +375,7 @@ block tvectorspace:
 
 
 block tstack:
-  template reject(e) =
+  template reject(e: untyped) =
     static: assert(not compiles(e))
 
   type

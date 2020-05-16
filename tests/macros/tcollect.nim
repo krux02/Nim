@@ -7,7 +7,7 @@ const data = [1,2,3,4,5,6]
 
 import macros
 
-macro collect(body): untyped =
+macro collect(body: untyped): untyped =
   # analyse the body, find the deepest expression 'it' and replace it via
   # 'result.add it'
   let res = genSym(nskVar, "collectResult")
@@ -33,7 +33,7 @@ macro collect(body): untyped =
         result[^1] = t(n[^1], res)
     else:
       if true: #n == it:
-        template adder(res, it) =
+        template adder(res, it: untyped) =
           res.add it
         result = getAst adder(res, n)
       else:

@@ -1,7 +1,7 @@
-template accept(x) =
+template accept(x: untyped) =
   static: assert(compiles(x))
 
-template reject(x) =
+template reject(x: untyped) =
   static: assert(not compiles(x))
 
 type
@@ -65,4 +65,3 @@ accept distinctGeneric1(f1, f1)
 accept distinctGeneric2(f1, f1)
 accept distinctGeneric3(f1, f1)
 accept distinctGeneric4(f1, f1)
-

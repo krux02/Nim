@@ -21,7 +21,7 @@ proc point(x, y: int): int = discard
 proc color(r, g, b: int): int = discard
 proc rect(a, b, c, d: int): int = discard
 
-template declareUnpackingMacro(nimname,extname) =
+template declareUnpackingMacro(nimname,extname: untyped) =
   macro nimname(n: varargs[untyped]): untyped =
     var s: string = astToStr(extname) & "("
     var first = true

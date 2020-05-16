@@ -2,8 +2,6 @@ discard """
   output: "2.0"
 """
 
-{.warning[TypelessParam]: off.}
-
 import sugar
 
 # bug #3329
@@ -19,4 +17,3 @@ proc mean[T: SomeNumber](xs: seq[T]): T =
 when true:
   let x = mean(@[1.float, 2, 3])
   echo x
-

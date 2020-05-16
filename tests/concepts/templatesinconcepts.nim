@@ -1,8 +1,8 @@
 import typetraits
 
-template typeLen(x): int = typeof(x).name.len
+template typeLen(x: untyped): int = typeof(x).name.len
 
-template bunchOfChecks(x) =
+template bunchOfChecks(x: untyped) =
   x.typeLen > 3
   x != 10 is bool
 
@@ -31,10 +31,10 @@ type
   ConceptUsingTemplate2 = concept x
     stmtListExprTmpl x
 
-template ok(x) =
+template ok(x: untyped) =
   static: assert(x)
 
-template no(x) =
+template no(x: untyped) =
   static: assert(not(x))
 
 ok int is Eq

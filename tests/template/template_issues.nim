@@ -87,7 +87,7 @@ block t909:
 block t993:
   type PNode = ref object of RootObj
 
-  template litNode(name, ty)  =
+  template litNode(name, ty: untyped)  =
     type name = ref object of PNode
       val: ty
   litNode PIntNode, int
@@ -107,7 +107,7 @@ block t993:
 
 
 block t1337:
-  template someIt(a, pred): untyped =
+  template someIt(a, pred: untyped): untyped =
     var it {.inject.} = 0
     pred
 

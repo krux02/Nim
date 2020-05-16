@@ -13,7 +13,7 @@ block tbind:
 
   proc p1(x: int8, y: int): int = return x + y
 
-  template tempBind(x, y): untyped =
+  template tempBind(x, y: untyped): untyped =
     bind p1
     p1(x, y)
 

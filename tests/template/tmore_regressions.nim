@@ -28,7 +28,7 @@ forEveryMatchingEntity()
 
 # bug #11483
 proc main =
-  template first(body) =
+  template first(body: untyped) =
     template second: var int =
       var o: int
       var i  = addr(o)
@@ -41,4 +41,3 @@ proc main =
     second = 6
 
 main()
-

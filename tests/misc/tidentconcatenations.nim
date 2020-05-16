@@ -18,7 +18,7 @@ template defineKeccak(bits: untyped) =
 template defineSha(bits: static[int]) =
   proc `extSha bits`(output: pointer, outSize: csize_t, input: pointer, inputSize: csize_t) {.nodecl, importc: "sha_" & astToStr(bits).}
 
-template defineHashProcs(bits) =
+template defineHashProcs(bits: untyped) =
   defineSha(bits)
   defineKeccak(bits)
 

@@ -11,7 +11,7 @@ int
 
 import typetraits
 
-template reject(expr) = assert(not compiles(x))
+template reject(expr: untyped) = assert(not compiles(x))
 
 type
   TObj = object

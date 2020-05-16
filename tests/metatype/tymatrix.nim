@@ -1,4 +1,4 @@
-template reject(e) =
+template reject(e: untyped) =
   static: assert(not compiles(e))
 
 type
@@ -18,4 +18,3 @@ reject m1 * m3 # not compatible
 
 var m5 = m2 * m3
 static: assert high(m5) == 11 # 4*3 - 1
-

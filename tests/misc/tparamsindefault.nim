@@ -22,7 +22,7 @@ typedescDefault
 '''
 """
 
-template reject(x) =
+template reject(x: untyped) =
   assert(not compiles(x))
 
 block:

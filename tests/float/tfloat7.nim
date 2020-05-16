@@ -11,7 +11,7 @@ passed.
 """
 
 import strutils
-template expect_fail(x) =
+template expect_fail(x: untyped) =
   try:
     discard x
     echo("expected to fail!")

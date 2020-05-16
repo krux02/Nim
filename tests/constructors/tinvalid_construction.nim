@@ -3,10 +3,10 @@ cmd: "nim $target --experimental:notnil $options $file"
 """
 
 
-template accept(x) =
+template accept(x: untyped) =
   static: assert compiles(x)
 
-template reject(x) =
+template reject(x: untyped) =
   static: assert(not compiles(x))
 
 type

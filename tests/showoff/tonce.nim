@@ -5,7 +5,7 @@ new instantiation
 some call of p'''
 """
 
-template once(body) =
+template once(body: untyped) =
   var x {.global.} = false
   if not x:
     x = true

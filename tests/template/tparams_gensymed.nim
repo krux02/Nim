@@ -89,12 +89,12 @@ proc getTypeInfo*(T: typedesc): pointer =
 macro implementUnary(op: untyped): untyped =
   result = newStmtList()
 
-  template defineTable(tableSymbol) =
+  template defineTable(tableSymbol: untyped) =
     var tableSymbol = initTable[pointer, pointer]()
   let tableSymbol = genSym(nskVar, "registeredProcs")
   result.add(getAst(defineTable(tableSymbol)))
 
-  template defineRegisterInstantiation(tableSym, regTemplSym, instSym, op) =
+  template defineRegisterInstantiation(tableSym, regTemplSym, instSym, op: untyped) =
     template regTemplSym*(T: typedesc) =
       let ti = getTypeInfo(T)
 
@@ -119,7 +119,7 @@ registerInstantiation(int)
 registerInstantiation(float)
 
 # bug #10192
-template nest(body) {.dirty.} =
+template nest(body: untyped) {.dirty.} =
   template p1(b1: untyped) {.dirty, used.} =
     template implp1: untyped {.dirty.} = b1
   template p2(b2: untyped) {.dirty, used.} =
@@ -185,7 +185,7 @@ template mystate_machine(body: untyped) =
   var state_stack: seq[State]
   template state_current(): State {.inject, used.} =
     state_stack[^1]
-  template state_push(state_name) {.inject, used.} =
+  template state_push(state_name: untyped) {.inject, used.} =
     state_stack.add State.state_name
   template state_pop(n = 1) {.inject, used.} =
     state_stack.setLen(state_stack.len - n)

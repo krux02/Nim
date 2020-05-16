@@ -40,7 +40,7 @@ block unpack_asgn:
     var y: int
     (y, x) = foobar()
 
-  template pt(x) =
+  template pt(x: untyped) =
     var y: int
     (x, y) = foobar()
 

@@ -8,7 +8,7 @@ arg
 
 import sugar
 
-template tempo(s) =
+template tempo(s: untyped) =
   s("arg")
 
 tempo((s: string)->auto => echo(s))

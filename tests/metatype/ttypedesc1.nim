@@ -38,10 +38,10 @@ test "types can be used as proc params":
   check ((foo(seq[int]) == "seq"))
   check ((foo(seq[TFoo[bool, string]]) == "seq"))
 
-template accept(x) =
+template accept(x: untyped) =
   static: assert(compiles(x))
 
-template reject(x) =
+template reject(x: untyped) =
   static: assert(not compiles(x))
 
 var

@@ -1,6 +1,6 @@
 # bug #1988
 
-template t(e) = discard
+template t(e: untyped) = discard
 
 proc positive(x: int): int = +x
 proc negative(x: int): int = -x

@@ -3,7 +3,7 @@ discard """
 nope'''
 """
 
-template canImport(x): bool =
+template canImport(x: untyped): bool =
   compiles:
     import x
 
