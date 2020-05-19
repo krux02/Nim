@@ -102,7 +102,7 @@ proc attachDispatcher(s: PSym, dispatcher: PNode) =
     # we've added a dispatcher already, so overwrite it
     s.ast[dispatcherPos] = dispatcher
   else:
-    setLen(s.ast.sons, dispatcherPos+1)
+    setLen(s.ast, dispatcherPos+1)
     if s.ast[resultPos] == nil:
       s.ast[resultPos] = newNodeI(nkEmpty, s.info)
     s.ast[dispatcherPos] = dispatcher

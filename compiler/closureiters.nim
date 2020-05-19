@@ -396,12 +396,10 @@ proc hasYieldsInExpressions(n: PNode): bool =
 proc exprToStmtList(n: PNode): tuple[s, res: PNode] =
   assert(n.kind == nkStmtListExpr)
   result.s = newNodeI(nkStmtList, n.info)
-  result.s.sons = @[]
 
   var n = n
   while n.kind == nkStmtListExpr:
-    result.s.sons.add(n.sons)
-    result.s.sons.setLen(result.s.len - 1) # delete last son
+    result.s.addAll n[0 ..^ 2]
     n = n[^1]
 
   result.res = n
@@ -870,7 +868,7 @@ proc transformClosureIteratorBody(ctx: var Ctx, n: PNode, gotoOut: PNode): PNode
         for j in i + 1..<n.len:
           s.add(n[j])
 
-        n.sons.setLen(i + 1)
+        n.setLen(i + 1)
         discard ctx.newState(s, go)
         if ctx.transformClosureIteratorBody(s, gotoOut) != s:
           internalError(ctx.g.config, "transformClosureIteratorBody != s")
@@ -1316,7 +1314,7 @@ proc transformClosureIterator*(g: ModuleGraph; fn: PSym, n: PNode): PNode =
   for s in ctx.states:
     assert(s.len == 2)
     let body = s[1]
-    s.sons.del(1)
+    s.del(1)
     result.add(s)
     result.add(body)
 

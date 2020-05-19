@@ -730,7 +730,7 @@ proc matchUserTypeClass*(m: var TCandidate; ff, a: PType): PType =
         else:
           param = paramSym skType
           param.typ = if typ.isMetaType:
-                        c.newTypeWithSons(tyInferred, @[typ])
+                        c.newTypeWithSons(tyInferred, [typ])
                       else:
                         makeTypeDesc(c, typ)
 
@@ -1745,7 +1745,7 @@ proc typeRel(c: var TCandidate, f, aOrig: PType,
         result = if f.base.kind != tyNone: typeRel(c, f.lastSon, aOrig.n.typ)
                  else: isGeneric
         if result != isNone:
-          var boundType = newTypeWithSons(c.c, tyStatic, @[aOrig.n.typ])
+          var boundType = newTypeWithSons(c.c, tyStatic, [aOrig.n.typ])
           boundType.n = aOrig.n
           put(c, f, boundType)
       else:
@@ -2237,7 +2237,7 @@ proc paramTypesMatch*(m: var TCandidate, f, a: PType,
 proc setSon(father: PNode, at: int, son: PNode) =
   let oldLen = father.len
   if oldLen <= at:
-    setLen(father.sons, at + 1)
+    setLen(father, at + 1)
   father[at] = son
   # insert potential 'void' parameters:
   #for i in oldLen..<at:
@@ -2448,7 +2448,7 @@ proc matchesAux(c: PContext, n: PNode,
           m.typedescMatched = false
           n[a] = prepareOperand(c, formal.typ, n[a])
           arg = paramTypesMatch(m, formal.typ, n[a].typ,
-                                    n.sons[a])
+                                    n[a])
           if arg == nil:
             noMatch()
             return

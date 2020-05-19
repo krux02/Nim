@@ -355,13 +355,13 @@ proc catches(tracked: PEffects, e: PType) =
     else:
       inc i
   if tracked.exc.len > 0:
-    setLen(tracked.exc.sons, L)
+    setLen(tracked.exc, L)
   else:
     assert L == 0
 
 proc catchesAll(tracked: PEffects) =
   if tracked.exc.len > 0:
-    setLen(tracked.exc.sons, tracked.bottom)
+    setLen(tracked.exc, tracked.bottom)
 
 proc track(tracked: PEffects, n: PNode)
 proc trackTryStmt(tracked: PEffects, n: PNode) =
@@ -1104,7 +1104,7 @@ proc setEffectsForProcType*(g: ModuleGraph; t: PType, n: PNode) =
   if t.kind != tyProc or effects.kind != nkEffectList: return
   if n.kind != nkEmpty:
     internalAssert g.config, effects.len == 0
-    newSeq(effects.sons, effectListLen)
+    effects.setLen effectListLen
     let raisesSpec = effectSpec(n, wRaises)
     if not isNil(raisesSpec):
       effects[exceptionEffects] = raisesSpec
@@ -1122,7 +1122,7 @@ proc setEffectsForProcType*(g: ModuleGraph; t: PType, n: PNode) =
     effects[pragmasEffects] = n
 
 proc initEffects(g: ModuleGraph; effects: PNode; s: PSym; t: var TEffects; c: PContext) =
-  newSeq(effects.sons, effectListLen)
+  effects.setLen effectListLen
   effects[exceptionEffects] = newNodeI(nkArgList, s.info)
   effects[tagEffects] = newNodeI(nkArgList, s.info)
   effects[requiresEffects] = g.emptyNode

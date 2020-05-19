@@ -379,7 +379,7 @@ proc fixupStaticType(c: PContext, n: PNode) =
   # apply this measure only in code that is enlightened to work
   # with static types.
   if n.typ.kind != tyStatic:
-    n.typ = newTypeWithSons(getCurrOwner(c), tyStatic, @[n.typ])
+    n.typ = newTypeWithSons(getCurrOwner(c), tyStatic, [n.typ])
     n.typ.n = n # XXX: cycles like the one here look dangerous.
                 # Consider using `n.copyTree`
 
@@ -773,7 +773,7 @@ proc evalAtCompileTime(c: PContext, n: PNode): PNode =
         if n[i].typ.isNil or n[i].typ.kind != tyStatic or
             tfUnresolved notin n[i].typ.flags:
           break maybeLabelAsStatic
-      n.typ = newTypeWithSons(c, tyStatic, @[n.typ])
+      n.typ = newTypeWithSons(c, tyStatic, [n.typ])
       n.typ.flags.incl tfUnresolved
 
   # optimization pass: not necessary for correctness of the semantic pass
@@ -2615,7 +2615,7 @@ proc semExpr(c: PContext, n: PNode, flags: TExprFlags = {}): PNode =
       let modifier = n.modifierTypeKindOfNode
       if modifier != tyNone:
         var baseType = semExpr(c, n[0]).typ.skipTypes({tyTypeDesc})
-        result.typ = c.makeTypeDesc(c.newTypeWithSons(modifier, @[baseType]))
+        result.typ = c.makeTypeDesc(c.newTypeWithSons(modifier, [baseType]))
         return
     var typ = semTypeNode(c, n, nil).skipTypes({tyTypeDesc})
     result.typ = makeTypeDesc(c, typ)

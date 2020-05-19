@@ -594,7 +594,7 @@ proc processPragma(c: PContext, n: PNode, i: int) =
     invalidPragma(c, n)
 
   var userPragma = newSym(skTemplate, it[1].ident, nil, it.info, c.config.options)
-  userPragma.ast = newNode(nkPragma, n.info, n.sons[i+1..^1])
+  userPragma.ast = newNode(nkPragma, n.info, n[i+1..^1])
   strTableAdd(c.userPragmas, userPragma)
 
 proc pragmaRaisesOrTags(c: PContext, n: PNode) =
@@ -755,7 +755,7 @@ proc singlePragma(c: PContext, sym: PSym, n: PNode, i: var int,
       globalError(c.config, it.info, "recursive dependency: " & userPragma.name.s)
 
     pragma(c, sym, userPragma.ast, validPragmas, isStatement)
-    n.sons[i..i] = userPragma.ast.sons # expand user pragma with its content
+    n[i..i] = userPragma.ast[0 ..^ 1] # expand user pragma with its content
     i.inc(userPragma.ast.len - 1) # inc by -1 is ok, user pragmas was empty
     dec c.instCounter
   else:

@@ -12,6 +12,7 @@
 import
   lineinfos, hashes, options, ropes, idents, idgen, int128
 from strutils import toLowerAscii
+from algorithm import reverse
 
 export int128
 
@@ -751,7 +752,7 @@ type
     of nkIdent:
       ident*: PIdent
     else:
-      sons*: seq[PNode]
+      sons: seq[PNode]
     comment*: string
 
   TStrTable* = object         # a table[PIdent] of PSym
@@ -1103,6 +1104,28 @@ template `[]=`*(n: Indexable, i: int; x: Indexable) = n.sons[i] = x
 template `[]`*(n: Indexable, i: BackwardsIndex): Indexable = n[n.len - i.int]
 template `[]=`*(n: Indexable, i: BackwardsIndex; x: Indexable) = n[n.len - i.int] = x
 
+proc setLen*(n: Indexable, len: int) =
+  n.sons.setLen len
+
+template `[]`*[T: Indexable](n: T, s: HSlice): openArray[T] =
+  let tmp = s
+  toOpenArray(n.sons, n ^^ tmp.a, n ^^ tmp.b)
+
+proc `[]=`*[T: Indexable](n: T, idx: HSlice, newSons: openArray[T]) =
+  n.sons[idx] = newSons
+
+proc insert*[T: Indexable](father, son: T; index: int) =
+  insert(father.sons, son, index)
+
+proc addAll*(father: Indexable; sons: openArray[Indexable]) =
+  father.sons.add sons
+
+proc del*(father: Indexable; idx: int) =
+  father.sons.del idx
+
+proc reverseSons*(n: PNode) =
+  reverse n.sons
+
 when defined(useNodeIds):
   const nodeIdToDebug* = -1
   var gNodeId: int
@@ -1242,11 +1265,11 @@ proc newNodeI*(kind: TNodeKind, info: TLineInfo, children: int): PNode =
       writeStackTrace()
     inc gNodeId
 
-proc newNode*(kind: TNodeKind, info: TLineInfo, sons: seq[PNode] = @[],
+proc newNode*(kind: TNodeKind, info: TLineInfo, sons: openArray[PNode] = [],
               typ: PType = nil): PNode =
   # XXX use shallowCopy here for ownership transfer:
   result = PNode(kind: kind, info: info, typ: typ)
-  result.sons = sons
+  result.addAll sons
   when defined(useNodeIds):
     result.id = gNodeId
     if result.id == nodeIdToDebug:
@@ -1776,10 +1799,12 @@ proc requiredParams*(s: PSym): int =
   return s.typ.len - 1
 
 iterator items*(n: PNode): PNode =
-  for i in 0..<n.safeLen: yield n[i]
+  for i in 0 ..< n.safeLen:
+    yield n[i]
 
 iterator pairs*(n: PNode): tuple[i: int, n: PNode] =
-  for i in 0..<n.safeLen: yield (i, n[i])
+  for i in 0 ..< n.safeLen:
+    yield (i, n[i])
 
 proc isAtom*(n: PNode): bool {.inline.} =
   result = n.kind >= nkNone and n.kind <= nkNilLit

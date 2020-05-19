@@ -181,9 +181,6 @@ include vmhooks
 template createStr(x: untyped) =
   x.node = newNode(nkStrLit)
 
-template createSet(x: untyped) =
-  x.node = newNode(nkCurly)
-
 proc moveConst(x: var TFullReg, y: TFullReg) =
   x.ensureKind(y.kind)
   case x.kind
@@ -216,7 +213,7 @@ proc copyValue(src: PNode): PNode =
   of nkIdent: result.ident = src.ident
   of nkStrLit..nkTripleStrLit: result.strVal = src.strVal
   else:
-    newSeq(result.sons, src.len)
+    result.setLen src.len
     for i in 0..<src.len:
       result[i] = copyValue(src[i])
 
@@ -416,7 +413,7 @@ proc opConv(c: PCtx; dest: var TFullReg, src: TFullReg, desttyp, srctyp: PType):
       if src.node.kind == nkBracket:
         # Array of chars
         var strVal = ""
-        for son in src.node.sons:
+        for son in src.node:
           let c = char(son.intVal)
           if c == '\0': break
           strVal.add(c)
@@ -496,7 +493,7 @@ proc recSetFlagIsRef(arg: PNode) =
 proc setLenSeq(c: PCtx; node: PNode; newLen: int; info: TLineInfo) =
   let typ = node.typ.skipTypes(abstractInst+{tyRange}-{tyTypeDesc})
   let oldLen = node.len
-  setLen(node.sons, newLen)
+  node.setLen newLen
   if oldLen < newLen:
     for i in oldLen..<newLen:
       node[i] = getNullValue(typ[0], info, c.config)
@@ -674,7 +671,7 @@ proc rawExecute(c: PCtx, start: int, tos: PStackFrame): TFullReg =
       let idx = regs[rc].intVal.int
       let src = if regs[rb].kind == rkNode: regs[rb].node else: regs[rb].nodeAddr[]
       if src.kind notin {nkEmpty..nkTripleStrLit} and idx <% src.len:
-        regs[ra].nodeAddr = addr src.sons[idx]
+        regs[ra].nodeAddr = addr src[idx]
       else:
         stackTrace(c, tos, pc, formatErrorIndexBound(idx, src.len-1))
     of opcLdStrIdx:
@@ -725,13 +722,13 @@ proc rawExecute(c: PCtx, start: int, tos: PStackFrame): TFullReg =
       of nkEmpty..nkNilLit:
         stackTrace(c, tos, pc, errNilAccess)
       of nkObjConstr:
-        let n = src.sons[rc + 1]
+        let n = src[rc + 1]
         if n.kind == nkExprColonExpr:
-          regs[ra].nodeAddr = addr n.sons[1]
+          regs[ra].nodeAddr = addr n[1]
         else:
-          regs[ra].nodeAddr = addr src.sons[rc + 1]
+          regs[ra].nodeAddr = addr src[rc + 1]
       else:
-        regs[ra].nodeAddr = addr src.sons[rc]
+        regs[ra].nodeAddr = addr src[rc]
     of opcWrObj:
       # a.b = c
       decodeBC(rkNode)
@@ -1063,19 +1060,16 @@ proc rawExecute(c: PCtx, start: int, tos: PStackFrame): TFullReg =
       regs[ra].intVal = ord(containsSets(c.config, a, b) and not equalSets(c.config, a, b))
     of opcMulSet:
       decodeBC(rkNode)
-      createSet(regs[ra])
-      move(regs[ra].node.sons,
-            nimsets.intersectSets(c.config, regs[rb].node, regs[rc].node).sons)
+      regs[ra].node = nimsets.intersectSets(c.config, regs[rb].node, regs[rc].node)
+      doAssert regs[ra].node.kind == nkCurly
     of opcPlusSet:
       decodeBC(rkNode)
-      createSet(regs[ra])
-      move(regs[ra].node.sons,
-           nimsets.unionSets(c.config, regs[rb].node, regs[rc].node).sons)
+      regs[ra].node = nimsets.unionSets(c.config, regs[rb].node, regs[rc].node)
+      doAssert regs[ra].node.kind == nkCurly
     of opcMinusSet:
       decodeBC(rkNode)
-      createSet(regs[ra])
-      move(regs[ra].node.sons,
-           nimsets.diffSets(c.config, regs[rb].node, regs[rc].node).sons)
+      regs[ra].node = nimsets.diffSets(c.config, regs[rb].node, regs[rc].node)
+      doAssert regs[ra].node.kind == nkCurly
     of opcConcatStr:
       decodeBC(rkNode)
       createStr regs[ra]
@@ -1356,7 +1350,7 @@ proc rawExecute(c: PCtx, start: int, tos: PStackFrame): TFullReg =
       let count = regs[instr2.regA].intVal.int
       regs[ra].node = newNodeI(nkBracket, c.debug[pc])
       regs[ra].node.typ = typ
-      newSeq(regs[ra].node.sons, count)
+      regs[ra].node.setLen count
       for i in 0..<count:
         regs[ra].node[i] = getNullValue(typ[0], c.debug[pc], c.config)
     of opcNewStr:
@@ -1525,7 +1519,7 @@ proc rawExecute(c: PCtx, start: int, tos: PStackFrame): TFullReg =
       decodeBC(rkNode)
       let idx = regs[rb].intVal.int
       var dest = regs[ra].node
-      if nfSem in dest.flags and allowSemcheckedAstModification notin c.config.legacyFeatures:
+      if nfSem in dest.flags:
         stackTrace(c, tos, pc, "typechecked nodes may not be modified")
       elif dest.kind in {nkEmpty..nkNilLit}:
         stackTrace(c, tos, pc, "cannot set child of node kind: n" & $dest.kind)
@@ -1536,7 +1530,7 @@ proc rawExecute(c: PCtx, start: int, tos: PStackFrame): TFullReg =
     of opcNAdd:
       decodeBC(rkNode)
       var u = regs[rb].node
-      if nfSem in u.flags and allowSemcheckedAstModification notin c.config.legacyFeatures:
+      if nfSem in u.flags:
         stackTrace(c, tos, pc, "typechecked nodes may not be modified")
       elif u.kind in {nkEmpty..nkNilLit}:
         stackTrace(c, tos, pc, "cannot add to node kind: n" & $u.kind)
@@ -1547,7 +1541,7 @@ proc rawExecute(c: PCtx, start: int, tos: PStackFrame): TFullReg =
       decodeBC(rkNode)
       let x = regs[rc].node
       var u = regs[rb].node
-      if nfSem in u.flags and allowSemcheckedAstModification notin c.config.legacyFeatures:
+      if nfSem in u.flags:
         stackTrace(c, tos, pc, "typechecked nodes may not be modified")
       elif u.kind in {nkEmpty..nkNilLit}:
         stackTrace(c, tos, pc, "cannot add to node kind: n" & $u.kind)

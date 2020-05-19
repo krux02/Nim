@@ -93,7 +93,7 @@ proc computeSubObjectAlign(conf: ConfigRef; n: PNode): BiggestInt =
         internalError(conf, "computeSubObjectAlign")
   of nkRecList:
     result = 1
-    for i, child in n.sons:
+    for i, child in n:
       let align = computeSubObjectAlign(conf, n[i])
       if align < 0:
         return align
@@ -146,7 +146,7 @@ proc computeObjectOffsetsFoldFunction(conf: ConfigRef; n: PNode, packed: bool, a
         computeObjectOffsetsFoldFunction(conf, n[i].lastSon, packed, branchAccum)
         accum.mergeBranch(branchAccum)
   of nkRecList:
-    for i, child in n.sons:
+    for i, child in n:
       computeObjectOffsetsFoldFunction(conf, child, packed, accum)
   of nkSym:
     var size = szUnknownSize
@@ -173,7 +173,7 @@ proc computeUnionObjectOffsetsFoldFunction(conf: ConfigRef; n: PNode; accum: var
     localError(conf, n.info, "Illegal use of ``case`` in union type.")
   of nkRecList:
     let accumRoot = accum # copy, because each branch should start af the same offset
-    for i, child in n.sons:
+    for i, child in n:
       var branchAccum = accumRoot
       computeUnionObjectOffsetsFoldFunction(conf, child, branchAccum)
       accum.mergeBranch(branchAccum)

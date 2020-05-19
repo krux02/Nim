@@ -379,13 +379,6 @@ proc semExprFlagDispatched(c: PContext, n: PNode, flags: TExprFlags): PNode =
 
 include seminst, semcall
 
-when false:
-  # hopefully not required:
-  proc resetSemFlag(n: PNode) =
-    excl n.flags, nfSem
-    for i in 0..<n.safeLen:
-      resetSemFlag(n[i])
-
 proc semAfterMacroCall(c: PContext, call, macroResult: PNode,
                        s: PSym, flags: TExprFlags): PNode =
   ## Semantically check the output of a macro.

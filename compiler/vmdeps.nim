@@ -187,7 +187,7 @@ proc mapTypeToAstX(cache: IdentCache; t: PType; info: TLineInfo;
   of tyEnum:
     result = newNodeIT(nkEnumTy, if t.n.isNil: info else: t.n.info, t)
     result.add newNodeI(nkEmpty, info)  # pragma node, currently always empty for enum
-    for c in t.n.sons:
+    for c in t.n:
       result.add copyTree(c)
   of tyTuple:
     if inst:
@@ -198,7 +198,7 @@ proc mapTypeToAstX(cache: IdentCache; t: PType; info: TLineInfo;
           result.add mapTypeToAst(subType, info)
       else:
         result = newNodeX(nkTupleTy)
-        for s in t.n.sons:
+        for s in t.n:
           result.add newIdentDefs(s)
     else:
       result = mapTypeToBracket("tuple", mTuple, t, info)

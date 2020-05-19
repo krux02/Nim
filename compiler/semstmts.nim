@@ -218,7 +218,7 @@ proc semTry(c: PContext, n: PNode; flags: TExprFlags): PNode =
 
       if a.len == 2 and a[0].kind == nkBracket:
         # rewrite ``except [a, b, c]: body`` -> ```except a, b, c: body```
-        a.sons[0..0] = a[0].sons
+        a[0..0] = a[0][0 ..^ 1]
 
       if a.len == 2 and a[0].isInfixAs():
         # support ``except Exception as ex: body``
@@ -1169,10 +1169,7 @@ proc typeSectionRightSidePass(c: PContext, n: PNode) =
             var body = s.typ.lastSon
             if body.kind == tyObject:
               # erases all declared fields
-              when defined(nimNoNilSeqs):
-                body.n.sons = @[]
-              else:
-                body.n.sons = nil
+              body.n.setLen 0
 
       popOwner(c)
       closeScope(c)

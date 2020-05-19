@@ -565,7 +565,7 @@ proc weakrefOp(c: var TLiftCtx; t: PType; body, x, y: PNode) =
     if body.len == 0:
       body.add des
     else:
-      body.sons.insert(des, 0)
+      body.insert(des, 0)
   of attachedDeepCopy: assert(false, "cannot happen")
   of attachedTrace, attachedDispose: discard
 
@@ -626,7 +626,7 @@ proc closureOp(c: var TLiftCtx; t: PType; body, x, y: PNode) =
       if body.len == 0:
         body.add des
       else:
-        body.sons.insert(des, 0)
+        body.insert(des, 0)
     of attachedDeepCopy: assert(false, "cannot happen")
     of attachedTrace, attachedDispose: discard
 

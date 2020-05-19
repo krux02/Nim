@@ -211,7 +211,7 @@ proc loadAny(p: var JsonParser, t: PType,
     if p.kind != jsonObjectStart: raiseParseErr(p, "'{' expected for an object")
     next(p)
     result = newNode(nkObjConstr)
-    result.sons = @[newNode(nkEmpty)]
+    result.add newNode(nkEmpty)
     while p.kind != jsonObjectEnd and p.kind != jsonEof:
       if p.kind != jsonString:
         raiseParseErr(p, "string expected for a field name")
@@ -222,7 +222,7 @@ proc loadAny(p: var JsonParser, t: PType,
       next(p)
       let pos = field.position + 1
       if pos >= result.len:
-        setLen(result.sons, pos + 1)
+        result.setLen pos + 1
       let fieldNode = newNode(nkExprColonExpr)
       fieldNode.add newSymNode(newSym(skField, ident, nil, unknownLineInfo))
       fieldNode.add loadAny(p, field.typ, tab, cache, conf)

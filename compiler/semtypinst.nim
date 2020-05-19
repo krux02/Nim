@@ -457,7 +457,7 @@ proc eraseVoidParams*(t: PType) =
           t.n[pos] = t.n[j]
           inc pos
       setLen t.sons, pos
-      setLen t.n.sons, pos
+      setLen t.n, pos
       break
 
 proc skipIntLiteralParams*(t: PType) =

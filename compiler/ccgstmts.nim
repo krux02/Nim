@@ -248,7 +248,7 @@ proc potentialValueInit(p: BProc; v: PSym; value: PNode): Rope =
     result = nil
 
 proc genSingleVar(p: BProc, a: PNode) =
-  let vn = a.sons[0]
+  let vn = a[0]
   let v = vn.sym
   let value = a[2]
   if sfCompileTime in v.flags:
@@ -334,7 +334,7 @@ proc genClosureVar(p: BProc, a: PNode) =
     constructLoc(p, v)
 
 proc genVarStmt(p: BProc, n: PNode) =
-  for it in n.sons:
+  for it in n:
     if it.kind == nkCommentStmt: continue
     if it.kind == nkIdentDefs:
       # can be a lifted var nowadays ...
@@ -364,7 +364,7 @@ proc genIf(p: BProc, n: PNode, d: var TLoc) =
     getTemp(p, n.typ, d)
   genLineDir(p, n)
   let lend = getLabel(p)
-  for it in n.sons:
+  for it in n:
     # bug #4230: avoid false sharing between branches:
     if d.k == locTemp and isEmptyType(n.typ): d.k = locNone
     if it.len == 2:
@@ -499,7 +499,7 @@ proc genComputedGoto(p: BProc; n: PNode) =
       if it.kind in {nkLetSection, nkVarSection}:
         let asgn = copyNode(it)
         asgn.transitionSonsKind(nkAsgn)
-        asgn.sons.setLen 2
+        asgn.setLen 2
         for sym, value in it.fieldValuePairs:
           if value.kind != nkEmpty:
             asgn[0] = sym
@@ -1340,7 +1340,7 @@ proc genTrySetjmp(p: BProc, t: PNode, d: var TLoc) =
 
 proc genAsmOrEmitStmt(p: BProc, t: PNode, isAsmStmt=false): Rope =
   var res = ""
-  for it in t.sons:
+  for it in t:
     case it.kind
     of nkStrLit..nkTripleStrLit:
       res.add(it.strVal)
@@ -1420,7 +1420,7 @@ proc genEmit(p: BProc, t: PNode) =
     line(p, cpsStmts, s)
 
 proc genPragma(p: BProc, n: PNode) =
-  for it in n.sons:
+  for it in n:
     case whichPragma(it)
     of wEmit: genEmit(p, it)
     of wInjectStmt:

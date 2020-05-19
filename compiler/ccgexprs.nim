@@ -1032,7 +1032,7 @@ proc genEcho(p: BProc, n: PNode) =
     # echo directly to the Genode LOG session
     var args: Rope = nil
     var a: TLoc
-    for it in n.sons:
+    for it in n:
       if it.skipConv.kind == nkNilLit:
         args.add(", \"\"")
       else:
@@ -2302,7 +2302,7 @@ proc genSetConstr(p: BProc, e: PNode, d: var TLoc) =
       # big set:
       linefmt(p, cpsStmts, "#nimZeroMem($1, sizeof($2));$n",
           [rdLoc(d), getTypeDesc(p.module, e.typ)])
-      for it in e.sons:
+      for it in e:
         if it.kind == nkRange:
           getTemp(p, getSysType(p.module.g.graph, unknownLineInfo, tyInt), idx) # our counter
           initLocExpr(p, it[0], a)
@@ -2318,7 +2318,7 @@ proc genSetConstr(p: BProc, e: PNode, d: var TLoc) =
       # small set
       var ts = "NU" & $(getSize(p.config, e.typ) * 8)
       lineF(p, cpsStmts, "$1 = 0;$n", [rdLoc(d)])
-      for it in e.sons:
+      for it in e:
         if it.kind == nkRange:
           getTemp(p, getSysType(p.module.g.graph, unknownLineInfo, tyInt), idx) # our counter
           initLocExpr(p, it[0], a)
@@ -2764,7 +2764,7 @@ proc getNullValueAux(p: BProc; t: PType; obj, constOrNil: PNode,
                      isConst: bool, info: TLineInfo) =
   case obj.kind
   of nkRecList:
-    for it in obj.sons:
+    for it in obj:
       getNullValueAux(p, t, it, constOrNil, result, count, isConst, info)
   of nkRecCase:
     getNullValueAux(p, t, obj[0], constOrNil, result, count, isConst, info)

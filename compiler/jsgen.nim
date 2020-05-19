@@ -2274,7 +2274,7 @@ proc genStmt(p: PProc, n: PNode) =
   if r.res != nil: lineF(p, "$#;$n", [r.res])
 
 proc genPragma(p: PProc, n: PNode) =
-  for it in n.sons:
+  for it in n:
     case whichPragma(it)
     of wEmit: genAsmOrEmitStmt(p, it[1])
     else: discard

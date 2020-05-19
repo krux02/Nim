@@ -597,7 +597,7 @@ proc getIntSetOfType(c: PContext, t: PType): IntSet =
   result = initIntSet()
   if t.enumHasHoles:
     let t = t.skipTypes(abstractRange)
-    for field in t.n.sons:
+    for field in t.n:
       result.incl(field.sym.position)
   else:
     assert(lengthOrd(c.config, t) <= BiggestInt(MaxSetElements))
@@ -1023,7 +1023,7 @@ proc liftParamType(c: PContext, procKind: TSymKind, genericParams: PNode,
     let base = (if lifted != nil: lifted else: paramType.base)
     if base.isMetaType and procKind == skMacro:
       localError(c.config, info, errMacroBodyDependsOnGenericTypes % paramName)
-    result = addImplicitGeneric(c, c.newTypeWithSons(tyStatic, @[base]),
+    result = addImplicitGeneric(c, c.newTypeWithSons(tyStatic, [base]),
         paramTypId, info, genericParams, paramName)
     if result != nil: result.flags.incl({tfHasStatic, tfUnresolved})
 
@@ -1035,7 +1035,7 @@ proc liftParamType(c: PContext, procKind: TSymKind, genericParams: PNode,
           paramTypId.id == getIdent(c.cache, "type").id):
         # XXX Why doesn't this check for tyTypeDesc instead?
         paramTypId = nil
-      let t = c.newTypeWithSons(tyTypeDesc, @[paramType.base])
+      let t = c.newTypeWithSons(tyTypeDesc, [paramType.base])
       incl t.flags, tfCheckedForDestructor
       result = addImplicitGeneric(c, t, paramTypId, info, genericParams, paramName)
 
@@ -1057,7 +1057,7 @@ proc liftParamType(c: PContext, procKind: TSymKind, genericParams: PNode,
     # the seq type class with the seq identifier.
     if paramType.kind == tySequence and paramType.lastSon.kind == tyNone:
       let typ = c.newTypeWithSons(tyBuiltInTypeClass,
-                                  @[newTypeS(paramType.kind, c)])
+                                  [newTypeS(paramType.kind, c)])
       result = addImplicitGeneric(c, typ, paramTypId, info, genericParams, paramName)
     else:
       for i in 0..<paramType.len:
@@ -1087,7 +1087,7 @@ proc liftParamType(c: PContext, procKind: TSymKind, genericParams: PNode,
 
     let x = instGenericContainer(c, paramType.sym.info, result,
                                   allowMetaTypes = true)
-    result = newTypeWithSons(c, tyCompositeTypeClass, @[paramType, x])
+    result = newTypeWithSons(c, tyCompositeTypeClass, [paramType, x])
     #result = newTypeS(tyCompositeTypeClass, c)
     #for i in 0..<x.len: result.rawAddSon(x[i])
     result = addImplicitGeneric(c, result, paramTypId, info, genericParams, paramName)
@@ -1217,7 +1217,7 @@ proc semProcTypeNode(c: PContext, n, genericParams: PNode,
           # which will prevent other types from matching - clearly a very
           # surprising behavior. We must instead fix the expected type of
           # the proc to be the unbound typedesc type:
-          typ = newTypeWithSons(c, tyTypeDesc, @[newTypeS(tyNone, c)])
+          typ = newTypeWithSons(c, tyTypeDesc, [newTypeS(tyNone, c)])
           typ.flags.incl tfCheckedForDestructor
 
       else:
@@ -1498,12 +1498,12 @@ proc semTypeClass(c: PContext, n: PNode, prev: PType): PType =
   result = newOrPrevType(tyUserTypeClass, prev, c)
   result.flags.incl tfCheckedForDestructor
   var owner = getCurrOwner(c)
-  var candidateTypeSlot = newTypeWithSons(owner, tyAlias, @[c.errorType])
+  var candidateTypeSlot = newTypeWithSons(owner, tyAlias, [c.errorType])
   result.sons = @[candidateTypeSlot]
   result.n = n
 
   if inherited.kind != nkEmpty:
-    for n in inherited.sons:
+    for n in inherited:
       let typ = semTypeNode(c, n, nil)
       result.add(typ)
 
@@ -2011,7 +2011,7 @@ proc processMagicType(c: PContext, m: PSym) =
   else: localError(c.config, m.info, errTypeExpected)
 
 proc semGenericConstraints(c: PContext, x: PType): PType =
-  result = newTypeWithSons(c, tyGenericParam, @[x])
+  result = newTypeWithSons(c, tyGenericParam, [x])
 
 proc semGenericParamList(c: PContext, n: PNode, father: PType = nil): PNode =
   result = copyNode(n)
@@ -2030,7 +2030,7 @@ proc semGenericParamList(c: PContext, n: PNode, father: PType = nil): PNode =
       if typ.kind != tyStatic or typ.len == 0:
         if typ.kind == tyTypeDesc:
           if typ[0].kind == tyNone:
-            typ = newTypeWithSons(c, tyTypeDesc, @[newTypeS(tyNone, c)])
+            typ = newTypeWithSons(c, tyTypeDesc, [newTypeS(tyNone, c)])
             incl typ.flags, tfCheckedForDestructor
         else:
           typ = semGenericConstraints(c, typ)
@@ -2039,7 +2039,7 @@ proc semGenericParamList(c: PContext, n: PNode, father: PType = nil): PNode =
       def = semConstExpr(c, def)
       if typ == nil:
         if def.typ.kind != tyTypeDesc:
-          typ = newTypeWithSons(c, tyStatic, @[def.typ])
+          typ = newTypeWithSons(c, tyStatic, [def.typ])
       else:
         # the following line fixes ``TV2*[T:SomeNumber=TR] = array[0..1, T]``
         def.typ = def.typ.skipTypes({tyTypeDesc})

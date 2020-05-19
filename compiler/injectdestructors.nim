@@ -27,7 +27,6 @@ import
   lineinfos, parampatterns, sighashes
 
 from trees import exprStructuralEquivalent
-from algorithm import reverse
 
 const
   scopeBasedDestruction = false
@@ -480,7 +479,7 @@ proc handleNested(n, dest: PNode; c: var Con; mode: ProcessMode): PNode =
       if c.scopeDestroys.len > oldTmpDestroysLen:
         handleTmpDestroys(c, result, t, oldHasUnstructuredCf, oldTmpDestroysLen)
     else:
-      setLen(result.sons, last)
+      result.setLen last
       if c.scopeDestroys.len > oldTmpDestroysLen:
         handleTmpDestroys(c, result, t, oldHasUnstructuredCf, oldTmpDestroysLen)
       if result.kind != nkFinally:
@@ -1052,7 +1051,7 @@ proc injectDestructorCalls*(g: ModuleGraph; owner: PSym; n: PNode): PNode =
   if c.topLevelVars.len > 0:
     result.add c.topLevelVars
   if c.destroys.len > 0 or c.scopeDestroys.len > 0:
-    reverse c.destroys.sons
+    reverseSons c.destroys
     var fin: PNode
     if owner.kind == skModule:
       fin = newTryFinally(body, extractDestroysForTemporaries(c, c.destroys))

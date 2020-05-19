@@ -96,6 +96,7 @@ remove all WTFs from the codebase.
 
 * refactoring
 ** DONE remove all traces on ~nOrig~
+** DONE make PNode.sons private for better mutability control.
 ** change ~enforceVoidContext~ to ~tyVoid~
 ** rename down cast / up cast
 ** normalize the magic syntax to a single syntax (identifier no strings)

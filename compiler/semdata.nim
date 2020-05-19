@@ -318,20 +318,21 @@ proc makeTypeFromExpr*(c: PContext, n: PNode): PType =
   assert n != nil
   result.n = n
 
-proc newTypeWithSons*(owner: PSym, kind: TTypeKind, sons: seq[PType]): PType =
+proc newTypeWithSons*(owner: PSym, kind: TTypeKind, sons: openArray[PType]): PType =
   result = newType(kind, owner)
-  result.sons = sons
+  result.addAll sons
 
-proc newTypeWithSons*(c: PContext, kind: TTypeKind,
-                      sons: seq[PType]): PType =
+proc newTypeWithSons*(c: PContext, kind: TTypeKind, sons: openArray[PType]): PType =
   result = newType(kind, getCurrOwner(c))
-  result.sons = sons
+  result.addAll sons
 
 proc makeStaticExpr*(c: PContext, n: PNode): PNode =
   result = newNodeI(nkStaticExpr, n.info)
-  result.sons = @[n]
-  result.typ = if n.typ != nil and n.typ.kind == tyStatic: n.typ
-               else: newTypeWithSons(c, tyStatic, @[n.typ])
+  result.add n
+  if n.typ != nil and n.typ.kind == tyStatic:
+    result.typ = n.typ
+  else:
+    result.typ = newTypeWithSons(c, tyStatic, [n.typ])
 
 proc makeAndType*(c: PContext, t1, t2: PType): PType =
   result = newTypeS(tyAnd, c)

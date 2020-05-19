@@ -323,7 +323,7 @@ proc evalOp(m: TMagic, n, a, b, c: PNode; g: ModuleGraph): PNode =
   of mCStrToStr, mCharToStr:
     if a.kind == nkBracket:
       var s = ""
-      for b in a.sons:
+      for b in a:
         s.add b.getStrOrChar
       result = newStrNodeT(s, n, g)
     else:
@@ -467,16 +467,16 @@ proc foldArrayAccess(m: PSym, n: PNode; g: ModuleGraph): PNode =
   var y = getConstExpr(m, n[1], g)
   if y == nil: return
 
-  var idx = toInt64(getOrdValue(y))
+  var idx = getOrdValue(y).toInt
   case x.kind
   of nkPar, nkTupleConstr:
     if idx >= 0 and idx < x.len:
-      result = x.sons[idx]
+      result = x[idx]
       if result.kind == nkExprColonExpr: result = result[1]
     else:
       localError(g.config, n.info, formatErrorIndexBound(idx, x.len-1) & $n)
   of nkBracket:
-    idx = idx - toInt64(firstOrd(g.config, x.typ))
+    idx = idx - firstOrd(g.config, x.typ).toInt
     if idx >= 0 and idx < x.len: result = x[int(idx)]
     else: localError(g.config, n.info, formatErrorIndexBound(idx, x.len-1) & $n)
   of nkStrLit..nkTripleStrLit:

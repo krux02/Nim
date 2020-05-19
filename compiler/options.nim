@@ -146,10 +146,6 @@ type
       ## Note: this feature can't be localized with {.push.}
 
   LegacyFeature* = enum
-    allowSemcheckedAstModification,
-      ## Allows to modify a NimNode where the type has already been
-      ## flagged with nfSem. If you actually do this, it will cause
-      ## bugs.
     checkUnsignedConversions
       ## Historically and especially in version 1.0.0 of the language
       ## conversions to unsigned numbers were checked. In 1.0.4 they

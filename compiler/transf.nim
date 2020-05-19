@@ -56,13 +56,13 @@ proc newTransNode(a: PNode): PNode {.inline.} =
 proc newTransNode(kind: TNodeKind, info: TLineInfo,
                   sons: int): PNode {.inline.} =
   var x = newNodeI(kind, info)
-  newSeq(x.sons, sons)
+  x.setLen sons
   result = x
 
 proc newTransNode(kind: TNodeKind, n: PNode,
                   sons: int): PNode {.inline.} =
   var x = newNodeIT(kind, n.info, n.typ)
-  newSeq(x.sons, sons)
+  x.setLen sons
   x.typ = n.typ
 #  x.flags = n.flags
   result = x
@@ -1074,7 +1074,7 @@ proc flattenStmts(n: PNode) =
     while i < n.len:
       let it = n[i]
       if it.kind in {nkStmtList, nkStmtListExpr}:
-        n.sons[i..i] = it.sons[0..<it.len]
+        n[i..i] = it[0 ..^ 1]
         goOn = true
       inc i
 
@@ -1092,11 +1092,11 @@ proc liftDeferAux(n: PNode) =
           var tryStmt = newNodeI(nkTryStmt, n[i].info)
           var body = newNodeI(n.kind, n[i].info)
           if i < last:
-            body.sons = n.sons[(i+1)..last]
+            body.addAll n[(i+1)..last]
           tryStmt.add body
           tryStmt.add deferPart
           n[i] = tryStmt
-          n.sons.setLen(i+1)
+          n.setLen i+1
           n.typ = n[i].typ
           goOn = true
           break
