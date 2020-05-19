@@ -1569,7 +1569,7 @@ proc delSon*(father: PNode, idx: int) =
   father.sons.setLen(father.len - 1)
 
 proc copyNode*(src: PNode): PNode =
-  # does not copy its sons!
+  ## Copy ``src`` excluding its sons. See also: ``copyTree``.
   if src == nil:
     return nil
   result = newNode(src.kind)
@@ -1588,23 +1588,20 @@ proc copyNode*(src: PNode): PNode =
   of nkStrLit..nkTripleStrLit: result.strVal = src.strVal
   else: discard
 
-template transitionNodeKindCommon(k: TNodeKind) =
-  let obj {.inject.} = n[]
-  n[] = TNode(kind: k, typ: obj.typ, info: obj.info, flags: obj.flags,
-              comment: obj.comment)
-  when defined(useNodeIds):
-    n.id = obj.id
+template unsafeKindAddr(n: PNode): ptr TNodeKind =
+  cast[ptr TNodeKind](cast[uint](n) + cast[uint](offsetOf(n,kind)))
 
 proc transitionSonsKind*(n: PNode, kind: range[nkComesFrom..nkTupleConstr]) =
-  transitionNodeKindCommon(kind)
-  n.sons = obj.sons
+  doAssert n.kind in nkComesFrom..nkTupleConstr
+  unsafeKindAddr(n)[] = kind
 
 proc transitionIntKind*(n: PNode, kind: range[nkCharLit..nkUInt64Lit]) =
-  transitionNodeKindCommon(kind)
-  n.intVal = obj.intVal
+  doAssert n.kind in nkCharLit..nkUInt64Lit
+  unsafeKindAddr(n)[] = kind
 
 proc transitionNoneToSym*(n: PNode) =
-  transitionNodeKindCommon(nkSym)
+  doAssert n.kind == nkNone
+  unsafeKindAddr(n)[] = nkSym
 
 template transitionSymKindCommon*(k: TSymKind) =
   let obj {.inject.} = s[]
@@ -1657,7 +1654,8 @@ proc shallowCopy*(src: PNode): PNode =
     newSeq(result.sons, src.len)
 
 proc copyTree*(src: PNode): PNode =
-  # copy a whole syntax tree; performs deep copying
+  ## Perform a deep copy of the syntax tree ``src`` (recursive).
+  ## See also: ``copyNode``.
   copyNodeImpl(result, src):
     newSeq(result.sons, src.len)
     for i in 0..<src.len:

@@ -69,7 +69,7 @@ remove all WTFs from the codebase.
 ** fix ~proc len*[TOpenArray: openArray|varargs](x: TOpenArray): int~ (WTF)
 ** fix how newNimNode/newTree sets line information
 ** allow conversion of ~seq[byte](mystring)~ and ~string(mySeqofBytes)~.
-** allow assigning the key of variant objects again.
+** allow assigning the key/kind field of variant objects again.
 
 * feature stripping
 ** DONE remove manyloc tests
