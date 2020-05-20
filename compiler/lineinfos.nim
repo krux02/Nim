@@ -140,7 +140,7 @@ const
 
 const
 
-  WarningsToStr* = [
+  WarningsToStr* : array[warnCannotOpenFile..warnUser, string] = [
     warnCannotOpenFile:             "CannotOpenFile",
     warnOctalEscape:                "OctalEscape",
     warnXIsNeverRead:               "XIsNeverRead",
@@ -179,7 +179,7 @@ const
     warnUser:                       "User"
   ]
 
-  HintsToStr* = [
+  HintsToStr* : array[hintSuccess..hintExtendedContext, string] = [
     hintSuccess:                     "Success",
     hintSuccessX:                    "SuccessX",
     hintCC:                          "CC",

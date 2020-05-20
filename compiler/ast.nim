@@ -1107,9 +1107,14 @@ template `[]=`*(n: Indexable, i: BackwardsIndex; x: Indexable) = n[n.len - i.int
 proc setLen*(n: Indexable, len: int) =
   n.sons.setLen len
 
-template `[]`*[T: Indexable](n: T, s: HSlice): openArray[T] =
-  let tmp = s
-  toOpenArray(n.sons, n ^^ tmp.a, n ^^ tmp.b)
+when not declared(nimToOpenArrayCString):
+  # for bootstrapping compiler only. Bad performance.
+  proc `[]`*[T: Indexable](n: T, s: HSlice): seq[T] =
+    n.sons[s]
+else:
+  template `[]`*[T: Indexable](n: T, s: HSlice): openArray[T] =
+    let tmp = s
+    toOpenArray(n.sons, n ^^ tmp.a, n ^^ tmp.b)
 
 proc `[]=`*[T: Indexable](n: T, idx: HSlice, newSons: openArray[T]) =
   n.sons[idx] = newSons
