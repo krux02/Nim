@@ -2144,6 +2144,11 @@ proc addQuoted*[T](s: var string, x: T) =
   # prevent temporary string allocation
   elif T is SomeSignedInt:
     s.addInt(x)
+  elif T is SomeUnsignedInt:
+    when T is uint64:
+      s.add($x)
+    else:
+      s.addInt(int64(x))
   elif T is SomeFloat:
     s.addFloat(x)
   else:

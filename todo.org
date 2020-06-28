@@ -93,6 +93,7 @@ remove all WTFs from the codebase.
 ** deprecate ~pro new[T](var T): void~
 ** restrict usage of typedesc https://github.com/nim-lang/Nim/pull/11959
 ** require full path names in ~nim c myfile.nim~
+** deprecate ~runnableExamples~ in favor of doc comments with examples.
 
 * refactoring
 ** DONE remove all traces on ~nOrig~
@@ -110,6 +111,7 @@ remove all WTFs from the codebase.
 ** reenabled niminaction tests and js tests
 ** ~typed~ should not mean: template/macro must generate a value
 ** getTypeInst, getTypeImpl fix needs a better/compatible solution.
+** forwarding templates should not create line info.
 
 * etc
 ** wtf is up with ~cast[type(foo.bar)](expr)~? Why does it still work even after ~type~ is removed from ~system.nim~
