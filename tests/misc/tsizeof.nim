@@ -685,3 +685,13 @@ reject:
 
 reject:
   const off8 = offsetof(MyPackedCaseObject, val5)
+
+
+type
+  # this thing may not have padding bytes at the end
+  PackedUnion* {.union, packed.} = object
+    a*: array[11, byte]
+    b*: int64
+
+doAssert sizeof(PackedUnion) == 11
+doAssert alignof(PackedUnion) == 1
