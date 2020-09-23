@@ -65,11 +65,11 @@ proc bitsplit(a: uint64): (uint32,uint32) =
 
 proc toInt64*(arg: Int128): int64 =
   if isNegative(arg):
-    assert(arg.sdata(3) == -1, "out of range")
-    assert(arg.sdata(2) == -1, "out of range")
+    assert(arg.sdata(3) == -1, $arg & " not in range for int64")
+    assert(arg.sdata(2) == -1, $arg & " not in range for int64")
   else:
-    assert(arg.sdata(3) == 0, "out of range")
-    assert(arg.sdata(2) == 0, "out of range")
+    assert(arg.sdata(3) == 0, $arg & " not in range for int64")
+    assert(arg.sdata(2) == 0, $arg & " not in range for int64")
 
   cast[int64](bitconcat(arg.udata[1], arg.udata[0]))
 
@@ -327,7 +327,7 @@ proc `*`(a: Int128, b: uint32): Int128 =
   let tmp3 = uint64(a.udata[3]) * uint64(b)
 
   if unlikely(tmp3 > uint64(high(int32))):
-    assert(false, "overflow")
+    raiseAssert("int128 overflow in " & $a & " * " & $b)
 
   result.udata[0] = cast[uint32](tmp0)
   result.udata[1] = cast[uint32](tmp1) + cast[uint32](tmp0 shr 32)
