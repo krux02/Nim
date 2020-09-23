@@ -167,9 +167,25 @@ proc buildNimble(latest: bool, args: string) =
              options = "--noNimblePath --nilseqs:on -d:release " & args)
 
 proc bundleNimsuggest(args: string) =
-  nimCompileFold("Compile nimsuggest", "nimsuggest/nimsuggest.nim",
-                 options = "-d:release -d:danger " & args)
+  nimCompileFold(
+    "Compile nimsuggest", "nimsuggest/nimsuggest.nim",
+    options = "-d:release -d:danger " & args
+  )
 
+proc bundleNimgrep(args: string) =
+  nimCompileFold(
+    "Compile nimgrep", "tools/nimgrep.nim",
+    options = "-d:release " & args
+  )
+
+proc bundleNimfind(args: string) =
+  nimCompileFold("Compile nimfind", "tools/nimfind.nim", options =
+    "-d:release " & args)
+
+proc bundleTestament(args: string) =
+  nimCompileFold("Compile testament", "testament/testament.nim",
+                 options = "-d:release " & args)
+  
 proc buildVccTool(args: string) =
   nimCompileFold("Compile Vcc", "tools/vccexe/vccexe.nim ", options = args)
 
@@ -220,14 +236,11 @@ proc buildTool(toolname, args: string) =
 
 proc buildTools(args: string = "") =
   bundleNimsuggest(args)
-  nimCompileFold("Compile nimgrep", "tools/nimgrep.nim",
-                 options = "-d:release " & args)
+  bundleNimgrep(args)
   when defined(windows): buildVccTool(args)
   bundleNimpretty(args)
-  nimCompileFold("Compile nimfind", "tools/nimfind.nim",
-                 options = "-d:release " & args)
-  nimCompileFold("Compile testament", "testament/testament.nim",
-                 options = "-d:release " & args)
+  bundleNimfind(args)
+  bundleTestament(args)
 
 proc nsis(latest: bool; args: string) =
   bundleNimbleExe(latest, args)
@@ -427,7 +440,7 @@ proc winRelease*() =
 # -------------- tests --------------------------------------------------------
 
 proc tests(args: string) =
-  let args = if args.len > 0: args else "all"
+  let args = if args.len > 0: args else: "all"
   nimexec "cc --opt:speed testament/testament"
   let tester = quoteShell(getCurrentDir() / "testament/testament".exe)
   let success = tryExec tester & " " & args
@@ -665,6 +678,9 @@ when isMainModule:
       of "wintools": bundleWinTools(op.cmdLineRest)
       of "nimble": buildNimble(latest, op.cmdLineRest)
       of "nimsuggest": bundleNimsuggest(op.cmdLineRest)
+      of "nimfind":  bundleNimfind(op.cmdLineRest)
+      of "nimgrep": bundleNimgrep(op.cmdLineRest)
+      of "testament": bundleTestament(op.cmdLineRest)
       of "toolsnonimble":
         buildTools(op.cmdLineRest)
       of "tools":

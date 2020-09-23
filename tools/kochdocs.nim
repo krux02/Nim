@@ -44,7 +44,7 @@ proc exec*(cmd: string, errorcode: int = QuitFailure, additionalPath = "") =
   if execShellCmd(cmd) != 0: quit("FAILURE", errorcode)
   putEnv("PATH", prevPath)
 
-template inFold*(desc, body) =
+template inFold*(desc, body: untyped) =
   if existsEnv("TRAVIS"):
     echo "travis_fold:start:" & desc.replace(" ", "_")
 

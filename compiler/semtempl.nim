@@ -127,6 +127,8 @@ type
     noGenSym: int
     inTemplateHeader: int
 
+template graph*(arg: TemplCtx): ModuleGraph = arg.c.graph
+    
 template withBracketExpr(ctx, x, body: untyped) =
   body
 
@@ -175,7 +177,7 @@ proc onlyReplaceParams(c: var TemplCtx, n: PNode): PNode =
         result = newSymNode(s, n.info)
         onUse(n.info, s)
   else:
-    for i in 0..<n.safeLen:
+    for i in 0 ..< n.safeLen:
       result[i] = onlyReplaceParams(c, n[i])
 
 proc newGenSym(kind: TSymKind, n: PNode, c: var TemplCtx): PSym =

@@ -5,7 +5,7 @@
 #
 #    See the file "copying.txt", included in this
 #    distribution, for details about the copyright.
-#
+# 
 
 ## Nimfind is a tool that helps to give editors IDE like capabilities.
 
@@ -233,3 +233,7 @@ proc handleCmdLine(cache: IdentCache; conf: ConfigRef) =
   discard self.loadConfigsAndRunMainCommand(cache, conf)
 
 handleCmdLine(newIdentCache(), newConfigRef())
+
+# Local Variables:
+# compile-command: "cd ../; ./koch nimfind"
+# End:
