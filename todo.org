@@ -52,15 +52,15 @@ remove all WTFs from the codebase.
 ** move/create jsNumber, jsString, jsObject to jstypes.nim
 
 * fixes
-** fix how varargs work
-** do something about generic parameters for macro declarations. They are a bit weird.
-** fix parser to read negative literals
 ** DONE use nnkTupleConstr consistently (replace nnkPar where necessary)
 ** DONE make sure, ~typed~ doesn't mean ~void~ in macro/templates anymore.
 ** DONE error on compile time var at runtime
 ** DONE inconsistency, getType: (BracketExpr (Sym "ref") ...) vs. getTypeInst  (RefTy ...)  (deprecated getType)
-** raise error on union at compile time
 ** DONE generic typedesc T should not be visible anymore in the getImpl of generic instantiations.
+** raise error on union usage at compile time
+** fix how varargs work
+** do something about generic parameters for macro declarations. They are a bit weird.
+** fix parser to read negative literals
 ** move documentation comments to identifier/symbol properties
 ** Refactor nkPostfix export marker and backticks around identifiers into flags on identifiers.
 ** fix literals of type ~int~
